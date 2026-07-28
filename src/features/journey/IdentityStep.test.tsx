@@ -56,7 +56,7 @@ describe('IdentityStep', () => {
     act(() => vi.advanceTimersByTime(500));
     expect(avatar).toHaveTextContent('🐱');
 
-    fireEvent.click(screen.getByRole('button', { name: '다른 캐릭터 추천' }));
+    fireEvent.click(screen.getByRole('button', { name: '새로운 동료 찾기' }));
     act(() => vi.advanceTimersByTime(500));
     expect(avatar).toHaveTextContent(suggestedAvatar('변경한 이름'));
   });
