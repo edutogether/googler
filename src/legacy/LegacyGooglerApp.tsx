@@ -11,6 +11,10 @@ import { courses } from '../content/courses';
 import { completedMissionIds, countCompletedMissions, isDayComplete as isLearningDayComplete, missionStorageKey, progressPercent as calculateProgressPercent, shouldCelebrateDayCompletion } from '../domain/progress';
 import { levelShareMessage, missionShareMessage } from '../shared/sharing';
 import { createAppServices } from '../data/createAppServices';
+import { LearningPage } from '../pages/LearningPage';
+import { StartPage } from '../pages/StartPage';
+import { ExamPage } from '../pages/ExamPage';
+import { RetryPage } from '../pages/RetryPage';
 
 // 배포 시 여기에 파이어베이스 프로젝트 설정값을 반드시 채워주세요!
 const adjectives = ["열정적인", "발랄한", "똑똑한", "용감한", "빛나는", "멋진", "귀여운", "성실한", "무적의", "날쌘", "행복한", "명랑한"];
@@ -476,185 +480,19 @@ export default function LegacyGooglerApp() {
 
           <main className="max-w-3xl mx-auto px-4 space-y-6">
 
-            {activeTab === 'intro' && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#E8EAED] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8F0FE] rounded-bl-full -z-10 opacity-70"></div>
-                  <h2 className="text-2xl font-extrabold mb-8 flex items-center gap-2 text-[#202124]">
-                    <Rocket className="w-7 h-7 text-[#4285F4]" />
-                    시험 준비, 차근차근 시작해요
-                  </h2>
-                  <div className="space-y-6">
-                    <div className="flex gap-5 group">
-                      <div className="bg-[#E8F0FE] text-[#1A73E8] font-black text-xl w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">1</div>
-                      <div className="pt-1">
-                        <h3 className="font-bold text-lg text-[#202124]">개인 구글 계정 준비</h3>
-                        <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">학교 계정은 나중에 시험 결제가 막힐 수 있습니다. 반드시 **개인 Gmail 계정**으로 진행해 주세요.</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-5 group">
-                      <div className="bg-[#FCE8E6] text-[#D93025] font-black text-xl w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">2</div>
-                      <div className="pt-1">
-                        <h3 className="font-bold text-lg text-[#202124]">학습 센터(Skillshop) 연동</h3>
-                        <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">구글 공식 교육 플랫폼에 내 계정을 연결합니다.</p>
-                        <a href="https://skillshop.exceedlms.com/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-[#1A73E8] bg-[#E8F0FE] hover:bg-[#D2E3FC] px-4 py-2 rounded-xl transition-colors">
-                          스킬샵 바로가기 <ExternalLink className="w-4 h-4" />
-                        </a>
-                      </div>
-                    </div>
-                    <div className="flex gap-5 group">
-                      <div className="bg-[#FEF7E0] text-[#E37400] font-black text-xl w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">3</div>
-                      <div className="pt-1">
-                        <h3 className="font-bold text-lg text-[#202124]">언어 설정 확인 (필수)</h3>
-                        <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">우측 상단 내 프로필을 눌러 언어가 **'한국어'**로 설정되어 있는지 꼭 확인하세요.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
+            {activeTab === 'intro' && <StartPage />}
             {activeTab === 'learning' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className={`p-8 rounded-[2rem] shadow-sm text-white relative overflow-hidden ${currentLevel === 'L1' ? 'bg-gradient-to-r from-[#1A73E8] to-[#4285F4]' : 'bg-gradient-to-r from-[#EA4335] to-[#f06b60]'}`}>
-                  <div className="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
-                  <h2 className="text-2xl font-extrabold mb-2 relative z-10">핵심 역량 마스터 코스 🌱</h2>
-                  <p className="text-white/90 relative z-10 font-medium text-sm">하루 30분, 매일매일 미션을 깨고 랭킹 점수를 획득하세요!</p>
-                </div>
-
-                <div className="space-y-5">
-                  {coursesByLevel[currentLevel].days.map((dayItem, index) => {
-                    const isDayComplete = isLearningDayComplete(completedIds, dayItem);
-                    const theme = themeColors[dayItem.theme] || themeColors.blue;
-
-                    return (
-                      <div key={dayItem.id} className={`bg-white rounded-[2rem] shadow-sm border overflow-hidden transition-all duration-300 ${isDayComplete ? 'border-[#CEEAD6] shadow-[#E6F4EA]' : 'border-[#E8EAED] hover:shadow-md'}`}>
-                        <div className={`p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isDayComplete ? 'bg-[#F3F8F4]' : theme.bg}`}>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className={`text-xs font-extrabold px-3 py-1 rounded-lg tracking-wide ${isDayComplete ? 'bg-[#CEEAD6] text-[#0D652D]' : `${theme.highlight} ${theme.text}`}`}>
-                                Day {index + 1}
-                              </span>
-                              {isDayComplete && <span className="flex items-center text-xs font-bold text-[#0D652D]"><Check className="w-3.5 h-3.5 mr-0.5" /> 100% 완료</span>}
-                            </div>
-                            <h3 className="text-xl font-extrabold text-[#202124] flex items-center gap-2">{dayItem.title}</h3>
-                            <p className="text-sm text-[#5F6368] mt-1.5 font-medium">{dayItem.description}</p>
-                          </div>
-                        </div>
-
-                        <div className="px-6 md:px-8 py-4 border-y border-[#E8EAED] bg-white flex flex-wrap gap-2">
-                          <a href={dayItem.resources.help.url} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#FCE8E6] text-[#5F6368] hover:text-[#D93025] transition-colors border border-[#E8EAED] group"><HelpCircle className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">공식 도움말</span></a>
-                          <a href={dayItem.resources.youtube.url} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#FEF7E0] text-[#5F6368] hover:text-[#E37400] transition-colors border border-[#E8EAED] group"><MonitorPlay className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">영상 콘텐츠</span></a>
-                          <a href={dayItem.resources.education.url} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#E8F0FE] text-[#5F6368] hover:text-[#1A73E8] transition-colors border border-[#E8EAED] group"><BookOpen className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">공식 가이드</span></a>
-                        </div>
-
-                        <div className="p-6 md:p-8 bg-white">
-                          <div className="space-y-3">
-                            {dayItem.missions.map((mission, idx) => {
-                              const isChecked = progress[missionStorageKey(currentLevel, dayItem, idx)] || false;
-                              return (
-                                <label key={idx} className={`flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer transition-all border ${isChecked ? 'bg-[#F8F9FA] border-transparent shadow-none' : 'bg-white border-[#E8EAED] hover:border-[#DADCE0]'}`}>
-                                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-[#34A853] border-[#34A853]' : 'border-[#DADCE0]'}`}>
-                                    {isChecked && <Check className="w-4 h-4 text-white" />}
-                                  </div>
-                                  <input type="checkbox" className="hidden" checked={isChecked} onChange={() => toggleCheck(dayItem.progressKey, idx)} />
-                                  <span className={`text-sm font-medium transition-colors ${isChecked ? 'text-[#9AA0A6] line-through' : 'text-[#202124]'}`}>{mission.text}</span>
-                                </label>
-                              )
-                            })}
-                          </div>
-                          <div className="mt-6 pt-6 border-t border-[#E8EAED]">
-                            <button
-                              onClick={() => handleKakaoShare(dayItem, index)}
-                              disabled={!isDayComplete}
-                              className={`w-full font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-sm transition-transform text-lg ${isDayComplete ? 'bg-[#FEE500] hover:bg-[#F4DC00] text-[#371D1E] active:scale-95 cursor-pointer' : 'bg-[#F1F3F4] text-[#9AA0A6] cursor-not-allowed opacity-70'}`}
-                            >
-                              <Share2 className="w-6 h-6" />
-                              {isDayComplete ? '미션 완료! 단톡방에 링크 공유하기 🎉' : '위 미션을 먼저 완료해주세요!'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+              <LearningPage
+                currentLevel={currentLevel}
+                completedIds={completedIds}
+                progress={progress}
+                onToggleCheck={toggleCheck}
+                onShare={handleKakaoShare}
+              />
             )}
 
-            {activeTab === 'week3' && (
-              <div className="space-y-6 animate-fade-in">
-                 <div className="bg-[#34A853] text-white p-10 rounded-[2rem] shadow-sm text-center relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent blur-xl"></div>
-                  <Medal className="w-16 h-16 mx-auto mb-4 text-[#FEF0C3] drop-shadow-md relative z-10" />
-                  <h2 className="text-3xl font-black mb-2 relative z-10">D-Day: 다 함께 따는 날!</h2>
-                  <p className="text-[#CEEAD6] font-medium relative z-10">각자 집에서, 하지만 마음은 함께! 화상으로 모여 시험을 치릅니다.</p>
-                </div>
-
-                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#E8EAED]">
-                  <h3 className="text-xl font-bold mb-6 text-[#202124] flex items-center gap-2"><Calendar className="w-6 h-6 text-[#9AA0A6]" /> Pass Party 일정표 🌙</h3>
-                  <div className="relative border-l-2 border-[#E8EAED] ml-3 space-y-8 pb-4">
-                    <div className="relative pl-6">
-                      <div className="absolute w-4 h-4 bg-[#4285F4] rounded-full -left-[9px] top-1 border-4 border-white shadow-sm"></div>
-                      <div className="flex items-center gap-2 mb-1"><span className="text-sm font-bold text-[#1A73E8] bg-[#E8F0FE] px-2.5 py-0.5 rounded-md">밤 9:00</span></div>
-                      <h4 className="font-bold text-lg text-[#202124] mb-1">화상회의 접속 및 접수</h4>
-                      <p className="text-[#5F6368] text-sm leading-relaxed">다같이 모여서 인사를 나누고, 공지된 바우처(쿠폰)를 등록해 무료로 시험 결제를 진행해요.</p>
-                    </div>
-                    <div className="relative pl-6">
-                      <div className="absolute w-4 h-4 bg-[#EA4335] rounded-full -left-[9px] top-1 border-4 border-white shadow-sm"></div>
-                      <div className="flex items-center gap-2 mb-1"><span className="text-sm font-bold text-[#D93025] bg-[#FCE8E6] px-2.5 py-0.5 rounded-md">밤 9:30</span></div>
-                      <h4 className="font-bold text-lg text-[#202124] mb-1">시험 시작! (최대 3시간)</h4>
-                      <p className="text-[#5F6368] text-sm leading-relaxed">마이크는 끄고 카메라는 켜둔 채로 집중해서 시험을 풉니다. 일찍 끝난 분은 먼저 나가셔도 좋아요!</p>
-                    </div>
-                    <div className="relative pl-6">
-                      <div className="absolute w-4 h-4 bg-[#FBBC05] rounded-full -left-[9px] top-1 border-4 border-white shadow-sm"></div>
-                      <div className="flex items-center gap-2 mb-1"><span className="text-sm font-bold text-[#E37400] bg-[#FEF7E0] px-2.5 py-0.5 rounded-md">실시간</span></div>
-                      <h4 className="font-bold text-lg text-[#202124] mb-1">채팅 헬프 데스크 운영 🆘</h4>
-                      <p className="text-[#5F6368] text-sm leading-relaxed">문제가 아니라 "다음 버튼이 안 눌려요" 같은 기술적 막힘이 생기면 채팅창에 질문하세요. 함께 문제를 해결합니다.</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 pt-6 border-t border-[#E8EAED] animate-fade-in-up">
-                    <button onClick={handlePassShare} className="w-full bg-[#1A73E8] hover:bg-[#1557B0] text-white font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 text-lg">
-                      <Trophy className="w-6 h-6 text-yellow-300" />
-                      시험 끝! 단톡방에 합격 인증하기 🎉
-                    </button>
-                    <p className="text-center text-xs text-[#9AA0A6] mt-3 font-bold">버튼을 누르면 내 캐릭터에 멋진 뱃지(🥇/👑)가 달립니다!</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'week4' && (
-              <div className="space-y-6 animate-fade-in">
-                 <div className="bg-[#EA4335] text-white p-8 rounded-[2rem] shadow-sm text-center">
-                  <HeartHandshake className="w-16 h-16 mx-auto mb-4 text-[#FAD2CF]" />
-                  <h2 className="text-2xl font-black mb-2">여유로운 재도전 (보안관 주간) 🛡️</h2>
-                  <p className="text-[#FCE8E6] font-medium">안타깝게 불합격하셨나요? 전혀 문제없습니다. 우리에겐 아직 시간이 있습니다!</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#E8EAED] hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-[#FCE8E6] rounded-2xl flex items-center justify-center mb-4"><AlertCircle className="w-6 h-6 text-[#D93025]" /></div>
-                    <h3 className="font-bold text-lg text-[#202124] mb-2">나의 약점 파악하기</h3>
-                    <p className="text-sm text-[#5F6368] leading-relaxed">시험 종료 후 받은 이메일 리포트를 확인하세요. 점수가 낮았던 특정 Unit을 스킬샵에서 집중적으로 다시 읽어봅니다.</p>
-                  </div>
-                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#E8EAED] hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-[#E8F0FE] rounded-2xl flex items-center justify-center mb-4"><Users className="w-6 h-6 text-[#1A73E8]" /></div>
-                    <h3 className="font-bold text-lg text-[#202124] mb-2">보안관 찬스 쓰기</h3>
-                    <p className="text-sm text-[#5F6368] leading-relaxed">먼저 합격한 멤버들이 '보안관'으로 대기 중입니다. 단톡방에 질문을 남기면 Google Meet 화면 공유를 통해 1:1로 도와드릴 거예요.</p>
-                  </div>
-                </div>
-
-                <div className="bg-[#202124] p-6 rounded-[2rem] text-center shadow-lg">
-                  <p className="font-bold text-white tracking-wide mb-4">준비가 완료되었다면 주중에 마음 편히 재응시 하세요! 화이팅! 🚀</p>
-                  <button onClick={handlePassShare} className="w-full bg-[#FEE500] hover:bg-[#F4DC00] text-[#371D1E] font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-95">
-                    <Share2 className="w-5 h-5" />
-                    재도전 성공! 단톡방에 합격 자랑하기 🎉
-                  </button>
-                  <p className="text-center text-xs text-white/50 mt-3 font-bold">버튼을 누르면 내 캐릭터에 멋진 뱃지(🥇/👑)가 달립니다!</p>
-                </div>
-              </div>
-            )}
+            {activeTab === 'week3' && <ExamPage onPassShare={handlePassShare} />}
+            {activeTab === 'week4' && <RetryPage onPassShare={handlePassShare} />}
           </main>
         </>
       )}
