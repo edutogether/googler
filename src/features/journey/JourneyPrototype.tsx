@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LegacyGooglerApp from '../../legacy/LegacyGooglerApp';
-import { suggestedAvatar, suggestedDisplayName } from '../../domain/journeyProfile';
+import { suggestedDisplayName } from '../../domain/journeyProfile';
 import { startJourneyBgm, stopJourneyBgm } from '../audio/audioEngine';
 import { IdentityStep } from './IdentityStep';
 
@@ -11,11 +11,10 @@ const messages = ['Google 계정의 첫 문을 열고 있어요.', '당신의 �
 
 export default function JourneyPrototype() {
   const [mode, setMode] = useState<string>('entry');
-  const [step, setStep] = useState(0); const [name, setName] = useState(suggestedDisplayName()); const [avatar, setAvatar] = useState(suggestedAvatar(name)); const [avatarLocked] = useState(false); const [level, setLevel] = useState(0); const [tone, setTone] = useState(1); const [sound, setSound] = useState(() => localStorage.getItem('journey-sound') !== 'off'); const audio = useRef<AudioContext | null>(null);
+  const [step, setStep] = useState(0); const [name, setName] = useState(suggestedDisplayName()); const [level, setLevel] = useState(0); const [tone, setTone] = useState(1); const [sound, setSound] = useState(() => localStorage.getItem('journey-sound') !== 'off'); const audio = useRef<AudioContext | null>(null);
   const play = (frequency=440) => { if (!sound || typeof AudioContext === 'undefined') return; if (!audio.current) audio.current = new AudioContext(); const oscillator=audio.current.createOscillator(); const gain=audio.current.createGain(); gain.gain.value=.025; oscillator.frequency.value=frequency; oscillator.connect(gain).connect(audio.current.destination); oscillator.start(); oscillator.stop(audio.current.currentTime+.08); };
   useEffect(()=>localStorage.setItem('journey-sound', sound ? 'on':'off'),[sound]);
   useEffect(()=>{ if (!sound) stopJourneyBgm(); return ()=>stopJourneyBgm(); },[sound]);
-  useEffect(()=>{ const timer = setTimeout(()=>{ if (!avatarLocked) setAvatar(suggestedAvatar(name)); }, 500); return()=>clearTimeout(timer); },[name, avatarLocked]);
   useEffect(()=>{ if(mode!=='loading') return; const id=setTimeout(()=>setMode('planner'), 2400); return()=>clearTimeout(id);},[mode]);
   const journeyStages = ['여정 시작','계정 준비','이름과 캐릭터','수준 진단','출발 단계','학습 리듬','코치 선택','플래너 생성']; const stage = mode==='entry'?1:mode==='return'?2:mode==='new'?3:mode==='diagnostic'?4:mode==='level'?5:mode==='tone'?7:8;
   const shell=(children: React.ReactNode)=><main className="journey-shell min-h-screen px-4 py-6"><div className="max-w-4xl mx-auto"><header className="flex items-center justify-between gap-3 mb-8"><div><p className="text-xs font-bold text-[#5f6368]">여정 준비 {stage} / 8</p><p className="text-sm font-bold text-[#1a73e8]">{journeyStages[stage-1]}</p></div><button onClick={()=>setSound(!sound)} className="rounded-full border border-[#dadce0] bg-white px-4 py-2 text-sm text-[#202124]">{sound?'🔊 사운드':'🔇 음소거'}</button></header><div className="h-1.5 rounded-full bg-[#e8eaed] mb-8 overflow-hidden"><div className="journey-progress h-full transition-all" style={{width:`${stage/8*100}%`}} /></div>{children}</div></main>;
