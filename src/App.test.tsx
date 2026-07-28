@@ -7,7 +7,7 @@ describe('journey prototype', () => {
   it('shows the two game-like entry choices and starts a new journey', () => {
     render(<App />);
     expect(screen.getByText('Be a Googler')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('처음 여정을 시작해요'));
+    fireEvent.click(screen.getByText('처음 여정 시작하기'));
     expect(screen.getByText('운영 확인을 위한 이름')).toBeInTheDocument();
   });
   it('keeps the preserved learning space available after the planner', () => {

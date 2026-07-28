@@ -1,4 +1,4 @@
-import JourneyPrototype from './features/journey/JourneyPrototype';
+import JourneyPrototype from './features/journey/JourneyPrototypeRefined';
 
 export default function App() {
   return <JourneyPrototype />;
