@@ -1,0 +1,4 @@
+import { describe, expect, it } from 'vitest'
+import { courses, courseFor } from '../content/courses'
+import { isDayComplete, isLevelComplete, levelProgress, missionKey, totalProgress } from './progress'
+describe('progress rules', () => { const l1 = courseFor('L1'); const all = Object.fromEntries(courses.flatMap((course) => course.days.flatMap((day) => day.missions.map((mission) => [missionKey(course.id, mission.id), true])))); it('keeps progress in range', () => { expect(levelProgress(l1, {})).toBe(0); expect(totalProgress(courses, all)).toBe(100) }); it('completes a day and level only with known missions', () => { const day = l1.days[0]; const progress = Object.fromEntries(day.missions.map((mission) => [missionKey('L1', mission.id), true])); expect(isDayComplete('L1', day, progress)).toBe(true); expect(isLevelComplete(l1, progress)).toBe(false); expect(levelProgress(l1, { unknown: true })).toBe(0) }) })
