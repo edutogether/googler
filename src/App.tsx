@@ -1,5 +1,5 @@
-import LegacyGooglerApp from './legacy/LegacyGooglerApp';
+import JourneyPrototype from './features/journey/JourneyPrototype';
 
 export default function App() {
-  return <LegacyGooglerApp />;
+  return <JourneyPrototype />;
 }
