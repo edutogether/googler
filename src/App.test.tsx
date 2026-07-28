@@ -8,7 +8,7 @@ describe('journey prototype', () => {
     render(<App />);
     expect(screen.getByText('Be a Googler')).toBeInTheDocument();
     fireEvent.click(screen.getByText('처음 여정을 시작해요'));
-    expect(screen.getByText('여정에서 사용할 이름은 무엇인가요?')).toBeInTheDocument();
+    expect(screen.getByText('운영 확인을 위한 이름')).toBeInTheDocument();
   });
   it('keeps the preserved learning space available after the planner', () => {
     render(<LegacyGooglerApp />);
