@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   CheckCircle, Play, BookOpen, Users, Award,
   Calendar, CheckSquare, Rocket, Trophy, HeartHandshake, AlertCircle,
@@ -6,39 +6,13 @@ import {
   Crown, Settings, X, Dices
 } from 'lucide-react';
 
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from 'firebase/firestore';
 import { coursesByLevel } from '../content/courses';
 import { courses } from '../content/courses';
 import { completedMissionIds, countCompletedMissions, isDayComplete as isLearningDayComplete, missionStorageKey, progressPercent as calculateProgressPercent, shouldCelebrateDayCompletion } from '../domain/progress';
 import { levelShareMessage, missionShareMessage } from '../shared/sharing';
+import { createAppServices } from '../data/createAppServices';
 
 // 배포 시 여기에 파이어베이스 프로젝트 설정값을 반드시 채워주세요!
-const firebaseConfig = {
-  // apiKey: "YOUR_API_KEY",
-  // authDomain: "YOUR_AUTH_DOMAIN",
-  // projectId: "YOUR_PROJECT_ID",
-  // storageBucket: "YOUR_STORAGE_BUCKET",
-  // messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  // appId: "YOUR_APP_ID"
-};
-
-let app, auth, db;
-const appId = 'gpass-custom-app-id';
-
-try {
-  if (Object.keys(firebaseConfig).length > 0) {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-  }
-} catch (e) {
-  console.error("Firebase 초기화 에러 (설정값을 확인하세요):", e);
-}
-
-// 💬 체크리스트 3종류
-// 랜덤 닉네임 및 이모지 데이터
 const adjectives = ["열정적인", "발랄한", "똑똑한", "용감한", "빛나는", "멋진", "귀여운", "성실한", "무적의", "날쌘", "행복한", "명랑한"];
 const animals = [
   { name: "토끼", emoji: "🐰" }, { name: "다람쥐", emoji: "🐿️" }, { name: "고양이", emoji: "🐱" },
@@ -144,88 +118,35 @@ export default function LegacyGooglerApp() {
 
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  useEffect(() => {
-    if (!auth) { setIsLoading(false); return; } // DB 연결 안되었을때 방어코드
+  const services = useMemo(() => createAppServices(), []);
 
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (error) {
-        console.error("인증 에러:", error);
-      }
-    };
-    initAuth();
-
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser && db) {
-        try {
-          const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
-          const docSnap = await getDoc(profileRef);
-
-          if (docSnap.exists() && docSnap.data().nickname) {
-            setUserProfile({ nickname: docSnap.data().nickname, emoji: docSnap.data().emoji || "🐰" });
-            setShowProfileSetup(false);
-          } else {
-            setShowProfileSetup(true);
-          }
-        } catch (e) {
-          console.error(e);
-          setShowProfileSetup(true);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  useEffect(() => services.subscribeToSession(async (uid) => {
+    setUser(uid ? { uid } : null);
+    if (!uid) { setIsLoading(false); return; }
+    try {
+      const profile = await services.profiles.get(uid);
+      if (profile?.nickname) { setUserProfile(profile); setShowProfileSetup(false); }
+      else setShowProfileSetup(true);
+    } catch { setShowProfileSetup(true); }
+    setIsLoading(false);
+  }), [services]);
 
   useEffect(() => {
-    if (!user || !db) return;
-
-    const progressRef = doc(db, 'artifacts', appId, 'users', user.uid, 'user_progress', 'gpass_data');
-    const unsubProgress = onSnapshot(progressRef, (docSnap) => {
-      if (docSnap.exists()) setProgress(docSnap.data().progress || {});
-      setIsLoading(false);
-    }, (error) => {
-      console.error("데이터 로드 에러:", error);
-      setIsLoading(false);
-    });
-
-    const rankingsRef = collection(db, 'artifacts', appId, 'public', 'data', 'rankings');
-    const unsubRankings = onSnapshot(rankingsRef, (querySnapshot) => {
-      const ranks = [];
-      querySnapshot.forEach((d) => ranks.push(d.data()));
-      setRankings(ranks);
-    }, (error) => console.error("랭킹 로드 에러:", error));
-
-    return () => {
-      unsubProgress();
-      unsubRankings();
-    };
-  }, [user]);
-
+    if (!user) return;
+    const unsubProgress = services.progress.subscribe(user.uid, (next) => { setProgress(next); setIsLoading(false); });
+    const unsubRankings = services.leaderboard.subscribe(setRankings);
+    return () => { unsubProgress(); unsubRankings(); };
+  }, [services, user]);
   const handleSaveProfile = async (selectedEmoji, nicknameInput) => {
     if (!nicknameInput.trim()) {
       showToastMsg("닉네임을 입력해주세요!");
       return;
     }
 
-    if (db && user) {
-      const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
-      await setDoc(profileRef, { nickname: nicknameInput, emoji: selectedEmoji });
-
-      const rankRef = doc(db, 'artifacts', appId, 'public', 'data', 'rankings', user.uid);
-      await setDoc(rankRef, {
-        uid: user.uid,
-        nickname: nicknameInput,
-        emoji: selectedEmoji,
-        updatedAt: Date.now()
-      }, { merge: true });
+    if (user) {
+      const profile = { nickname: nicknameInput, emoji: selectedEmoji };
+      await services.profiles.save(user.uid, profile);
+      await services.leaderboard.save({ uid: user.uid, ...profile });
     }
 
     setUserProfile({ nickname: nicknameInput, emoji: selectedEmoji });
@@ -279,18 +200,12 @@ export default function LegacyGooglerApp() {
   };
 
   const handlePassShare = async () => {
-    if (user && db) {
+    if (user) {
       const newProgress = { ...progress, [`passed${currentLevel}`]: true };
       setProgress(newProgress);
 
-      const progressRef = doc(db, 'artifacts', appId, 'users', user.uid, 'user_progress', 'gpass_data');
-      await setDoc(progressRef, { progress: newProgress }, { merge: true });
-
-      const rankRef = doc(db, 'artifacts', appId, 'public', 'data', 'rankings', user.uid);
-      await setDoc(rankRef, {
-        [`passed${currentLevel}`]: true,
-        updatedAt: Date.now()
-      }, { merge: true });
+      await services.progress.save(user.uid, newProgress);
+      await services.leaderboard.save({ uid: user.uid, ...userProfile, [`passed${currentLevel}`]: true });
 
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
@@ -315,26 +230,23 @@ export default function LegacyGooglerApp() {
       setTimeout(() => setShowConfetti(false), 3000);
     }
 
-    if (db) {
+    if (user) {
       try {
-        const progressRef = doc(db, 'artifacts', appId, 'users', user.uid, 'user_progress', 'gpass_data');
-        await setDoc(progressRef, { progress: newProgress }, { merge: true });
+        await services.progress.save(user.uid, newProgress);
 
         const updatedIds = completedMissionIds(newProgress, courses);
         const l1Score = countCompletedMissions(updatedIds, coursesByLevel.L1);
         const l2Score = countCompletedMissions(updatedIds, coursesByLevel.L2);
 
-        const rankRef = doc(db, 'artifacts', appId, 'public', 'data', 'rankings', user.uid);
-        await setDoc(rankRef, {
+        await services.leaderboard.save({
           uid: user.uid,
           nickname: userProfile.nickname,
           emoji: userProfile.emoji,
           scoreL1: l1Score,
           scoreL2: l2Score,
           passedL1: newProgress.passedL1 || false,
-          passedL2: newProgress.passedL2 || false,
-          updatedAt: Date.now()
-        }, { merge: true });
+          passedL2: newProgress.passedL2 || false
+        });
 
       } catch (error) {
         console.error("데이터 저장 실패:", error);
