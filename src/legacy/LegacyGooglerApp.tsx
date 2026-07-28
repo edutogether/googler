@@ -10,6 +10,9 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from 'firebase/firestore';
 import { coursesByLevel } from '../content/courses';
+import { courses } from '../content/courses';
+import { completedMissionIds, countCompletedMissions, isDayComplete as isLearningDayComplete, missionStorageKey, progressPercent as calculateProgressPercent, shouldCelebrateDayCompletion } from '../domain/progress';
+import { levelShareMessage, missionShareMessage } from '../shared/sharing';
 
 // 배포 시 여기에 파이어베이스 프로젝트 설정값을 반드시 채워주세요!
 const firebaseConfig = {
@@ -130,7 +133,7 @@ export default function LegacyGooglerApp() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   const [showRanking, setShowRanking] = useState(false);
-  const [currentLevel, setCurrentLevel] = useState('L1');
+  const [currentLevel, setCurrentLevel] = useState<'L1' | 'L2'>('L1');
   const [activeTab, setActiveTab] = useState('intro');
 
   const [progress, setProgress] = useState<Record<string, boolean>>({});
@@ -230,10 +233,11 @@ export default function LegacyGooglerApp() {
     showToastMsg(`환영합니다!`);
   };
 
-  const l1Completed = Object.keys(progress).filter(k => k.startsWith(`L1_`) && !k.startsWith('L1_passed') && progress[k]).length;
-  const l2Completed = Object.keys(progress).filter(k => k.startsWith(`L2_`) && !k.startsWith('L2_passed') && progress[k]).length;
+  const completedIds = completedMissionIds(progress, courses);
+  const l1Completed = countCompletedMissions(completedIds, coursesByLevel.L1);
+  const l2Completed = countCompletedMissions(completedIds, coursesByLevel.L2);
   const currentLevelMissions = currentLevel === 'L1' ? l1Completed : l2Completed;
-  const progressPercent = Math.round((currentLevelMissions / 30) * 100) || 0;
+  const currentProgressPercent = calculateProgressPercent(completedIds, coursesByLevel[currentLevel]);
 
   const showToastMsg = (msg) => {
     setToastMsg(msg);
@@ -270,9 +274,8 @@ export default function LegacyGooglerApp() {
   };
 
   const handleKakaoShare = (dayItem, index) => {
-    const title = `Google Educator Maker 미션 인증`;
-    const text = `🚀 [Google Educator Maker]\n\n오늘 미션 클리어! ✌️✨\n👉 Day ${index + 1} - '${dayItem.title}'\n\n🔥 나의 현재 달성률: ${progressPercent}%\n얼른 들어와서 같이 구글 마스터 됩시다! 🏃‍♂️💨`;
-    invokeNativeShare(title, text);
+    const message = missionShareMessage(dayItem.title, index + 1, currentProgressPercent);
+    invokeNativeShare(message.title, message.text);
   };
 
   const handlePassShare = async () => {
@@ -293,28 +296,23 @@ export default function LegacyGooglerApp() {
       setTimeout(() => setShowConfetti(false), 5000);
     }
 
-    const title = `Google Educator Maker 합격 인증`;
-    const text = `🎉 꺄아악! 저 구글 교육자 ${currentLevel} 합격했어요!! 🏆✨\n\n같이 으쌰으쌰 해준 멤버들 덕분이에요! 💖\n아직 시험 안 보신 분들 제 꿀기운 팍팍 받아가세요! 무조건 할 수 있습니다! 화이팅!! 🚀`;
-    invokeNativeShare(title, text);
+    const message = levelShareMessage(currentLevel);
+    invokeNativeShare(message.title, message.text);
   };
 
   const toggleCheck = async (dayId, checkIndex) => {
     if (!user) return;
 
     const key = `${currentLevel}_${dayId}_${checkIndex}`;
+    const day = coursesByLevel[currentLevel].days.find((item) => item.progressKey === dayId);
+    const previousIds = completedMissionIds(progress, courses);
     const isNowChecked = !progress[key];
     const newProgress = { ...progress, [key]: isNowChecked };
     setProgress(newProgress);
 
-    if (isNowChecked) {
-      let dayCompleted = true;
-      for(let i=0; i<3; i++) {
-        if(i !== checkIndex && !newProgress[`${currentLevel}_${dayId}_${i}`]) dayCompleted = false;
-      }
-      if(dayCompleted) {
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
-      }
+    if (isNowChecked && day && shouldCelebrateDayCompletion(previousIds, completedMissionIds(newProgress, courses), day)) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
     }
 
     if (db) {
@@ -322,8 +320,9 @@ export default function LegacyGooglerApp() {
         const progressRef = doc(db, 'artifacts', appId, 'users', user.uid, 'user_progress', 'gpass_data');
         await setDoc(progressRef, { progress: newProgress }, { merge: true });
 
-        const l1Score = Object.keys(newProgress).filter(k => k.startsWith('L1_') && !k.startsWith('L1_passed') && newProgress[k]).length;
-        const l2Score = Object.keys(newProgress).filter(k => k.startsWith('L2_') && !k.startsWith('L2_passed') && newProgress[k]).length;
+        const updatedIds = completedMissionIds(newProgress, courses);
+        const l1Score = countCompletedMissions(updatedIds, coursesByLevel.L1);
+        const l2Score = countCompletedMissions(updatedIds, coursesByLevel.L2);
 
         const rankRef = doc(db, 'artifacts', appId, 'public', 'data', 'rankings', user.uid);
         await setDoc(rankRef, {
@@ -459,13 +458,13 @@ export default function LegacyGooglerApp() {
               <div className="flex justify-between items-end mb-1">
                 <span className="text-xs font-bold text-[#5F6368]">{currentLevel} 달성률 (30개 미션)</span>
                 <span className={`text-lg font-black ${currentLevel === 'L1' ? 'text-[#1A73E8]' : 'text-[#D93025]'}`}>
-                  {progressPercent}%
+                  {currentProgressPercent}%
                 </span>
               </div>
               <div className="w-full bg-[#E8EAED] rounded-full h-2.5 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ease-out ${currentLevel === 'L1' ? 'bg-[#4285F4]' : 'bg-[#EA4335]'}`}
-                  style={{ width: `${progressPercent}%` }}
+                  style={{ width: `${currentProgressPercent}%` }}
                 />
               </div>
             </div>
@@ -613,7 +612,7 @@ export default function LegacyGooglerApp() {
 
                 <div className="space-y-5">
                   {coursesByLevel[currentLevel].days.map((dayItem, index) => {
-                    const isDayComplete = dayItem.missions.every((mission) => progress[currentLevel + '_' + dayItem.progressKey + '_' + mission.progressKey]);
+                    const isDayComplete = isLearningDayComplete(completedIds, dayItem);
                     const theme = themeColors[dayItem.theme] || themeColors.blue;
 
                     return (
@@ -640,7 +639,7 @@ export default function LegacyGooglerApp() {
                         <div className="p-6 md:p-8 bg-white">
                           <div className="space-y-3">
                             {dayItem.missions.map((mission, idx) => {
-                              const isChecked = progress[currentLevel + '_' + dayItem.progressKey + '_' + mission.progressKey] || false;
+                              const isChecked = progress[missionStorageKey(currentLevel, dayItem, idx)] || false;
                               return (
                                 <label key={idx} className={`flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer transition-all border ${isChecked ? 'bg-[#F8F9FA] border-transparent shadow-none' : 'bg-white border-[#E8EAED] hover:border-[#DADCE0]'}`}>
                                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-[#34A853] border-[#34A853]' : 'border-[#DADCE0]'}`}>
