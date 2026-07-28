@@ -1,5 +1,6 @@
 import { BookOpen, Check, HelpCircle, MonitorPlay, Share2 } from 'lucide-react';
 import type { CourseLevel, LearningDay } from '../../domain/course';
+import { ShareButton } from '../sharing/ShareButton';
 import { MissionChecklist } from './MissionChecklist';
 
 type LearningDayCardProps = {
@@ -43,14 +44,14 @@ export function LearningDayCard({ currentLevel, dayItem, index, isDayComplete, p
                                 onToggleCheck={onToggleCheck}
                               />
                               <div className="mt-6 pt-6 border-t border-[#E8EAED]">
-                                <button
+                                <ShareButton
                                   onClick={() => onShare(dayItem, index)}
                                   disabled={!isDayComplete}
                                   className={`w-full font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-sm transition-transform text-lg ${isDayComplete ? 'bg-[#FEE500] hover:bg-[#F4DC00] text-[#371D1E] active:scale-95 cursor-pointer' : 'bg-[#F1F3F4] text-[#9AA0A6] cursor-not-allowed opacity-70'}`}
                                 >
                                   <Share2 className="w-6 h-6" />
                                   {isDayComplete ? '미션 완료! 단톡방에 링크 공유하기 🎉' : '위 미션을 먼저 완료해주세요!'}
-                                </button>
+                                </ShareButton>
                               </div>
                             </div>
                           </div>

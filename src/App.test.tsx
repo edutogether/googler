@@ -30,4 +30,15 @@ describe('preserved product baseline', () => {
     expect(screen.getAllByText(/Day \d+/)).toHaveLength(10);
     expect(screen.getAllByRole('checkbox')).toHaveLength(30);
   });
+
+  it('edits a preview profile and opens the empty leaderboard without inventing rankings', () => {
+    const { container } = render(<App />);
+    fireEvent.click(container.querySelector('button.hidden.md\\:block')!);
+    fireEvent.change(screen.getByPlaceholderText('ex) 발랄한 다람쥐'), { target: { value: '테스트 토끼' } });
+    fireEvent.click(screen.getByRole('button', { name: '🐱' }));
+    expect(screen.getByText(/환영합니다!/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /랭킹보기/ }));
+    expect(screen.getByText('Google Educator가 되기 위한 여정')).toBeInTheDocument();
+    expect(screen.getByText('아직 레이스에 참여한 멤버가 없습니다! 🏃💨')).toBeInTheDocument();
+  });
 });
