@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LegacyGooglerApp from '../../legacy/LegacyGooglerApp';
-import { suggestedAvatar, suggestedDisplayName, type PrivateLearnerProfile, type PublicLearnerProfile } from '../../domain/journeyProfile';
+import { suggestedAvatar, suggestedDisplayName } from '../../domain/journeyProfile';
 import { startJourneyBgm, stopJourneyBgm } from '../audio/audioEngine';
 import { IdentityStep } from './IdentityStep';
 
@@ -10,8 +10,8 @@ const tones = [{ name: '차분한 코치', line: '오늘도 한 걸음씩, 충�
 const messages = ['Google 계정의 첫 문을 열고 있어요.', '당신의 학습 리듬을 살피고 있어요.', '이번 주의 작은 승리를 고르고 있어요.', '복습과 보충일을 균형 있게 배치하고 있어요.', 'Google Educator 여정에 색을 입히고 있어요.', '첫 미션을 조심스럽게 고르고 있어요.'];
 
 export default function JourneyPrototype() {
-  const [mode, setMode] = useState<'entry'|'new'|'return'|'diagnostic'|'level'|'tone'|'loading'|'planner'|'legacy'>('entry');
-  const [step, setStep] = useState(0); const [name, setName] = useState(suggestedDisplayName()); const [legalName] = useState(''); const [avatar, setAvatar] = useState(suggestedAvatar(name)); const [avatarLocked] = useState(false); const [level, setLevel] = useState(0); const [tone, setTone] = useState(1); const [sound, setSound] = useState(() => localStorage.getItem('journey-sound') !== 'off'); const audio = useRef<AudioContext | null>(null); const privateProfile: PrivateLearnerProfile = { legalName, accountEmail: '' }; const publicProfile: PublicLearnerProfile = { displayName: name, avatarId: avatar, title: '새로운 구글러' };
+  const [mode, setMode] = useState<string>('entry');
+  const [step, setStep] = useState(0); const [name, setName] = useState(suggestedDisplayName()); const [avatar, setAvatar] = useState(suggestedAvatar(name)); const [avatarLocked] = useState(false); const [level, setLevel] = useState(0); const [tone, setTone] = useState(1); const [sound, setSound] = useState(() => localStorage.getItem('journey-sound') !== 'off'); const audio = useRef<AudioContext | null>(null);
   const play = (frequency=440) => { if (!sound || typeof AudioContext === 'undefined') return; if (!audio.current) audio.current = new AudioContext(); const oscillator=audio.current.createOscillator(); const gain=audio.current.createGain(); gain.gain.value=.025; oscillator.frequency.value=frequency; oscillator.connect(gain).connect(audio.current.destination); oscillator.start(); oscillator.stop(audio.current.currentTime+.08); };
   useEffect(()=>localStorage.setItem('journey-sound', sound ? 'on':'off'),[sound]);
   useEffect(()=>{ if (!sound) stopJourneyBgm(); return ()=>stopJourneyBgm(); },[sound]);
