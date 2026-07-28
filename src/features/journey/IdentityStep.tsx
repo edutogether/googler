@@ -70,8 +70,8 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
       <div className="mt-7 grid gap-6 md:grid-cols-2">
         <div className="space-y-5">
           <div>
-            <h2 className="font-black">운영 확인을 위한 이름</h2>
-            <p className="mt-1 text-sm text-[#5f6368]">이 이름은 본인과 운영자만 확인할 수 있어요. 랭킹이나 공개 공간에는 표시되지 않아요.</p>
+            <h2 className="font-black">용사님의 이름</h2>
+            <p className="mt-1 text-sm text-[#5f6368]">이 이름은 본인과 운영자만 확인해요. 수료 확인과 운영 안내에만 사용돼요.</p>
             <input
               value={privateProfile.legalName}
               onChange={(event) => setPrivateProfile((profile) => ({ ...profile, legalName: event.target.value }))}
@@ -80,8 +80,8 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
             />
           </div>
           <div>
-            <h2 className="font-black">여정에서 사용할 이름</h2>
-            <p className="mt-1 text-sm text-[#5f6368]">캘린더, 랭킹과 함께 배우는 공간에는 이 이름이 보여요.</p>
+            <h2 className="font-black">모험 닉네임</h2>
+            <p className="mt-1 text-sm text-[#5f6368]">캘린더, 랭킹과 함께 배우는 공간에서는 이 이름으로 보여요.</p>
             <div className="mt-3 flex gap-2">
               <input
                 value={publicProfile.displayName}
@@ -93,21 +93,21 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
                 aria-label="공개 여정 이름"
               />
               <button onClick={chooseSuggestedName} className="rounded-xl bg-[#e8f0fe] px-3 text-sm font-bold text-[#1967d2]">
-                다른 이름 추천
+                새로운 모험 이름
               </button>
             </div>
             {!validDisplayName && <p className="mt-2 text-xs text-[#d93025]">공개 이름은 공백만 아닌 2~16자로 입력해 주세요.</p>}
           </div>
         </div>
         <aside className="relative rounded-2xl bg-[#f8f9fa] p-6 text-center">
-          <p className="text-sm font-bold text-[#5f6368]">다른 사람에게는 이렇게 보여요</p>
+          <p className="text-sm font-bold text-[#5f6368]">모험 프로필 미리보기 · 다른 구글러에게는 이렇게 보여요</p>
           <button onClick={() => setPickerOpen(true)} className="mt-4 text-7xl" aria-label="캐릭터 선택">
             {publicProfile.avatarId}
           </button>
           <h2 className="mt-3 text-xl font-black">{displayName || '여정 이름을 기다리는 중'}</h2>
           <p className="text-sm text-[#5f6368]">{publicProfile.title}{settled && ' · 추천 완료'}</p>
           <button onClick={recommendAnotherAvatar} className="mt-4 rounded-xl border border-[#dadce0] px-4 py-2 text-sm font-bold">
-            다른 캐릭터 추천
+            새로운 동료 찾기
           </button>
           {pickerOpen && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80 p-4" role="dialog" aria-label="캐릭터 선택기" onClick={() => setPickerOpen(false)}>
@@ -135,7 +135,7 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
         </aside>
       </div>
       <button disabled={!validDisplayName} onClick={onContinue} className="mt-8 rounded-xl bg-[#1a73e8] px-6 py-3 font-bold text-white disabled:bg-[#dadce0]">
-        이 모습으로 계속하기
+        이 모습으로 모험 시작하기
       </button>
     </section>
   );
