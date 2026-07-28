@@ -9,6 +9,7 @@ import {
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from 'firebase/firestore';
+import { coursesByLevel } from '../content/courses';
 
 // 배포 시 여기에 파이어베이스 프로젝트 설정값을 반드시 채워주세요!
 const firebaseConfig = {
@@ -34,12 +35,6 @@ try {
 }
 
 // 💬 체크리스트 3종류
-const defaultChecklist = [
-  "공식 도움말 살펴보기 완료 ! 💡",
-  "유튜브 영상 콘텐츠 따라하기 완료 ! 📺",
-  "공식 가이드 콘텐츠 실습하기 완료 ! 🖱️"
-];
-
 // 랜덤 닉네임 및 이모지 데이터
 const adjectives = ["열정적인", "발랄한", "똑똑한", "용감한", "빛나는", "멋진", "귀여운", "성실한", "무적의", "날쌘", "행복한", "명랑한"];
 const animals = [
@@ -49,37 +44,6 @@ const animals = [
   { name: "거북이", emoji: "🐢" }, { name: "병아리", emoji: "🐥" }, { name: "햄스터", emoji: "🐹" }
 ];
 const animalEmojis = animals.map(a => a.emoji);
-
-const curriculumData = {
-  L1: {
-    learning: [
-      { id: 'l1_1', day: '월요일', theme: 'blue', title: '크롬 & 구글 드라이브', desc: '크롬 동기화, 파일 업로드 및 폴더 공유하기', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/drive/answer/2424368?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+크롬+드라이브' } },
-      { id: 'l1_2', day: '화요일', theme: 'blue', title: '구글 문서 (Docs)', desc: '문서 공동 편집, 댓글 및 제안 모드 활용', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/docs/answer/7068618?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+구글+문서' } },
-      { id: 'l1_3', day: '수요일', theme: 'yellow', title: '구글 프레젠테이션', desc: '슬라이드 테마 적용, 애니메이션 및 동영상 삽입', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/docs/answer/2720754?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+프레젠테이션' } },
-      { id: 'l1_4', day: '목요일', theme: 'purple', title: '구글 설문지 (Forms)', desc: '설문지 만들고 퀴즈로 설정하여 자동 채점하기', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/docs/answer/6281888?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+설문지' } },
-      { id: 'l1_5', day: '금요일', theme: 'green', title: '구글 클래스룸', desc: '수업 개설, 학생 초대, 자료 및 과제 게시하기', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/edu/classroom/answer/6020279?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+클래스룸' } },
-      { id: 'l1_6', day: '월요일', theme: 'red', title: '지메일 (Gmail)', desc: '라벨 관리, 중요 필터 설정, 내 서명 만들기', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/mail/answer/8395?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+지메일' } },
-      { id: 'l1_7', day: '화요일', theme: 'blue', title: '구글 캘린더 & Tasks', desc: '일정 공유, 회의 예약, 할 일(Tasks) 연동', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/calendar/answer/2465776?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+캘린더' } },
-      { id: 'l1_8', day: '수요일', theme: 'green', title: '구글 미트 (Meet)', desc: '화면 공유, 소모임 방 만들기', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/meet/answer/9302870?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+미트' } },
-      { id: 'l1_9', day: '목요일', theme: 'indigo', title: '구글 사이트 도구', desc: '나만의 멋진 학급 포트폴리오 사이트 제작', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/sites/answer/90569?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+사이트도구' } },
-      { id: 'l1_10', day: '금요일', theme: 'yellow', title: '구글 그룹스 & 킵', desc: '게시판형 그룹 만들기, 스마트하게 메모', links: { edu: 'https://skillshop.exceedlms.com/student/path/61209-google-workspace', help: 'https://support.google.com/groups/answer/2464926?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+1+그룹스+킵' } },
-    ]
-  },
-  L2: {
-    learning: [
-      { id: 'l2_1', day: '월요일', theme: 'blue', title: '드라이브 & 문서 심화', desc: '공유 드라이브 관리, 고급 문서 서식 및 번역', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/a/users/answer/9310156?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+드라이브+문서' } },
-      { id: 'l2_2', day: '화요일', theme: 'green', title: '스프레드시트 심화', desc: '피벗 테이블, VLOOKUP 함수 데이터 분석', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/docs/answer/1272900?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+스프레드시트' } },
-      { id: 'l2_3', day: '수요일', theme: 'purple', title: '설문지 & 클래스룸 심화', desc: '답변 기준 섹션 이동, 클래스룸 성적 채점표', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/docs/answer/141062?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+설문지+클래스룸' } },
-      { id: 'l2_4', day: '목요일', theme: 'red', title: '유튜브 (YouTube)', desc: '교육용 채널 관리, 재생목록, 제한 모드 설정', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/youtube/answer/1646861?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+유튜브' } },
-      { id: 'l2_5', day: '금요일', theme: 'indigo', title: '사이트 & 블로거 심화', desc: '고급 사이트 레이아웃, 교육용 블로그 구성', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/sites/answer/90569?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+사이트도구' } },
-      { id: 'l2_6', day: '월요일', theme: 'green', title: '구글 어스 & 지도', desc: '프로젝트 만들기, 스트리트 뷰 활용 수업 설계', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/earth/answer/9398104?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+구글어스' } },
-      { id: 'l2_7', day: '화요일', theme: 'blue', title: '지메일 & 캘린더 심화', desc: '맞춤 레이아웃, 예약 일정 블록', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/calendar/answer/10729749?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+캘린더' } },
-      { id: 'l2_8', day: '수요일', theme: 'yellow', title: '미트 & 챗 스페이스', desc: '출석부 자동생성, Q&A 기능, 스페이스 활용', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/meet/answer/10091338?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+미트' } },
-      { id: 'l2_9', day: '목요일', theme: 'indigo', title: '구글 트렌드 & 학술검색', desc: '데이터 트렌드 시각화, 학술자료 알리미', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/trends/?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+트렌드' } },
-      { id: 'l2_10', day: '금요일', theme: 'red', title: '최종 복습 & 모의고사', desc: 'L2 전체 범위 정리 및 오답 노트 작성', links: { edu: 'https://skillshop.exceedlms.com/student/path/61210-google-workspace-advanced', help: 'https://support.google.com/a/answer/1382206?hl=ko', youtube: 'https://www.youtube.com/results?search_query=구글+공인+교육자+level+2+기출문제' } },
-    ]
-  }
-};
 
 const themeColors = {
   blue: { bg: 'bg-[#F4F7FB]', border: 'border-[#D2E3FC]', text: 'text-[#174EA6]', highlight: 'bg-[#E8F0FE]' },
@@ -648,8 +612,8 @@ export default function LegacyGooglerApp() {
                 </div>
 
                 <div className="space-y-5">
-                  {curriculumData[currentLevel].learning.map((dayItem, index) => {
-                    const isDayComplete = defaultChecklist.every((_, idx) => progress[`${currentLevel}_${dayItem.id}_${idx}`]);
+                  {coursesByLevel[currentLevel].days.map((dayItem, index) => {
+                    const isDayComplete = dayItem.missions.every((mission) => progress[currentLevel + '_' + dayItem.progressKey + '_' + mission.progressKey]);
                     const theme = themeColors[dayItem.theme] || themeColors.blue;
 
                     return (
@@ -663,27 +627,27 @@ export default function LegacyGooglerApp() {
                               {isDayComplete && <span className="flex items-center text-xs font-bold text-[#0D652D]"><Check className="w-3.5 h-3.5 mr-0.5" /> 100% 완료</span>}
                             </div>
                             <h3 className="text-xl font-extrabold text-[#202124] flex items-center gap-2">{dayItem.title}</h3>
-                            <p className="text-sm text-[#5F6368] mt-1.5 font-medium">{dayItem.desc}</p>
+                            <p className="text-sm text-[#5F6368] mt-1.5 font-medium">{dayItem.description}</p>
                           </div>
                         </div>
 
                         <div className="px-6 md:px-8 py-4 border-y border-[#E8EAED] bg-white flex flex-wrap gap-2">
-                          <a href={dayItem.links.help} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#FCE8E6] text-[#5F6368] hover:text-[#D93025] transition-colors border border-[#E8EAED] group"><HelpCircle className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">공식 도움말</span></a>
-                          <a href={dayItem.links.youtube} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#FEF7E0] text-[#5F6368] hover:text-[#E37400] transition-colors border border-[#E8EAED] group"><MonitorPlay className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">영상 콘텐츠</span></a>
-                          <a href={dayItem.links.edu} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#E8F0FE] text-[#5F6368] hover:text-[#1A73E8] transition-colors border border-[#E8EAED] group"><BookOpen className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">공식 가이드</span></a>
+                          <a href={dayItem.resources.help.url} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#FCE8E6] text-[#5F6368] hover:text-[#D93025] transition-colors border border-[#E8EAED] group"><HelpCircle className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">공식 도움말</span></a>
+                          <a href={dayItem.resources.youtube.url} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#FEF7E0] text-[#5F6368] hover:text-[#E37400] transition-colors border border-[#E8EAED] group"><MonitorPlay className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">영상 콘텐츠</span></a>
+                          <a href={dayItem.resources.education.url} target="_blank" rel="noreferrer" className="flex-1 min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8F9FA] hover:bg-[#E8F0FE] text-[#5F6368] hover:text-[#1A73E8] transition-colors border border-[#E8EAED] group"><BookOpen className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold">공식 가이드</span></a>
                         </div>
 
                         <div className="p-6 md:p-8 bg-white">
                           <div className="space-y-3">
-                            {defaultChecklist.map((checkText, idx) => {
-                              const isChecked = progress[`${currentLevel}_${dayItem.id}_${idx}`] || false;
+                            {dayItem.missions.map((mission, idx) => {
+                              const isChecked = progress[currentLevel + '_' + dayItem.progressKey + '_' + mission.progressKey] || false;
                               return (
                                 <label key={idx} className={`flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer transition-all border ${isChecked ? 'bg-[#F8F9FA] border-transparent shadow-none' : 'bg-white border-[#E8EAED] hover:border-[#DADCE0]'}`}>
                                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-[#34A853] border-[#34A853]' : 'border-[#DADCE0]'}`}>
                                     {isChecked && <Check className="w-4 h-4 text-white" />}
                                   </div>
-                                  <input type="checkbox" className="hidden" checked={isChecked} onChange={() => toggleCheck(dayItem.id, idx)} />
-                                  <span className={`text-sm font-medium transition-colors ${isChecked ? 'text-[#9AA0A6] line-through' : 'text-[#202124]'}`}>{checkText}</span>
+                                  <input type="checkbox" className="hidden" checked={isChecked} onChange={() => toggleCheck(dayItem.progressKey, idx)} />
+                                  <span className={`text-sm font-medium transition-colors ${isChecked ? 'text-[#9AA0A6] line-through' : 'text-[#202124]'}`}>{mission.text}</span>
                                 </label>
                               )
                             })}
