@@ -49,11 +49,22 @@ textarea {
   background: linear-gradient(135deg, #dff2ff 0%, #fff8e8 100%);
 }
 
-.visual-reset-stage {
+.visual-reset-stage-shell {
   position: relative;
-  width: min(100vw, calc(100svh * 1.3333333333));
-  aspect-ratio: 4 / 3;
+  display: grid;
+  width: 100vw;
+  min-width: 0;
+  height: 100svh;
+  min-height: 0;
+  place-items: center;
+}
+
+.visual-reset-image-frame {
+  position: relative;
+  width: min(100vw, calc(100svh * var(--visual-reset-asset-ratio)));
+  max-width: 100vw;
   max-height: 100svh;
+  aspect-ratio: var(--visual-reset-asset-ratio);
 }
 
 .visual-reset-image,
@@ -122,13 +133,18 @@ textarea {
   border-radius: 1.8rem;
 }
 
-.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot {
+.visual-reset-stage-shell.is-hotspot-debug .visual-reset-image-frame {
+  outline: 3px solid rgb(0 125 255 / 0.9);
+  outline-offset: -3px;
+}
+
+.visual-reset-stage-shell.is-hotspot-debug .visual-reset-hotspot {
   border-color: rgb(0 125 255 / 0.86);
   background-color: rgb(58 174 255 / 0.18);
   box-shadow: 0 0 0 1px rgb(255 255 255 / 0.92), 0 0 13px rgb(0 137 255 / 0.5);
 }
 
-.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot::after {
+.visual-reset-stage-shell.is-hotspot-debug .visual-reset-hotspot::after {
   position: absolute;
   z-index: 1;
   top: -1.25rem;
@@ -142,7 +158,7 @@ textarea {
   line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
-  content: attr(data-hotspot-label);
+  content: attr(data-hotspot-label) " · " attr(data-hotspot-position);
   border: 1px solid rgb(255 255 255 / 0.9);
   border-radius: 0.35rem;
   background: rgb(232 247 255 / 0.94);
@@ -150,8 +166,8 @@ textarea {
   pointer-events: none;
 }
 
-.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot:hover,
-.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot:focus-visible {
+.visual-reset-stage-shell.is-hotspot-debug .visual-reset-hotspot:hover,
+.visual-reset-stage-shell.is-hotspot-debug .visual-reset-hotspot:focus-visible {
   border-color: #fff;
   background-color: rgb(255 219 106 / 0.3);
   box-shadow: 0 0 0 2px rgb(255 255 255 / 0.95), 0 0 22px rgb(255 210 71 / 0.84);
@@ -168,8 +184,27 @@ textarea {
   }
 }
 
-.visual-reset-stage.is-reduced-motion .visual-reset-hotspot {
+.visual-reset-stage-shell.is-reduced-motion .visual-reset-hotspot {
   transition: none;
+}
+
+.visual-reset-debug-meta {
+  position: absolute;
+  z-index: 3;
+  top: 0.8rem;
+  left: 0.8rem;
+  display: grid;
+  gap: 0.12rem;
+  max-width: min(28rem, calc(100vw - 1.6rem));
+  padding: 0.5rem 0.65rem;
+  color: #06355f;
+  font-size: clamp(0.63rem, 1.15vw, 0.82rem);
+  line-height: 1.25;
+  border: 1px solid rgb(255 255 255 / 0.94);
+  border-radius: 0.55rem;
+  background: rgb(230 246 255 / 0.93);
+  box-shadow: 0 3px 13px rgb(0 62 112 / 0.24);
+  pointer-events: none;
 }
 
 @keyframes fade-in {

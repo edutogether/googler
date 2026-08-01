@@ -11,7 +11,6 @@ export type VisualResetHotspot = {
 };
 
 export const VISUAL_RESET_HOTSPOTS: VisualResetHotspot[] = [
-  { id: 'logo', label: 'Be a Googler 홈', tone: 'menu', left: 3.3, top: 3.1, width: 15.3, height: 4.9 },
   { id: 'explore', label: '탐험 시작 보기', tone: 'menu', left: 21.2, top: 3.0, width: 8.1, height: 6.0 },
   { id: 'learning-town', label: '학습 마을 보기', tone: 'menu', left: 31.1, top: 3.0, width: 8.1, height: 6.0 },
   { id: 'missions', label: '미션 보기', tone: 'menu', left: 41.4, top: 3.0, width: 6.2, height: 6.0 },
