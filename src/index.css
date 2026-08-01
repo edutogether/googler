@@ -107,7 +107,54 @@ textarea {
 
 .visual-reset-hotspot--menu,
 .visual-reset-hotspot--control {
+  border-radius: 1rem;
+}
+
+.visual-reset-hotspot--control {
   border-radius: 999px;
+}
+
+.visual-reset-hotspot--cta {
+  border-radius: 1.35rem;
+}
+
+.visual-reset-hotspot--card {
+  border-radius: 1.8rem;
+}
+
+.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot {
+  border-color: rgb(0 125 255 / 0.86);
+  background-color: rgb(58 174 255 / 0.18);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.92), 0 0 13px rgb(0 137 255 / 0.5);
+}
+
+.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot::after {
+  position: absolute;
+  z-index: 1;
+  top: -1.25rem;
+  left: 0;
+  max-width: 12rem;
+  padding: 0.18rem 0.38rem;
+  overflow: hidden;
+  color: #08305a;
+  font-size: clamp(0.45rem, 0.72vw, 0.7rem);
+  font-weight: 800;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  content: attr(data-hotspot-label);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  border-radius: 0.35rem;
+  background: rgb(232 247 255 / 0.94);
+  box-shadow: 0 2px 7px rgb(0 66 122 / 0.2);
+  pointer-events: none;
+}
+
+.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot:hover,
+.visual-reset-stage.is-hotspot-debug .visual-reset-hotspot:focus-visible {
+  border-color: #fff;
+  background-color: rgb(255 219 106 / 0.3);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.95), 0 0 22px rgb(255 210 71 / 0.84);
 }
 
 @media (prefers-reduced-motion: reduce) {

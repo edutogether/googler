@@ -4,9 +4,12 @@ import VisualResetMain from './VisualResetMain';
 import { VISUAL_RESET_HOTSPOTS } from './visualResetHotspots';
 
 const originalMatchMedia = window.matchMedia;
+const originalUrl = window.location.href;
 
 afterEach(() => {
   Object.defineProperty(window, 'matchMedia', { configurable: true, value: originalMatchMedia });
+  window.localStorage.removeItem('googlerHotspotDebug');
+  window.history.replaceState({}, '', originalUrl);
 });
 
 describe('VisualResetMain', () => {
@@ -26,6 +29,9 @@ describe('VisualResetMain', () => {
     expect(screen.getByRole('button', { name: '최근 획득 배지 보기' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '배경음악 재생' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '효과음 설정' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '학습 마을 보기' })).toHaveAttribute('data-hotspot-id', 'learning-town');
+    expect(screen.getByRole('button', { name: '학습 마을 보기' })).toHaveStyle({ left: '31.1%', width: '8.1%' });
+    expect(screen.queryByRole('button', { name: /하단.*화살표/ })).not.toBeInTheDocument();
   });
 
   it('does not navigate or render a separate UI when a hotspot is clicked', () => {
@@ -43,5 +49,19 @@ describe('VisualResetMain', () => {
     render(<VisualResetMain />);
     expect(screen.getByRole('main')).toHaveClass('visual-reset-page');
     expect(screen.getByRole('img', { name: 'BE A GOOGLER 메인 시안' }).parentElement).toHaveClass('is-reduced-motion');
+  });
+
+  it('reveals percentage-calibrated hotspot boxes and labels through the query debug mode', () => {
+    window.history.pushState({}, '', '/googler/?hotspots=1');
+    render(<VisualResetMain />);
+    const stage = screen.getByRole('img', { name: 'BE A GOOGLER 메인 시안' }).parentElement;
+    expect(stage).toHaveClass('is-hotspot-debug');
+    expect(screen.getByRole('button', { name: '새로운 여정 시작하기' })).toHaveAttribute('data-hotspot-label', '새로운 여정 시작하기');
+  });
+
+  it('also enables calibration with the persistent localStorage switch', () => {
+    window.localStorage.setItem('googlerHotspotDebug', '1');
+    render(<VisualResetMain />);
+    expect(screen.getByRole('img', { name: 'BE A GOOGLER 메인 시안' }).parentElement).toHaveClass('is-hotspot-debug');
   });
 });

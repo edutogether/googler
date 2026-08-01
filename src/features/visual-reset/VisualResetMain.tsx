@@ -16,12 +16,23 @@ function useReducedMotion() {
   return reducedMotion;
 }
 
+function useHotspotDebug() {
+  const [debugEnabled] = useState(() => {
+    const queryEnabled = new URLSearchParams(window.location.search).get('hotspots') === '1';
+    const storageEnabled = window.localStorage.getItem('googlerHotspotDebug') === '1';
+    return queryEnabled || storageEnabled;
+  });
+
+  return debugEnabled;
+}
+
 export default function VisualResetMain() {
   const reducedMotion = useReducedMotion();
+  const hotspotDebug = useHotspotDebug();
 
   return (
     <main className="visual-reset-page" aria-label="BE A GOOGLER 메인 시안 프로토타입">
-      <div className={`visual-reset-stage${reducedMotion ? ' is-reduced-motion' : ''}`}>
+      <div className={`visual-reset-stage${reducedMotion ? ' is-reduced-motion' : ''}${hotspotDebug ? ' is-hotspot-debug' : ''}`}>
         <img
           className="visual-reset-image"
           src="/googler/visual-reset/main/be-a-googler-main.png"
@@ -33,7 +44,9 @@ export default function VisualResetMain() {
               key={hotspot.id}
               type="button"
               aria-label={hotspot.label}
-              className={`visual-reset-hotspot visual-reset-hotspot--${hotspot.tone}`}
+              className={`visual-reset-hotspot visual-reset-hotspot--${hotspot.tone} visual-reset-hotspot--${hotspot.id}`}
+              data-hotspot-id={hotspot.id}
+              data-hotspot-label={hotspot.label}
               style={{
                 left: `${hotspot.left}%`,
                 top: `${hotspot.top}%`,
