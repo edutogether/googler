@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import App from './App';
+import JourneyPrototype from './features/journey/JourneyPrototype';
 import LegacyGooglerApp from './legacy/LegacyGooglerApp';
 
 function enterIdentityStep() {
@@ -18,7 +18,7 @@ afterEach(() => vi.useRealTimers());
 
 describe('Stage 1A journey experience', () => {
   it('shows the fixed two-line entry copy without a typing title', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     expect(screen.getByRole('heading', { name: 'Be a Googler' })).toBeInTheDocument();
     expect(screen.getByText('배우고, 직접 해보고, 함께 성장하는')).toBeInTheDocument();
     expect(screen.getByText('구글러의 작은 모험을 시작해보세요.')).toBeInTheDocument();
@@ -26,7 +26,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('uses eight connected stages and puts the adventure profile first in the identity DOM', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     enterIdentityStep();
     expect(screen.getByText('여정 준비 3 / 8')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '나만의 구글러 만들기' })).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('keeps legal and public names separate and validates the public nickname', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     enterIdentityStep();
     fireEvent.change(screen.getByLabelText('용사님의 이름'), { target: { value: '홍길동' } });
     fireEvent.change(screen.getByLabelText('모험 닉네임'), { target: { value: ' ' } });
@@ -47,7 +47,7 @@ describe('Stage 1A journey experience', () => {
 
   it('cycles an avatar, settles it after a typed nickname, and keeps a manually locked companion', () => {
     vi.useFakeTimers();
-    render(<App />);
+    render(<JourneyPrototype />);
     enterIdentityStep();
     const avatarButton = screen.getByRole('button', { name: '캐릭터 바꾸기' });
     const initialAvatar = avatarButton.textContent;
@@ -65,7 +65,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('opens and closes the avatar picker from its composite input and outside click', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     enterIdentityStep();
     fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
     expect(screen.getByRole('dialog', { name: '캐릭터 선택기' })).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('keeps the preview display-only while the composite bar owns avatar selection and name recommendations', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     enterIdentityStep();
     const profile = screen.getByLabelText('모험 프로필 미리보기');
     expect(within(profile).queryByRole('button')).not.toBeInTheDocument();
@@ -89,7 +89,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('updates both the input prefix and display-only preview from the picker, and closes on Escape', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     enterIdentityStep();
     fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
     fireEvent.click(screen.getByRole('button', { name: '🦉 선택' }));
@@ -101,7 +101,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('renders all four selectable starting levels and supports carousel arrow keys', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     enterLevelStep();
     expect(screen.getByText('처음부터 시작하기')).toBeInTheDocument();
     expect(screen.getByText('기초를 탄탄하게')).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe('Stage 1A journey experience', () => {
   });
 
   it('exposes accessible icon-only sound controls', () => {
-    render(<App />);
+    render(<JourneyPrototype />);
     fireEvent.click(screen.getByRole('button', { name: '배경음악 끄기' }));
     fireEvent.click(screen.getByRole('button', { name: '효과음 끄기' }));
     expect(screen.getByRole('button', { name: '배경음악 켜기' })).toBeInTheDocument();

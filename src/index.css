@@ -41,6 +41,90 @@ textarea {
   min-height: 1.5rem;
 }
 
+.visual-reset-page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #dff2ff 0%, #fff8e8 100%);
+}
+
+.visual-reset-stage {
+  position: relative;
+  width: min(100vw, calc(100svh * 1.3333333333));
+  aspect-ratio: 4 / 3;
+  max-height: 100svh;
+}
+
+.visual-reset-image,
+.visual-reset-hotspot-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.visual-reset-image {
+  display: block;
+  object-fit: contain;
+  user-select: none;
+}
+
+.visual-reset-hotspot-layer {
+  pointer-events: none;
+}
+
+.visual-reset-hotspot {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  outline: none;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.2) 50%, transparent 65%);
+  background-position: -220% 0;
+  background-size: 220% 100%;
+  box-shadow: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-position 200ms ease;
+}
+
+.visual-reset-hotspot:hover,
+.visual-reset-hotspot:focus-visible {
+  border-color: rgb(255 255 255 / 0.92);
+  box-shadow: 0 0 0 2px rgb(126 200 255 / 0.48), 0 0 18px rgb(255 255 255 / 0.64);
+  background-position: 220% 0;
+}
+
+.visual-reset-hotspot--cta:hover,
+.visual-reset-hotspot--cta:focus-visible {
+  border-color: rgb(255 255 255 / 1);
+  box-shadow: 0 0 0 2px rgb(72 145 255 / 0.62), 0 0 24px rgb(220 244 255 / 0.9);
+}
+
+.visual-reset-hotspot--menu,
+.visual-reset-hotspot--control {
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual-reset-hotspot {
+    transition: none;
+  }
+
+  .visual-reset-hotspot:hover,
+  .visual-reset-hotspot:focus-visible {
+    background-position: 0 0;
+  }
+}
+
+.visual-reset-stage.is-reduced-motion .visual-reset-hotspot {
+  transition: none;
+}
+
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
