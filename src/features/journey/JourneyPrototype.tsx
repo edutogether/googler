@@ -192,8 +192,15 @@ export default function JourneyPrototype() {
     const closePicker = (event: MouseEvent) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) setPickerOpen(false);
     };
+    const closePickerWithEscape = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') setPickerOpen(false);
+    };
     document.addEventListener('mousedown', closePicker);
-    return () => document.removeEventListener('mousedown', closePicker);
+    document.addEventListener('keydown', closePickerWithEscape);
+    return () => {
+      document.removeEventListener('mousedown', closePicker);
+      document.removeEventListener('keydown', closePickerWithEscape);
+    };
   }, []);
   useEffect(() => {
     if (screen !== 'loading') return;
@@ -209,11 +216,6 @@ export default function JourneyPrototype() {
     setManualAvatar(true);
     setPublicProfile((profile) => ({ ...profile, avatar }));
     setPickerOpen(false);
-  };
-  const findNewCompanion = () => {
-    setManualAvatar(false);
-    avatarIndex.current = (avatars.indexOf(stableAvatar(publicProfile.displayName)) + 1) % avatars.length;
-    setPublicProfile((profile) => ({ ...profile, avatar: avatars[avatarIndex.current] }));
   };
   const goNextDiagnostic = (answer: number) => {
     playEffect(420 + answer * 80);
@@ -264,16 +266,17 @@ export default function JourneyPrototype() {
       <div className="mt-9 grid items-start gap-6 lg:grid-cols-[2fr_3fr]">
         <section className="rounded-3xl border border-[#d2e3fc] bg-white p-6 shadow-sm" aria-label="모험 프로필 미리보기">
           <p className="text-sm font-bold text-[#1a73e8]">모험 프로필 미리보기</p>
-          <div ref={pickerRef} className="relative mt-6 text-center"><button type="button" aria-label="캐릭터 선택기 열기" onClick={() => setPickerOpen((open) => !open)} className="rounded-full p-2 text-7xl transition hover:bg-[#f1f3f4]" title="캐릭터 선택">{publicProfile.avatar}</button>{pickerOpen && <div className="absolute left-1/2 top-full z-20 mt-2 grid w-72 -translate-x-1/2 grid-cols-5 gap-1 rounded-2xl border border-[#dadce0] bg-white p-3 shadow-xl" role="dialog" aria-label="캐릭터 선택기"><button type="button" onClick={() => setPickerOpen(false)} aria-label="캐릭터 선택기 닫기" className="col-span-5 mb-1 rounded-lg px-2 py-1 text-right text-sm font-bold text-[#5f6368]">닫기 ×</button>{avatars.map((avatar) => <button type="button" key={avatar} onClick={() => selectAvatar(avatar)} className={`rounded-xl p-2 text-2xl hover:bg-[#e8f0fe] ${publicProfile.avatar === avatar ? 'bg-[#e8f0fe] ring-1 ring-[#4285f4]' : ''}`} aria-label={`${avatar} 선택`}>{avatar}</button>)}</div>}</div>
-          <h2 className="mt-4 break-words text-2xl font-black">{publicProfile.displayName.trim() || '이름을 정해볼까요?'}</h2>
-          <p className="journey-title-slot mt-2 text-sm font-semibold text-[#5f6368]" aria-live="polite">{animatedTitle || '\u00a0'}</p>
-          <span className="mt-3 inline-flex rounded-full bg-[#e8f0fe] px-3 py-1 text-xs font-bold text-[#1967d2]">새내기 구글러</span>
-          <button type="button" onClick={findNewCompanion} className="mt-5 block w-full rounded-xl border border-[#d2e3fc] bg-[#f8fbff] px-4 py-3 text-sm font-bold text-[#1967d2] hover:bg-[#e8f0fe]">새로운 동료 찾기</button><p className="mt-4 text-xs leading-relaxed text-[#5f6368]">다른 구글러에게는 이렇게 보여요</p>
+          <div className="mt-6 flex min-h-[236px] flex-col justify-between lg:min-h-[252px]">
+            <div className="flex items-center gap-4"><span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-[#f8fbff] text-5xl" aria-label={`선택한 캐릭터 ${publicProfile.avatar}`}>{publicProfile.avatar}</span><div className="min-w-0"><h2 className="break-words text-2xl font-black">{publicProfile.displayName.trim() || '이름을 정해볼까요?'}</h2><p className="journey-title-slot mt-1 text-sm font-semibold text-[#5f6368]" aria-live="polite">{animatedTitle || '\u00a0'}</p><span className="mt-2 inline-flex rounded-full bg-[#e8f0fe] px-3 py-1 text-xs font-bold text-[#1967d2]">새내기 구글러</span></div></div>
+            <div className="border-t border-[#e8eaed] pt-5"><p className="text-sm font-bold text-[#3c4043]">다른 구글러에게는 이렇게 보여요</p><p className="mt-2 text-sm leading-relaxed text-[#5f6368]">오늘도 새로운 도구를 탐험하고 있어요.</p></div>
+          </div>
         </section>
-        <section className="space-y-6 rounded-3xl border border-[#e8eaed] bg-white p-6 shadow-sm">
-          <div><div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-black">용사님의 이름</h2><span className="rounded-full bg-[#f1f3f4] px-2.5 py-1 text-xs font-bold text-[#5f6368]">운영자 확인용</span></div><p className="mt-2 text-sm leading-relaxed text-[#5f6368]">본인 확인과 수료·운영 안내에만 사용돼요.<br />다른 구글러에게는 공개되지 않아요.</p><label className="sr-only" htmlFor="legal-name">용사님의 이름</label><input id="legal-name" value={privateProfile.legalName} onChange={(event) => setPrivateProfile((profile) => ({ ...profile, legalName: event.target.value }))} placeholder="실명 또는 운영 확인 이름" className="mt-4 w-full rounded-2xl border border-[#dadce0] px-4 py-3 outline-none transition focus:border-[#1a73e8] focus:ring-2 focus:ring-[#d2e3fc]" /></div>
-          <div><div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-black">모험 닉네임</h2><span className="rounded-full bg-[#e6f4ea] px-2.5 py-1 text-xs font-bold text-[#137333]">다른 구글러에게 공개</span></div><p className="mt-2 text-sm text-[#5f6368]">캘린더와 랭킹에서는 이 이름으로 보여요.</p><label className="sr-only" htmlFor="display-name">모험 닉네임</label><input id="display-name" value={publicProfile.displayName} onChange={(event) => updateDisplayName(event.target.value)} placeholder="2~16자 모험 닉네임" className="mt-4 w-full rounded-2xl border border-[#dadce0] px-4 py-3 outline-none transition focus:border-[#1a73e8] focus:ring-2 focus:ring-[#d2e3fc]" />{!nicknameValid && <p role="alert" className="mt-2 text-sm font-semibold text-[#c5221f]">공백을 제외하고 2~16자로 입력해주세요.</p>}<button type="button" onClick={() => { const next = nicknames[(nicknames.indexOf(publicProfile.displayName) + 1 + nicknames.length) % nicknames.length]; updateDisplayName(next); setManualAvatar(false); }} className="mt-3 text-sm font-bold text-[#1967d2] hover:underline">새로운 모험 이름</button></div>
-          <button type="button" disabled={!nicknameValid} onClick={() => { playEffect(650); setScreen('diagnostic'); }} className="w-full rounded-2xl bg-[#1a73e8] px-6 py-4 font-bold text-white shadow-sm transition hover:bg-[#1967d2] disabled:cursor-not-allowed disabled:bg-[#dadce0]">이 모습으로 출발하기</button>
+        <section className="flex min-w-0 flex-col justify-between rounded-3xl border border-[#e8eaed] bg-white p-6 shadow-sm lg:min-h-full">
+          <div className="space-y-5">
+            <div><div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-black">용사님의 이름</h2><span className="rounded-full bg-[#f1f3f4] px-2.5 py-1 text-xs font-bold text-[#5f6368]">운영자 확인용</span></div><p className="mt-1.5 text-sm leading-relaxed text-[#5f6368]">본인 확인과 수료·운영 안내에만 사용되며, 다른 구글러에게는 공개되지 않아요.</p><label className="sr-only" htmlFor="legal-name">용사님의 이름</label><input id="legal-name" value={privateProfile.legalName} onChange={(event) => setPrivateProfile((profile) => ({ ...profile, legalName: event.target.value }))} placeholder="실명 또는 운영 확인 이름" className="mt-3 w-full rounded-2xl border border-[#dadce0] px-4 py-3 outline-none transition focus:border-[#1a73e8] focus:ring-2 focus:ring-[#d2e3fc]" /></div>
+            <div><div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-black">모험 닉네임</h2><span className="rounded-full bg-[#e6f4ea] px-2.5 py-1 text-xs font-bold text-[#137333]">다른 구글러에게 공개</span></div><p className="mt-1.5 text-sm text-[#5f6368]">캘린더와 랭킹에서는 이 이름으로 보여요.</p><div ref={pickerRef} className="relative mt-3"><div className="flex min-w-0 flex-wrap items-stretch rounded-2xl border border-[#dadce0] bg-white transition focus-within:border-[#1a73e8] focus-within:ring-2 focus-within:ring-[#d2e3fc] sm:flex-nowrap"><button type="button" aria-label="캐릭터 바꾸기" onClick={() => setPickerOpen((open) => !open)} title="캐릭터 바꾸기" className="group relative grid h-11 w-11 shrink-0 place-items-center rounded-l-2xl text-2xl transition hover:bg-[#e8f0fe] focus:bg-[#e8f0fe] focus:outline-none"><span>{publicProfile.avatar}</span><span className="absolute inset-0 grid place-items-center rounded-l-2xl bg-[#1a73e8]/15 text-xs text-[#1967d2] opacity-0 transition group-hover:opacity-100 group-focus:opacity-100" aria-hidden="true">↻</span><span className="absolute bottom-0.5 right-1 text-[10px] text-[#1967d2] sm:hidden" aria-hidden="true">⌄</span></button><label className="sr-only" htmlFor="display-name">모험 닉네임</label><input id="display-name" value={publicProfile.displayName} onChange={(event) => updateDisplayName(event.target.value)} placeholder="2~16자 모험 닉네임" className="min-w-0 flex-1 border-x border-[#e8eaed] px-3 py-2 outline-none" /><button type="button" onClick={() => { const currentIndex = nicknames.indexOf(publicProfile.displayName); updateDisplayName(nicknames[(currentIndex + 1 + nicknames.length) % nicknames.length]); }} className="min-h-11 shrink-0 px-3 text-sm font-bold text-[#1967d2] hover:bg-[#f8fbff] sm:rounded-r-2xl">새로운 모험 이름</button></div>{pickerOpen && <div className="absolute left-0 top-full z-20 mt-2 grid w-[min(18rem,100%)] grid-cols-5 gap-1 rounded-2xl border border-[#dadce0] bg-white p-3 shadow-xl" role="dialog" aria-label="캐릭터 선택기"><button type="button" onClick={() => setPickerOpen(false)} aria-label="캐릭터 선택기 닫기" className="col-span-5 mb-1 rounded-lg px-2 py-1 text-right text-sm font-bold text-[#5f6368]">닫기 ×</button>{avatars.map((avatar) => <button type="button" key={avatar} onClick={() => selectAvatar(avatar)} className={`rounded-xl p-2 text-2xl hover:bg-[#e8f0fe] ${publicProfile.avatar === avatar ? 'bg-[#e8f0fe] ring-1 ring-[#4285f4]' : ''}`} aria-label={`${avatar} 선택`}>{avatar}</button>)}</div>}</div>{!nicknameValid && <p role="alert" className="mt-2 text-sm font-semibold text-[#c5221f]">공백을 제외하고 2~16자로 입력해주세요.</p>}</div>
+          </div>
+          <button type="button" disabled={!nicknameValid} onClick={() => { playEffect(650); setScreen('diagnostic'); }} className="mt-5 w-full rounded-2xl bg-[#1a73e8] px-6 py-4 font-bold text-white shadow-sm transition hover:bg-[#1967d2] disabled:cursor-not-allowed disabled:bg-[#dadce0]">이 모습으로 출발하기</button>
         </section>
       </div>
     </section>

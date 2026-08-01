@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import LegacyGooglerApp from './legacy/LegacyGooglerApp';
@@ -49,7 +49,7 @@ describe('Stage 1A journey experience', () => {
     vi.useFakeTimers();
     render(<App />);
     enterIdentityStep();
-    const avatarButton = screen.getByRole('button', { name: '캐릭터 선택기 열기' });
+    const avatarButton = screen.getByRole('button', { name: '캐릭터 바꾸기' });
     const initialAvatar = avatarButton.textContent;
     act(() => vi.advanceTimersByTime(320));
     expect(avatarButton.textContent).not.toBe(initialAvatar);
@@ -57,17 +57,46 @@ describe('Stage 1A journey experience', () => {
     act(() => vi.advanceTimersByTime(500));
     fireEvent.click(avatarButton);
     fireEvent.click(screen.getByRole('button', { name: '🐼 선택' }));
+    fireEvent.click(screen.getByRole('button', { name: '새로운 모험 이름' }));
+    act(() => vi.advanceTimersByTime(500));
     fireEvent.change(screen.getByLabelText('모험 닉네임'), { target: { value: '용감한 별' } });
     act(() => vi.advanceTimersByTime(500));
     expect(avatarButton).toHaveTextContent('🐼');
   });
 
-  it('opens and closes the avatar picker from its button and outside click', () => {
+  it('opens and closes the avatar picker from its composite input and outside click', () => {
     render(<App />);
     enterIdentityStep();
-    fireEvent.click(screen.getByRole('button', { name: '캐릭터 선택기 열기' }));
+    fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
     expect(screen.getByRole('dialog', { name: '캐릭터 선택기' })).toBeInTheDocument();
     fireEvent.mouseDown(document.body);
+    expect(screen.queryByRole('dialog', { name: '캐릭터 선택기' })).not.toBeInTheDocument();
+  });
+
+  it('keeps the preview display-only while the composite bar owns avatar selection and name recommendations', () => {
+    render(<App />);
+    enterIdentityStep();
+    const profile = screen.getByLabelText('모험 프로필 미리보기');
+    expect(within(profile).queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText('본인 확인과 수료·운영 안내에만 사용되며, 다른 구글러에게는 공개되지 않아요.')).toBeInTheDocument();
+    const nickname = screen.getByLabelText('모험 닉네임');
+    const newName = screen.getByRole('button', { name: '새로운 모험 이름' });
+    expect(newName.parentElement).toContainElement(nickname);
+    const originalName = (nickname as HTMLInputElement).value;
+    fireEvent.click(newName);
+    expect((nickname as HTMLInputElement).value).not.toBe(originalName);
+    expect(screen.queryByText('새로운 동료 찾기')).not.toBeInTheDocument();
+  });
+
+  it('updates both the input prefix and display-only preview from the picker, and closes on Escape', () => {
+    render(<App />);
+    enterIdentityStep();
+    fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
+    fireEvent.click(screen.getByRole('button', { name: '🦉 선택' }));
+    expect(screen.getByRole('button', { name: '캐릭터 바꾸기' })).toHaveTextContent('🦉');
+    expect(screen.getByLabelText('선택한 캐릭터 🦉')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog', { name: '캐릭터 선택기' })).not.toBeInTheDocument();
   });
 
