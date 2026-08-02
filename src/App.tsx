@@ -1,5 +1,5 @@
-import LegacyGooglerApp from './legacy/LegacyGooglerApp';
+import MainWorldV3 from './features/main-v3/MainWorldV3';
 
 export default function App() {
-  return <LegacyGooglerApp />;
+  return <MainWorldV3 />;
 }
