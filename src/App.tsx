@@ -1,5 +1,5 @@
-import JourneyPrototype from './features/journey/JourneyPrototype';
+import MainWorldV3 from './features/main-v3/MainWorldV3';
 
 export default function App() {
-  return <JourneyPrototype />;
+  return <MainWorldV3 />;
 }

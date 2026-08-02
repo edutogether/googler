@@ -3,6 +3,14 @@ node_modules/
 
 # Production build
 dist/
+artifacts/visual-review/
+
+# Local source and listening-review media (the app uses only the loop MP3)
+public/audio/bgm/_review/
+public/audio/bgm/*.m4a
+
+# Local visual reference used for design inspection, not at runtime
+public/visual-reset/reference/
 
 # Environment variables
 .env

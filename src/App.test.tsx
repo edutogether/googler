@@ -1,129 +1,42 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import LegacyGooglerApp from './legacy/LegacyGooglerApp';
 
-function enterIdentityStep() {
-  fireEvent.click(screen.getByRole('button', { name: /모험 시작하기/ }));
-  fireEvent.click(screen.getByRole('button', { name: '내 모험 프로필 만들기' }));
+class MockAudio extends EventTarget {
+  static instances: MockAudio[] = [];
+  currentTime = 0; loop = false; muted = false; paused = true; preload = ''; volume = 1;
+  constructor(public src: string) { super(); MockAudio.instances.push(this); }
+  play = vi.fn(() => { this.paused = false; this.dispatchEvent(new Event('play')); return Promise.resolve(); });
+  pause = vi.fn(() => { this.paused = true; this.dispatchEvent(new Event('pause')); });
 }
 
-function enterLevelStep() {
-  enterIdentityStep();
-  fireEvent.click(screen.getByRole('button', { name: '이 모습으로 출발하기' }));
-  for (let index = 0; index < 7; index += 1) fireEvent.click(screen.getByText('조금 해봤어요'));
-}
+beforeEach(() => {
+  MockAudio.instances = [];
+  window.localStorage.clear();
+  vi.stubGlobal('Audio', MockAudio);
+});
 
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  window.history.replaceState({}, '', '/googler/');
+  vi.unstubAllGlobals();
+});
 
-describe('Stage 1A journey experience', () => {
-  it('shows the fixed two-line entry copy without a typing title', () => {
+describe('public MainWorldV3 route', () => {
+  it('renders MainWorldV3 as the default /googler/ screen', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Be a Googler' })).toBeInTheDocument();
-    expect(screen.getByText('배우고, 직접 해보고, 함께 성장하는')).toBeInTheDocument();
-    expect(screen.getByText('구글러의 작은 모험을 시작해보세요.')).toBeInTheDocument();
-    expect(screen.queryByText('반짝이는 구글러 💡')).not.toBeInTheDocument();
+
+    expect(document.querySelector('.mw3-shell')).toBeInTheDocument();
+    expect(document.querySelector('.vr2-shell')).toBeNull();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler의 여정을');
+    expect(screen.getByText('획득 배지')).toBeInTheDocument();
+    expect(MockAudio.instances).toHaveLength(1);
   });
 
-  it('uses eight connected stages and puts the adventure profile first in the identity DOM', () => {
+  it('keeps the preview query compatible with the same MainWorldV3 screen', () => {
+    window.history.replaceState({}, '', '/googler/?preview=main-v3');
     render(<App />);
-    enterIdentityStep();
-    expect(screen.getByText('여정 준비 3 / 8')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '나만의 구글러 만들기' })).toBeInTheDocument();
-    const profile = screen.getByLabelText('모험 프로필 미리보기');
-    const legalName = screen.getByLabelText('용사님의 이름');
-    expect(profile.compareDocumentPosition(legalName) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
 
-  it('keeps legal and public names separate and validates the public nickname', () => {
-    render(<App />);
-    enterIdentityStep();
-    fireEvent.change(screen.getByLabelText('용사님의 이름'), { target: { value: '홍길동' } });
-    fireEvent.change(screen.getByLabelText('모험 닉네임'), { target: { value: ' ' } });
-    expect(screen.getByRole('alert')).toHaveTextContent('2~16자');
-    expect(screen.queryByText('홍길동')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '이 모습으로 출발하기' })).toBeDisabled();
-  });
-
-  it('cycles an avatar, settles it after a typed nickname, and keeps a manually locked companion', () => {
-    vi.useFakeTimers();
-    render(<App />);
-    enterIdentityStep();
-    const avatarButton = screen.getByRole('button', { name: '캐릭터 바꾸기' });
-    const initialAvatar = avatarButton.textContent;
-    act(() => vi.advanceTimersByTime(320));
-    expect(avatarButton.textContent).not.toBe(initialAvatar);
-    fireEvent.change(screen.getByLabelText('모험 닉네임'), { target: { value: '다정한 별' } });
-    act(() => vi.advanceTimersByTime(500));
-    fireEvent.click(avatarButton);
-    fireEvent.click(screen.getByRole('button', { name: '🐼 선택' }));
-    fireEvent.click(screen.getByRole('button', { name: '새로운 모험 이름' }));
-    act(() => vi.advanceTimersByTime(500));
-    fireEvent.change(screen.getByLabelText('모험 닉네임'), { target: { value: '용감한 별' } });
-    act(() => vi.advanceTimersByTime(500));
-    expect(avatarButton).toHaveTextContent('🐼');
-  });
-
-  it('opens and closes the avatar picker from its composite input and outside click', () => {
-    render(<App />);
-    enterIdentityStep();
-    fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
-    expect(screen.getByRole('dialog', { name: '캐릭터 선택기' })).toBeInTheDocument();
-    fireEvent.mouseDown(document.body);
-    expect(screen.queryByRole('dialog', { name: '캐릭터 선택기' })).not.toBeInTheDocument();
-  });
-
-  it('keeps the preview display-only while the composite bar owns avatar selection and name recommendations', () => {
-    render(<App />);
-    enterIdentityStep();
-    const profile = screen.getByLabelText('모험 프로필 미리보기');
-    expect(within(profile).queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.getByText('본인 확인과 수료·운영 안내에만 사용되며, 다른 구글러에게는 공개되지 않아요.')).toBeInTheDocument();
-    const nickname = screen.getByLabelText('모험 닉네임');
-    const newName = screen.getByRole('button', { name: '새로운 모험 이름' });
-    expect(newName.parentElement).toContainElement(nickname);
-    const originalName = (nickname as HTMLInputElement).value;
-    fireEvent.click(newName);
-    expect((nickname as HTMLInputElement).value).not.toBe(originalName);
-    expect(screen.queryByText('새로운 동료 찾기')).not.toBeInTheDocument();
-  });
-
-  it('updates both the input prefix and display-only preview from the picker, and closes on Escape', () => {
-    render(<App />);
-    enterIdentityStep();
-    fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
-    fireEvent.click(screen.getByRole('button', { name: '🦉 선택' }));
-    expect(screen.getByRole('button', { name: '캐릭터 바꾸기' })).toHaveTextContent('🦉');
-    expect(screen.getByLabelText('선택한 캐릭터 🦉')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '캐릭터 바꾸기' }));
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByRole('dialog', { name: '캐릭터 선택기' })).not.toBeInTheDocument();
-  });
-
-  it('renders all four selectable starting levels and supports carousel arrow keys', () => {
-    render(<App />);
-    enterLevelStep();
-    expect(screen.getByText('처음부터 시작하기')).toBeInTheDocument();
-    expect(screen.getByText('기초를 탄탄하게')).toBeInTheDocument();
-    expect(screen.getByText('활용 능력 넓히기')).toBeInTheDocument();
-    expect(screen.getByText('심화·시험 준비')).toBeInTheDocument();
-    fireEvent.keyDown(screen.getByLabelText('출발 단계 카드. 방향키로 이동'), { key: 'ArrowRight' });
-    expect(screen.getAllByText('선택됨')).toHaveLength(1);
-  });
-
-  it('exposes accessible icon-only sound controls', () => {
-    render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: '배경음악 끄기' }));
-    fireEvent.click(screen.getByRole('button', { name: '효과음 끄기' }));
-    expect(screen.getByRole('button', { name: '배경음악 켜기' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '효과음 켜기' })).toBeInTheDocument();
-    expect(screen.queryByText('BGM 켜짐')).not.toBeInTheDocument();
-  });
-
-  it('keeps the preserved learning space available with its existing mission count', () => {
-    render(<LegacyGooglerApp />);
-    expect(screen.getByText('시험 준비, 차근차근 시작해요')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /무엇을 배울까/ }));
-    expect(screen.getAllByRole('checkbox')).toHaveLength(30);
+    expect(document.querySelector('.mw3-shell')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: '프로필과 오디오 컨트롤' })).toBeInTheDocument();
   });
 });
