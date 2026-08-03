@@ -8,12 +8,15 @@ const renderStep = () => render(<IdentityStep onContinue={vi.fn()} />);
 describe('IdentityStep', () => {
   afterEach(() => vi.useRealTimers());
 
-  it('keeps the operating name out of the public preview and identifies this as step 3 of 8', () => {
+  it('keeps the operating name out of the public preview and places the profile before inputs', () => {
     renderStep();
     fireEvent.change(screen.getByPlaceholderText('실명 또는 운영 확인 이름'), { target: { value: '운영 확인 전용 이름' } });
 
+    const preview = screen.getByText('모험 프로필 미리보기 · 다른 구글러에게는 이렇게 보여요');
+    const inputArea = screen.getByLabelText('이름과 캐릭터 입력');
     expect(screen.getByText('여정 준비 3 / 8')).toBeInTheDocument();
-    expect(screen.getByText('이름과 캐릭터')).toBeInTheDocument();
+    expect(screen.getByText('나만의 구글러 만들기')).toBeInTheDocument();
+    expect(preview.compareDocumentPosition(inputArea) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByText('운영 확인 전용 이름', { exact: true })).not.toBeInTheDocument();
     expect(screen.getByText('새내기 구글러')).toBeInTheDocument();
   });
@@ -23,10 +26,8 @@ describe('IdentityStep', () => {
     renderStep();
     const avatar = screen.getByRole('button', { name: '캐릭터 선택' });
     const initialAvatar = avatar.textContent;
-
     act(() => vi.advanceTimersByTime(320));
     expect(avatar).not.toHaveTextContent(initialAvatar ?? '');
-
     fireEvent.change(screen.getByRole('textbox', { name: '공개 여정 이름' }), { target: { value: '반짝 여우' } });
     act(() => vi.advanceTimersByTime(500));
     expect(avatar).toHaveTextContent(suggestedAvatar('반짝 여우'));
@@ -42,7 +43,6 @@ describe('IdentityStep', () => {
     renderStep();
     fireEvent.change(screen.getByRole('textbox', { name: '공개 여정 이름' }), { target: { value: '같은 이름' } });
     act(() => vi.advanceTimersByTime(500));
-
     expect(screen.getByRole('button', { name: '캐릭터 선택' })).toHaveTextContent(firstAvatar ?? '');
   });
 
@@ -51,11 +51,10 @@ describe('IdentityStep', () => {
     renderStep();
     const avatar = screen.getByRole('button', { name: '캐릭터 선택' });
     fireEvent.click(avatar);
-    fireEvent.click(screen.getByRole('button', { name: '🐱 선택' }));
+    fireEvent.click(screen.getByRole('button', { name: '🐰 선택' }));
     fireEvent.change(screen.getByRole('textbox', { name: '공개 여정 이름' }), { target: { value: '변경한 이름' } });
     act(() => vi.advanceTimersByTime(500));
-    expect(avatar).toHaveTextContent('🐱');
-
+    expect(avatar).toHaveTextContent('🐰');
     fireEvent.click(screen.getByRole('button', { name: '새로운 동료 찾기' }));
     act(() => vi.advanceTimersByTime(500));
     expect(avatar).toHaveTextContent(suggestedAvatar('변경한 이름'));
