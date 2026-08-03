@@ -7,6 +7,9 @@ import type { JourneySfxId } from '../audio/audioEngine';
 type IdentityStepProps = {
   onContinue: () => void;
   onSfx?: (id: JourneySfxId) => void;
+  initialLegalName?: string;
+  initialPublicProfile?: PublicLearnerProfile | null;
+  onProfileChange?: (legalName: string, profile: PublicLearnerProfile) => void;
 };
 
 const initialPublicProfile = (): PublicLearnerProfile => ({
@@ -15,13 +18,15 @@ const initialPublicProfile = (): PublicLearnerProfile => ({
   title: '새내기 구글러',
 });
 
-export function IdentityStep({ onContinue, onSfx }: IdentityStepProps) {
-  const [privateProfile, setPrivateProfile] = useState<PrivateLearnerProfile>({ legalName: '', accountEmail: '' });
-  const [publicProfile, setPublicProfile] = useState<PublicLearnerProfile>(initialPublicProfile);
+export function IdentityStep({ onContinue, onSfx, initialLegalName = '', initialPublicProfile: restoredPublicProfile = null, onProfileChange }: IdentityStepProps) {
+  const [privateProfile, setPrivateProfile] = useState<PrivateLearnerProfile>({ legalName: initialLegalName, accountEmail: '' });
+  const [publicProfile, setPublicProfile] = useState<PublicLearnerProfile>(() => restoredPublicProfile ?? initialPublicProfile());
   const [hasTypedName, setHasTypedName] = useState(false);
   const [manualAvatar, setManualAvatar] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [settled, setSettled] = useState(false);
+
+  useEffect(() => { onProfileChange?.(privateProfile.legalName, publicProfile); }, [onProfileChange, privateProfile.legalName, publicProfile]);
 
   useEffect(() => {
     if (hasTypedName || manualAvatar) return undefined;
