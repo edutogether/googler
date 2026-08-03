@@ -7,8 +7,32 @@ type PlaybackSession = {
   finished: boolean;
 };
 
+type SfxPlayback = { source: AudioBufferSourceNode; gain: GainNode; finished: boolean };
+
+export type JourneySfxId =
+  | 'journeyStart'
+  | 'select'
+  | 'next'
+  | 'avatarSelect'
+  | 'levelConfirm'
+  | 'coachSelect'
+  | 'plannerStart'
+  | 'calendarReveal'
+  | 'lessonComplete';
+
 const storageKey = 'journey-audio-settings';
 const bgmUrl = `${import.meta.env.BASE_URL}audio/bgm/googler-wonder-adventure.wav`;
+const sfxUrls: Record<JourneySfxId, string> = {
+  journeyStart: `${import.meta.env.BASE_URL}audio/sfx/journey-start.wav`,
+  select: `${import.meta.env.BASE_URL}audio/sfx/card-select.wav`,
+  next: `${import.meta.env.BASE_URL}audio/sfx/next-step.wav`,
+  avatarSelect: `${import.meta.env.BASE_URL}audio/sfx/avatar-select.wav`,
+  levelConfirm: `${import.meta.env.BASE_URL}audio/sfx/level-confirm.wav`,
+  coachSelect: `${import.meta.env.BASE_URL}audio/sfx/coach-select.wav`,
+  plannerStart: `${import.meta.env.BASE_URL}audio/sfx/planner-start.wav`,
+  calendarReveal: `${import.meta.env.BASE_URL}audio/sfx/calendar-reveal.wav`,
+  lessonComplete: `${import.meta.env.BASE_URL}audio/sfx/lesson-complete.wav`,
+};
 const fadeInSeconds = 0.5;
 const fadeOutMilliseconds = 450;
 const silentGain = 0.0001;
@@ -19,6 +43,10 @@ let playback: PlaybackSession | null = null;
 const fadingPlaybacks = new Set<PlaybackSession>();
 let bgmBuffer: AudioBuffer | null = null;
 let bgmLoading: Promise<AudioBuffer | null> | null = null;
+const sfxBuffers = new Map<JourneySfxId, AudioBuffer>();
+const sfxLoading = new Map<JourneySfxId, Promise<AudioBuffer | null>>();
+const activeSfx = new Set<SfxPlayback>();
+const recentSfx = new Map<JourneySfxId, number>();
 let settings: AudioSettings = { bgmEnabled: true, effectsEnabled: true, volume: 0.35, activated: false };
 
 const defaults = (): AudioSettings => ({ bgmEnabled: true, effectsEnabled: true, volume: 0.35, activated: false });
@@ -136,6 +164,24 @@ async function loadBgm(audio: AudioContext) {
   return bgmLoading;
 }
 
+async function loadSfx(id: JourneySfxId, audio: AudioContext) {
+  const cached = sfxBuffers.get(id);
+  if (cached) return cached;
+  const pending = sfxLoading.get(id);
+  if (pending) return pending;
+  const request = fetch(sfxUrls[id])
+    .then((response) => response.ok ? response.arrayBuffer() : Promise.reject(new Error(`Unable to load ${id} SFX`)))
+    .then((data) => audio.decodeAudioData(data))
+    .then((buffer) => {
+      sfxBuffers.set(id, buffer);
+      return buffer;
+    })
+    .catch(() => null)
+    .finally(() => { sfxLoading.delete(id); });
+  sfxLoading.set(id, request);
+  return request;
+}
+
 export async function startJourneyBgm(enabled = true) {
   if (!enabled || !settings.bgmEnabled || playback || !await activateJourneyAudio()) return;
   const audio = context;
@@ -164,6 +210,40 @@ export function stopJourneyBgm() {
   if (session) stopPlayback(session);
 }
 
+export async function playJourneySfx(id: JourneySfxId) {
+  if (!settings.effectsEnabled || !await activateJourneyAudio()) return;
+  const previous = recentSfx.get(id);
+  const now = Date.now();
+  if (previous !== undefined && now - previous < 80) return;
+
+  const audio = context;
+  const output = master;
+  if (!audio || !output) return;
+  const buffer = await loadSfx(id, audio);
+  if (!buffer || context !== audio || master !== output || !settings.effectsEnabled) return;
+  const latest = recentSfx.get(id);
+  if (latest !== undefined && Date.now() - latest < 80) return;
+  recentSfx.set(id, Date.now());
+  const gain = audio.createGain();
+  gain.gain.setValueAtTime(0.18, audio.currentTime);
+  gain.connect(output);
+  const source = audio.createBufferSource();
+  source.buffer = buffer;
+  source.loop = false;
+  source.connect(gain);
+  const sound: SfxPlayback = { source, gain, finished: false };
+  const finish = () => {
+    if (sound.finished) return;
+    sound.finished = true;
+    safely(() => source.disconnect());
+    safely(() => gain.disconnect());
+    activeSfx.delete(sound);
+  };
+  source.onended = finish;
+  activeSfx.add(sound);
+  source.start();
+}
+
 export function playJourneyEffect(kind: 'select' | 'next' | 'confirm' | 'reveal') {
   if (!settings.effectsEnabled || !settings.activated) return;
   const sounds = { select: [520, 0.07], next: [660, 0.08], confirm: [784, 0.12], reveal: [392, 0.16] } as const;
@@ -180,6 +260,13 @@ export function setJourneyVisibility(hidden: boolean) {
 export function disposeJourneyAudio() {
   stopJourneyBgm();
   for (const session of fadingPlaybacks) finishPlayback(session);
+  for (const sound of activeSfx) {
+    safely(() => sound.source.stop());
+    safely(() => sound.source.disconnect());
+    safely(() => sound.gain.disconnect());
+  }
+  activeSfx.clear();
+  recentSfx.clear();
   if (context) void context.close();
   context = null;
   master = null;

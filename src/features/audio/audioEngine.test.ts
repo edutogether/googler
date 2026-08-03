@@ -151,3 +151,61 @@ describe('WAV BGM playback', () => {
     expect(() => { engine.stopJourneyBgm(); engine.stopJourneyBgm(); engine.disposeJourneyAudio(); engine.disposeJourneyAudio(); }).not.toThrow();
   });
 });
+
+describe('WAV SFX playback', () => {
+  beforeEach(() => { vi.useFakeTimers(); localStorage.clear(); });
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
+
+  it('fetches, decodes, and starts a non-looping one-shot SFX', async () => {
+    const fetchMock = installWebAudio();
+    const engine = await loadMockedEngine();
+    await engine.playJourneySfx('journeyStart');
+    const audio = MockAudioContext.instances[0];
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('audio/sfx/journey-start.wav'));
+    expect(audio.decodeAudioData).toHaveBeenCalledOnce();
+    expect(audio.sources[0].loop).toBe(false);
+    expect(audio.sources[0].start).toHaveBeenCalledOnce();
+  });
+
+  it('caches each SFX independently and cleans up only its ended nodes', async () => {
+    const fetchMock = installWebAudio();
+    const engine = await loadMockedEngine();
+    await engine.playJourneySfx('select');
+    const audio = MockAudioContext.instances[0];
+    const first = audio.sources[0];
+    first.onended?.();
+    expect(first.disconnect).toHaveBeenCalledOnce();
+    vi.advanceTimersByTime(81);
+    await engine.playJourneySfx('select');
+    vi.advanceTimersByTime(81);
+    await engine.playJourneySfx('avatarSelect');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(audio.decodeAudioData).toHaveBeenCalledTimes(2);
+    expect(audio.sources).toHaveLength(3);
+  });
+
+  it('prevents an immediate duplicate but permits the same SFX after the guard interval', async () => {
+    installWebAudio();
+    const engine = await loadMockedEngine();
+    await engine.playJourneySfx('next');
+    await engine.playJourneySfx('next');
+    expect(MockAudioContext.instances[0].sources).toHaveLength(1);
+    vi.advanceTimersByTime(81);
+    await engine.playJourneySfx('next');
+    expect(MockAudioContext.instances[0].sources).toHaveLength(2);
+  });
+
+  it('recovers from a failed SFX fetch and keeps muted audio silent', async () => {
+    const fetchMock = installWebAudio(vi.fn()
+      .mockResolvedValueOnce({ ok: false })
+      .mockResolvedValueOnce({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) }));
+    const engine = await loadMockedEngine();
+    await expect(engine.playJourneySfx('coachSelect')).resolves.toBeUndefined();
+    await expect(engine.playJourneySfx('coachSelect')).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    engine.saveAudioSettings({ effectsEnabled: false });
+    vi.advanceTimersByTime(81);
+    await engine.playJourneySfx('plannerStart');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});

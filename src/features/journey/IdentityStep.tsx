@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import type { PrivateLearnerProfile, PublicLearnerProfile } from '../../domain/journeyProfile';
 import { journeyAvatars, nextSuggestedAvatar, suggestedAvatar, suggestedDisplayName } from '../../domain/journeyProfile';
 import { TypingJourneyTitle } from './TypingJourneyTitle';
+import type { JourneySfxId } from '../audio/audioEngine';
 
 type IdentityStepProps = {
   onContinue: () => void;
+  onSfx?: (id: JourneySfxId) => void;
 };
 
 const initialPublicProfile = (): PublicLearnerProfile => ({
@@ -13,7 +15,7 @@ const initialPublicProfile = (): PublicLearnerProfile => ({
   title: '새내기 구글러',
 });
 
-export function IdentityStep({ onContinue }: IdentityStepProps) {
+export function IdentityStep({ onContinue, onSfx }: IdentityStepProps) {
   const [privateProfile, setPrivateProfile] = useState<PrivateLearnerProfile>({ legalName: '', accountEmail: '' });
   const [publicProfile, setPublicProfile] = useState<PublicLearnerProfile>(initialPublicProfile);
   const [hasTypedName, setHasTypedName] = useState(false);
@@ -39,9 +41,10 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
     const timer = window.setTimeout(() => {
       setPublicProfile((profile) => ({ ...profile, avatarId: suggestedAvatar(displayName) }));
       setSettled(true);
+      onSfx?.('calendarReveal');
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [hasTypedName, manualAvatar, publicProfile.displayName]);
+  }, [hasTypedName, manualAvatar, onSfx, publicProfile.displayName]);
 
   const displayName = publicProfile.displayName.trim();
   const validDisplayName = displayName.length >= 2 && displayName.length <= 16;
@@ -58,6 +61,7 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
       avatarId: nextSuggestedAvatar(profile.displayName.trim(), profile.avatarId),
     }));
     setHasTypedName(true);
+    onSfx?.('avatarSelect');
   };
 
   return (
@@ -90,6 +94,7 @@ export function IdentityStep({ onContinue }: IdentityStepProps) {
                         setPublicProfile((profile) => ({ ...profile, avatarId: item }));
                         setManualAvatar(true);
                         setPickerOpen(false);
+                        onSfx?.('avatarSelect');
                       }}
                       className="rounded-xl p-2 text-2xl hover:bg-[#e8f0fe]"
                     >
