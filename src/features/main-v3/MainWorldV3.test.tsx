@@ -103,6 +103,21 @@ describe('MainWorldV3 final preview', () => {
     expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
   });
 
+  it('keeps compact desktop controls and badge discovery available at the 1024 CSS breakpoint', () => {
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1009 });
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+    render(<MainWorldV3 />);
+
+    const cluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+    expect(within(cluster).getByRole('button', { name: /BGM 켜기|BGM 끄기/ })).toBeInTheDocument();
+    expect(within(cluster).getByRole('button', { name: '호기심 많은 구글러 프로필 보기' })).toBeInTheDocument();
+    expect(within(cluster).getByRole('button', { name: '알림 보기' })).toBeInTheDocument();
+    expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+  });
+
   it('uses one looping BGM instance and makes actions announce a toast', async () => {
     render(<MainWorldV3 />);
     const audio = MockAudio.instances[0];

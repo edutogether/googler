@@ -316,8 +316,8 @@
   }
 }
 
-/* Desktop master: the only Desktop visual-material source. It does not affect 1023px and below. */
-@media (min-width: 1024px) {
+/* Desktop master: the only Desktop visual-material source. It starts before the 1024px outer-window scrollbar threshold. */
+@media (min-width: 1000px) {
   .mw3-shell {
     --mw3-pc-glass-light: linear-gradient(128deg, rgb(255 255 255 / .72), rgb(237 248 255 / .48));
     --mw3-pc-glass-card: linear-gradient(180deg, rgb(255 255 255 / .2), rgb(255 255 255 / 0) 46%), linear-gradient(135deg, rgb(255 254 249 / .82), rgb(251 247 238 / .72));
@@ -607,7 +607,7 @@
   @media (prefers-reduced-motion: reduce) { .mw3-mini-song-track { animation: none; } .mw3-mini-song-track > span:last-child { display: none; } }
 }
 
-@media (min-width: 1024px) and (max-width: 1450px) {
+@media (min-width: 1000px) and (max-width: 1450px) {
   .mw3-hero { top: 140px; transform: none; width: min(40vw, 560px); }
   .mw3-hero h1 { font-size: clamp(56px, 4.15vw, 62px); }
   .mw3-eyebrow { font-size: 18px; }
@@ -625,4 +625,27 @@
   .mw3-desktop-profile > .mw3-divider { margin-inline: 8px; }
   .mw3-navigation { padding-inline: 21px; }
   .mw3-navigation button { padding-inline: 7px; }
+}
+
+/* Compact desktop keeps the three global controls reachable without competing with navigation. */
+@media (min-width: 1000px) and (max-width: 1100px) {
+  .mw3-desktop-profile { top: 24px; right: 24px; min-height: 58px; padding-inline: 7px; border-radius: 30px; }
+  .mw3-desktop-profile > .mw3-divider { height: 28px; margin-inline: 5px; }
+  .mw3-mini-audio { width: auto; grid-template-columns: 44px 28px; gap: 3px; }
+  .mw3-mini-song { display: none; }
+  .mw3-mini-equalizer { width: 28px; gap: 3px; }
+  .mw3-desktop-profile .mw3-profile-button { min-width: 44px; min-height: 44px; padding: 0; }
+  .mw3-desktop-profile .mw3-profile-button img { width: 44px; height: 44px; }
+  .mw3-desktop-profile .mw3-identity,
+  .mw3-desktop-profile .mw3-profile-button > .mw3-icon { display: none; }
+  .mw3-desktop-profile .mw3-notification { width: 44px; height: 44px; }
+  .mw3-card--continue .mw3-card-content { grid-template-columns: 76px minmax(0, 1fr) auto; gap: 9px; }
+  .mw3-card--continue .mw3-island-frame { width: 76px; height: 64px; }
+  .mw3-card--continue .mw3-card-copy strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; line-height: 1.18; }
+  .mw3-card--continue .mw3-card-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mw3-card--continue .mw3-resume { min-width: 70px; min-height: 44px; padding-inline: 10px; }
+  .mw3-card--compact-badges .mw3-badge-row { grid-template-columns: repeat(3, 44px) 28px; justify-content: start; gap: 9px; }
+  .mw3-card--compact-badges .mw3-badge-row > span { width: 44px; height: 54px; }
+  .mw3-card--compact-badges .mw3-badge-row img { width: 44px; height: 48px; }
+  .mw3-card--compact-badges .mw3-badge-row > b { display: grid; width: 28px; height: 28px; margin-top: 8px; }
 }
