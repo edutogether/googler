@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import './VisualTunerShell.css';
 
 type Scope = 'all' | 'desktop' | 'desktop-narrow' | 'desktop-wide' | 'mobile' | 'mobile-wide' | 'current';
 type ViewMode = 'single' | 'desktop-pair' | 'mobile-pair' | 'overview';
+type ZoomMode = 'fit' | '1' | '.75' | '.5';
 type Values = Record<string, string>;
 type OverrideMap = Record<string, Record<string, Values>>;
 type TextMap = Record<string, Record<string, string>>;
@@ -82,9 +83,13 @@ async function writeState(file: string, value: unknown) {
   if (!response.ok) throw new Error('조정값을 저장하지 못했습니다.');
 }
 
-function TunerFrame({ spec, draft, selectedId, onSelected }: { spec: FrameSpec; draft: Draft; selectedId: string; onSelected: (id: string) => void }) {
+function TunerFrame({ spec, draft, selectedId, onSelected, zoom, popup, workspaceWidth }: { spec: FrameSpec; draft: Draft; selectedId: string; onSelected: (id: string) => void; zoom: ZoomMode; popup: Window | null; workspaceWidth: number }) {
   const frame = useRef<HTMLIFrameElement | null>(null);
-  const send = useCallback(() => frame.current?.contentWindow?.postMessage({ type: 'visual-tuner-update', selectedId, ...resolvedDraft(draft, spec) }, window.location.origin), [draft, selectedId, spec]);
+  const send = useCallback(() => {
+    const payload = { type: 'visual-tuner-update', selectedId, ...resolvedDraft(draft, spec) };
+    frame.current?.contentWindow?.postMessage(payload, window.location.origin);
+    popup?.postMessage(payload, window.location.origin);
+  }, [draft, popup, selectedId, spec]);
   useEffect(() => { send(); }, [send]);
   useEffect(() => {
     const receive = (event: MessageEvent) => {
@@ -94,8 +99,11 @@ function TunerFrame({ spec, draft, selectedId, onSelected }: { spec: FrameSpec; 
     window.addEventListener('message', receive);
     return () => window.removeEventListener('message', receive);
   }, [onSelected]);
-  return <figure className="vt-frame" data-testid={`tuner-frame-${spec.key}`}>
-    <figcaption>{spec.label}</figcaption>
+  const fitScale = Math.max(.1, Math.min(workspaceWidth / spec.width, Math.max(280, window.innerHeight - 112) / spec.height));
+  const scale = zoom === 'fit' ? fitScale : Number(zoom);
+  const frameStyle = { '--vt-scale': String(scale), '--vt-display-width': `${Math.round(spec.width * scale)}px`, '--vt-display-height': `${Math.round(spec.height * scale)}px` } as CSSProperties;
+  return <figure className="vt-frame" style={frameStyle} data-testid={`tuner-frame-${spec.key}`}>
+    <figcaption>{spec.label} <small>{Math.round(scale * 100)}%</small></figcaption>
     <div className="vt-frame-scale"><iframe ref={frame} title={`${spec.label} 실제 화면`} src={previewUrl} width={spec.width} height={spec.height} onLoad={send} /></div>
   </figure>;
 }
@@ -109,6 +117,10 @@ export default function VisualTunerShell() {
   const [lastProperty, setLastProperty] = useState('x');
   const [viewportKey, setViewportKey] = useState('pc-1760');
   const [mode, setMode] = useState<ViewMode>('single');
+  const [zoom, setZoom] = useState<ZoomMode>('fit');
+  const [collapsed, setCollapsed] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [popup, setPopup] = useState<Window | null>(null);
   const [status, setStatus] = useState('초안 저장소를 불러오는 중입니다.');
   const [locked, setLocked] = useState<Partial<Record<'pc' | 'mobile', boolean>>>({});
 
@@ -116,11 +128,18 @@ export default function VisualTunerShell() {
   const selectedName = targets.find(([id]) => id === selectedId)?.[1] ?? selectedId;
   const current = draft.overrides[scope]?.[selectedId] ?? {};
   const currentText = draft.text[scope]?.[selectedId] ?? '';
+  const workspaceWidth = Math.max(320, window.innerWidth - (fullscreen ? 48 : collapsed ? 86 : 304));
 
   useEffect(() => {
     void readState('draft.json').then((saved) => { setDraft(saved?.overrides ? saved : blankDraft()); setStatus('저장된 초안을 복원했습니다.'); }).catch(() => setStatus('새 초안으로 시작합니다.'));
     void readState('pc-approved.json').then(() => setLocked((value) => ({ ...value, pc: true }))).catch(() => undefined);
     void readState('mobile-approved.json').then(() => setLocked((value) => ({ ...value, mobile: true }))).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') setFullscreen(false); };
+    window.addEventListener('keydown', escape);
+    return () => window.removeEventListener('keydown', escape);
   }, []);
 
   const mutate = useCallback((update: (previous: Draft) => Draft) => {
@@ -166,9 +185,15 @@ export default function VisualTunerShell() {
     if (mode === 'overview') return [viewports[0], viewports[2], viewports[4], viewports[7]];
     return [viewport];
   }, [mode, viewport]);
+  const openPreviewWindow = () => {
+    const next = window.open(previewUrl, 'be-a-googler-visual-tuner-preview', `popup=yes,width=${viewport.width},height=${viewport.height},noopener=no`);
+    if (next) { setPopup(next); setStatus('선택한 viewport를 별도 창으로 열었습니다.'); }
+    else setStatus('브라우저가 새 창을 차단했습니다. 팝업 허용 후 다시 시도하세요.');
+  };
 
-  return <main className="visual-tuner-shell">
+  return <main className={`visual-tuner-shell${collapsed ? ' is-collapsed' : ''}${fullscreen ? ' is-fullscreen' : ''}`}>
     <aside className="vt-panel" aria-label="개발 전용 비주얼튜너">
+      <button type="button" className="vt-panel-toggle" aria-label={collapsed ? '편집 패널 펼치기' : '편집 패널 접기'} onClick={() => setCollapsed((value) => !value)}>{collapsed ? '☰' : '‹'}</button>
       <header><p>개발 전용</p><h1>반응형 비주얼튜너</h1><output aria-live="polite">{status}</output></header>
       <label>화면<select value={viewportKey} onChange={(event) => setViewportKey(event.target.value)}>{viewports.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></label>
       <label>비교 보기<select value={mode} onChange={(event) => setMode(event.target.value as ViewMode)}><option value="single">단일 화면 크게 보기</option><option value="desktop-pair">PC 2개 비교</option><option value="mobile-pair">모바일 2개 비교</option><option value="overview">전체 축소 비교</option></select></label>
@@ -185,6 +210,9 @@ export default function VisualTunerShell() {
         <button type="button" onClick={() => void saveDraft()}>초안 저장</button><button type="button" onClick={() => void approve('pc')}>PC 비주얼 확정</button><button type="button" onClick={() => void approve('mobile')}>모바일 비주얼 확정</button><button type="button" onClick={() => void exportApproved()}>코드 반영 후보 내보내기</button>
       </section>
     </aside>
-    <section className={`vt-canvas vt-${mode}`} aria-label="실제 MainWorldV3 미리보기">{frames.map((spec) => <TunerFrame key={spec.key} spec={spec} draft={draft} selectedId={selectedId} onSelected={setSelectedId} />)}</section>
+    <section className="vt-workspace" aria-label="실제 MainWorldV3 미리보기">
+      <header className="vt-toolbar"><strong>{viewport.label}</strong><label>배율 <select value={zoom} onChange={(event) => setZoom(event.target.value as ZoomMode)}><option value="fit">화면에 맞춤</option><option value="1">100%</option><option value=".75">75%</option><option value=".5">50%</option></select></label><button type="button" onClick={() => setFullscreen((value) => !value)}>{fullscreen ? '전체 화면 종료' : '미리보기 전체 화면'}</button><button type="button" onClick={openPreviewWindow}>미리보기 새 창</button></header>
+      <section className={`vt-canvas vt-${mode}`} aria-label="실제 MainWorldV3 미리보기">{frames.map((spec) => <TunerFrame key={spec.key} spec={spec} draft={draft} selectedId={selectedId} onSelected={setSelectedId} zoom={zoom} popup={popup} workspaceWidth={workspaceWidth} />)}</section>
+    </section>
   </main>;
 }

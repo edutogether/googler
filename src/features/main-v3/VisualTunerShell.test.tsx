@@ -53,4 +53,19 @@ describe('개발 전용 비주얼튜너', () => {
       expect(bodies.map((body) => body.file)).toEqual(expect.arrayContaining(['pc-approved.json', 'mobile-approved.json', 'approved-adjustments.json', 'approved-adjustments.md']));
     });
   });
+
+  it('패널 접기와 미리보기 전체 화면, 새 창 기능을 제공한다', () => {
+    const popup = { postMessage: vi.fn() } as unknown as Window;
+    vi.spyOn(window, 'open').mockReturnValue(popup);
+    render(<MainWorldV3 />);
+    fireEvent.click(screen.getByRole('button', { name: '편집 패널 접기' }));
+    expect(document.querySelector('.visual-tuner-shell')).toHaveClass('is-collapsed');
+    fireEvent.click(screen.getByRole('button', { name: '편집 패널 펼치기' }));
+    fireEvent.click(screen.getByRole('button', { name: '미리보기 전체 화면' }));
+    expect(document.querySelector('.visual-tuner-shell')).toHaveClass('is-fullscreen');
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(document.querySelector('.visual-tuner-shell')).not.toHaveClass('is-fullscreen');
+    fireEvent.click(screen.getByRole('button', { name: '미리보기 새 창' }));
+    expect(window.open).toHaveBeenCalled();
+  });
 });
