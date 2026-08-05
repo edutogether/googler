@@ -363,7 +363,7 @@
     box-shadow: 0 10px 24px rgb(48 42 31 / .11), inset 0 1px 0 var(--mw3-pc-highlight);
     backdrop-filter: blur(24px) saturate(1.08);
   }
-  .mw3-navigation { width: min(100%, 940px); background: var(--mw3-pc-glass-light); }
+  .mw3-navigation { width: min(100%, 980px); background: var(--mw3-pc-glass-light); }
   .mw3-profile { display: none; }
   .mw3-profile:hover { box-shadow: 0 11px 25px rgb(48 42 31 / .13), inset 0 1px 0 rgb(255 255 255 / .94); }
   .mw3-brand { padding-right: 22px; }
@@ -393,7 +393,7 @@
   .mw3-hero button:focus-visible,
   .mw3-card:focus-visible,
   .mw3-audio button:focus-visible { outline: 2px solid rgb(52 120 211 / .62); outline-offset: 3px; }
-  .mw3-desktop-profile { position: absolute; top: 22px; right: 22px; z-index: 7; display: flex; min-height: 72px; align-items: center; padding: 0 12px; border: 1px solid rgb(255 255 255 / .78); border-radius: 38px; background: linear-gradient(128deg, rgb(255 255 255 / .8), rgb(238 247 255 / .58)); box-shadow: 0 12px 28px rgb(48 42 31 / .12), inset 0 1px 0 rgb(255 255 255 / .92), inset 0 -1px 0 rgb(72 113 160 / .05); backdrop-filter: blur(26px) saturate(1.09); }
+  .mw3-desktop-profile { position: absolute; top: 22px; right: 22px; z-index: 7; display: flex; width: min(40vw, 700px); min-height: 72px; align-items: center; justify-content: space-between; padding: 0 12px; border: 1px solid rgb(255 255 255 / .78); border-radius: 38px; background: linear-gradient(128deg, rgb(255 255 255 / .8), rgb(238 247 255 / .58)); box-shadow: 0 12px 28px rgb(48 42 31 / .12), inset 0 1px 0 rgb(255 255 255 / .92), inset 0 -1px 0 rgb(72 113 160 / .05); backdrop-filter: blur(26px) saturate(1.09); }
   .mw3-desktop-profile > .mw3-divider { margin: 0 11px; }
   .mw3-desktop-notification { position: relative; display: grid; place-items: center; }
   .mw3-desktop-notification::after { position: absolute; top: 100%; right: 0; width: 292px; height: 14px; content: ""; }
@@ -412,7 +412,7 @@
   .mw3-notification-popover li small { display: block; margin-top: 2px; color: #515952; font-size: 11px; line-height: 1.35; letter-spacing: -.02em; }
   .mw3-notification-more { display: flex; width: 100%; min-height: 31px; align-items: center; justify-content: center; gap: 4px; margin-top: 8px; color: #4978b2; border: 0; border-radius: 10px; background: rgb(226 240 255 / .46); font: inherit; font-size: 12px; font-weight: 760; cursor: pointer; }
   .mw3-notification-more:hover { background: rgb(217 236 255 / .75); }
-  .mw3-mini-audio { position: relative; display: grid; width: clamp(264px, 18vw, 312px); min-width: 0; grid-template-columns: 44px minmax(0, 1fr) 42px; align-items: center; gap: 8px; }
+  .mw3-mini-audio { position: relative; display: grid; width: clamp(284px, 18.7vw, 328px); min-width: 0; grid-template-columns: 44px minmax(0, 1fr) 42px; align-items: center; gap: 8px; }
   .mw3-mini-bgm-control { position: relative; display: grid; width: 44px; height: 44px; place-items: center; }
   .mw3-mini-bgm { display: grid; position: relative; width: 44px; height: 44px; place-items: center; padding: 0; color: #347bd4; border: 0; border-radius: 13px; background: rgb(220 239 255 / .62); box-shadow: inset 0 1px rgb(255 255 255 / .74); cursor: pointer; transition: color var(--mw3-pc-motion), background var(--mw3-pc-motion), box-shadow var(--mw3-pc-motion); }
   .mw3-mini-bgm.is-playing { color: #276fc7; background: rgb(218 238 255 / .76); box-shadow: inset 0 1px rgb(255 255 255 / .66); }
@@ -497,6 +497,7 @@
   .mw3-text-action:active { box-shadow: inset 0 1px rgb(255 255 255 / .58); transform: translateY(1px); }
 
   .mw3-light-field { top: -2%; left: -9%; width: min(70vw, 1180px); height: 104%; background: radial-gradient(ellipse 100% 116% at 0% 8%, rgb(255 254 247 / .54) 0%, rgb(255 252 241 / .38) 35%, rgb(255 248 232 / .18) 66%, transparent 100%); }
+  .mw3-hero { left: clamp(58px, 9.45vw, 166px); }
   .mw3-guide { left: clamp(50.5%, 52.5vw, 57%); }
 
   .mw3-guide { isolation: isolate; width: 188px; padding: 21px 24px; border: 1px solid rgb(255 248 233 / .94); border-radius: 26px; background: linear-gradient(150deg, rgb(255 254 249 / .96), rgb(250 243 229 / .84)); box-shadow: 0 16px 34px rgb(52 43 30 / .13), inset 0 1px 0 rgb(255 255 255 / .99), inset 0 -1px 0 rgb(173 143 97 / .07); color: #29372e; font-weight: 640; line-height: 1.62; }
@@ -614,6 +615,7 @@
 }
 
 @media (min-width: 1000px) and (max-width: 1450px) {
+  .mw3-navigation { width: min(53vw, 760px); }
   .mw3-hero { top: 108px; transform: none; width: min(40vw, 560px); }
   .mw3-hero h1 { font-size: clamp(56px, 4.15vw, 62px); }
   .mw3-eyebrow { font-size: 18px; }
@@ -639,7 +641,8 @@
 
 /* Compact desktop keeps the three global controls reachable without competing with navigation. */
 @media (min-width: 1000px) and (max-width: 1100px) {
-  .mw3-desktop-profile { top: 24px; right: 24px; min-height: 58px; padding-inline: 7px; border-radius: 30px; }
+  .mw3-navigation { width: min(68vw, 760px); padding-inline: 21px; }
+  .mw3-desktop-profile { width: auto; top: 24px; right: 24px; min-height: 58px; padding-inline: 7px; border-radius: 30px; }
   .mw3-desktop-profile > .mw3-divider { height: 28px; margin-inline: 5px; }
   .mw3-mini-audio { width: auto; grid-template-columns: 44px 28px; gap: 3px; }
   .mw3-mini-song { display: none; }

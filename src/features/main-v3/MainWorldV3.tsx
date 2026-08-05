@@ -8,7 +8,7 @@ const BGM_SOURCE = asset('audio/bgm/moonlit-voyager-village-loop.mp3');
 export const MAIN_V3_BGM_STORAGE_KEY = 'be-a-googler:main-v3-bgm';
 export const MAIN_V3_SFX_STORAGE_KEY = 'be-a-googler:main-v3-sfx';
 const DEFAULT_VOLUME = 0.28;
-const DESKTOP_GUIDE_MESSAGE = '안녕?\n너는 호기심이 많은\n구글러구나!\n우리 같이 놀며\n배워볼까?';
+const DESKTOP_GUIDE_MESSAGE = '안녕?\n호기심이 아주 많은\n구글러구나!\n나와 같이\n즐겁게 배워볼래?';
 
 const navigation = [
   { id: 'explore', label: '탐험 시작', icon: 'compass' }, { id: 'town', label: '학습 마을', icon: 'map' },
