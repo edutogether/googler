@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { WorldIcon } from './WorldIcons';
-import VisualTunerShell from './VisualTunerShell';
 import './MainWorldV3.css';
 
 const base = import.meta.env.BASE_URL;
@@ -105,8 +104,8 @@ function DesktopProfileCluster({
     event.preventDefault(); setVolumeTrayDismissed(true);
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   };
-  return <section className="mw3-desktop-profile" data-tuner-id="desktop-audio" aria-label="프로필과 오디오 컨트롤">
-    <div className="mw3-mini-audio" data-tuner-id="desktop-audio" aria-label="BGM 미니 컨트롤">
+  return <section className="mw3-desktop-profile" aria-label="프로필과 오디오 컨트롤">
+    <div className="mw3-mini-audio" aria-label="BGM 미니 컨트롤">
       <div className="mw3-mini-bgm-control" data-volume-tray-dismissed={volumeTrayDismissed} onMouseEnter={() => setVolumeTrayDismissed(false)} onFocusCapture={() => setVolumeTrayDismissed(false)} onKeyDown={dismissVolumeTray}>
         <button type="button" className={`mw3-mini-bgm ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? 'BGM 끄기' : 'BGM 켜기'} onClick={onToggleBgm}><WorldIcon name="music" /></button>
         <div className="mw3-mini-volume-panel" aria-label="BGM 볼륨"><input type="range" min="0" max="1" step="0.01" value={volume} aria-label="BGM 볼륨 조절" onChange={(event) => onVolumeChange(Number(event.target.value))} /></div>
@@ -115,10 +114,10 @@ function DesktopProfileCluster({
       <span className={`mw3-mini-equalizer ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? '움직이는 이퀄라이저' : '정지된 이퀄라이저'}>{Array.from({ length: 6 }, (_, index) => <i key={index} />)}</span>
     </div>
     <span className="mw3-divider" aria-hidden="true" />
-    <button className="mw3-profile-button" data-tuner-id="profile" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={onProfile}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><small>Lv. 7 탐험가</small><strong>호기심 많은 구글러</strong></span><WorldIcon name="chevron" /></button>
+    <button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={onProfile}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><small>Lv. 7 탐험가</small><strong>호기심 많은 구글러</strong></span><WorldIcon name="chevron" /></button>
     <span className="mw3-divider" aria-hidden="true" />
     <div className="mw3-desktop-notification">
-      <button className="mw3-notification" data-tuner-id="notification" type="button" aria-label="알림 보기" aria-haspopup="dialog"><WorldIcon name="bell" /><span>3</span></button>
+      <button className="mw3-notification" type="button" aria-label="알림 보기" aria-haspopup="dialog"><WorldIcon name="bell" /><span>3</span></button>
       <div className="mw3-notification-popover" role="dialog" aria-label="새 알림">
         <div className="mw3-notification-popover-heading"><strong>새 소식</strong><button type="button" aria-label="알림 더보기">•••</button></div>
         <ul><li><i>✦</i><span><b>오늘의 여정이 열렸어요</b><small>별빛 항로가 탐험가를 기다려요.</small></span></li><li><i>◈</i><span><b>데이터 섬 탐험이 이어집니다</b><small>다음 지도가 은은히 빛나고 있어요.</small></span></li><li><i>✧</i><span><b>새로운 배지를 확인해보세요</b><small>보관함에 작은 선물이 도착했어요.</small></span></li></ul>
@@ -128,74 +127,18 @@ function DesktopProfileCluster({
   </section>;
 }
 
-type TunerMessage = { type: 'visual-tuner-update'; selectedId?: string; interactionMode?: 'select' | 'inspect'; overrides?: Record<string, Record<string, string>>; text?: Record<string, string> };
-
-const tunerStyleProperties = ['width', 'height', 'margin', 'padding', 'gap', 'opacity', 'border', 'borderRadius', 'boxShadow', 'fontSize', 'lineHeight', 'letterSpacing', 'fontWeight', 'maxWidth', 'backgroundPositionX', 'backgroundPositionY', 'backgroundSize', 'textAlign', 'visibility'] as const;
-
-function useTunerPreview(enabled: boolean) {
-  useEffect(() => {
-    if (!enabled) return undefined;
-    const saved = new Map<HTMLElement, { text: string; styles: Record<string, string> }>();
-    let selectedId = '';
-    let interactionMode: 'select' | 'inspect' = 'select';
-    const remember = (element: HTMLElement) => {
-      if (!saved.has(element)) saved.set(element, { text: element.textContent ?? '', styles: Object.fromEntries([...tunerStyleProperties, 'translate', 'outline', 'outlineOffset', 'whiteSpace'].map((property) => [property, element.style.getPropertyValue(property)])) });
-    };
-    const clear = () => saved.forEach((original, element) => {
-      [...tunerStyleProperties, 'translate', 'outline', 'outlineOffset', 'whiteSpace'].forEach((property) => element.style.setProperty(property, original.styles[property]));
-      element.textContent = original.text;
-    });
-    const publishBounds = () => {
-      if (!selectedId) return;
-      const element = document.querySelector<HTMLElement>(`[data-tuner-id="${selectedId}"]`);
-      if (!element) return;
-      const rect = element.getBoundingClientRect();
-      window.parent.postMessage({ type: 'visual-tuner-bounds', id: selectedId, bounds: { x: rect.left + window.scrollX, y: rect.top + window.scrollY, width: rect.width, height: rect.height, label: selectedId } }, window.location.origin);
-    };
-    const receive = (event: MessageEvent<TunerMessage>) => {
-      if (event.origin !== window.location.origin || event.data?.type !== 'visual-tuner-update') return;
-      clear();
-      Object.entries(event.data.overrides ?? {}).forEach(([id, values]) => document.querySelectorAll<HTMLElement>(`[data-tuner-id="${id}"]`).forEach((element) => {
-        remember(element);
-        if (values.x || values.y) element.style.translate = `${values.x ?? '0px'} ${values.y ?? '0px'}`;
-        tunerStyleProperties.forEach((property) => { if (values[property]) element.style.setProperty(property, values[property]); });
-      }));
-      Object.entries(event.data.text ?? {}).forEach(([id, value]) => document.querySelectorAll<HTMLElement>(`[data-tuner-id="${id}"]`).forEach((element) => { remember(element); element.textContent = value; element.style.whiteSpace = 'pre-line'; }));
-      selectedId = event.data.selectedId ?? '';
-      interactionMode = event.data.interactionMode ?? 'select';
-      requestAnimationFrame(publishBounds);
-    };
-    const select = (event: MouseEvent) => {
-      if (interactionMode !== 'select') return;
-      const elements = event.target instanceof Element ? document.elementsFromPoint(event.clientX, event.clientY).map((element) => element.closest<HTMLElement>('[data-tuner-id]')).filter((element): element is HTMLElement => Boolean(element)) : [];
-      const unique = [...new Map(elements.map((element) => [element.dataset.tunerId, element])).values()];
-      const target = event.altKey && unique.length > 1 ? unique[(unique.findIndex((element) => element.dataset.tunerId === selectedId) + 1) % unique.length] : unique[0];
-      if (!target?.dataset.tunerId) return;
-      event.preventDefault(); event.stopPropagation(); window.parent.postMessage({ type: 'visual-tuner-select', id: target.dataset.tunerId }, window.location.origin);
-    };
-    const resized = () => requestAnimationFrame(publishBounds);
-    window.addEventListener('message', receive); document.addEventListener('click', select, true); window.addEventListener('resize', resized); window.addEventListener('scroll', resized, true);
-    return () => { clear(); window.removeEventListener('message', receive); document.removeEventListener('click', select, true); window.removeEventListener('resize', resized); window.removeEventListener('scroll', resized, true); };
-  }, [enabled]);
-}
-
 export default function MainWorldV3() {
-  const query = new URLSearchParams(window.location.search);
-  const tuner = import.meta.env.DEV && query.get('preview') === 'main-v3' && query.get('tuner') === '1';
-  const tunerPreview = import.meta.env.DEV && query.get('preview') === 'main-v3' && query.get('tuner-preview') === '1';
-  if (tuner) return <VisualTunerShell />;
-  return <MainWorldV3Scene tunerPreview={tunerPreview} />;
+  return <MainWorldV3Scene />;
 }
 
-function MainWorldV3Scene({ tunerPreview }: { tunerPreview: boolean }) {
+function MainWorldV3Scene() {
   const { isPlaying, volume, resumeOnGesture, toggle, setVolume } = useWorldAudio();
-  useTunerPreview(tunerPreview);
   const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { resumeOnGesture(); window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [resumeOnGesture, sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   useEffect(() => () => window.cancelAnimationFrame(parallaxFrame.current ?? 0), []);
   useEffect(() => {
-    if (window.innerWidth < 768 || tunerPreview) { if (tunerPreview) setGuideText(DESKTOP_GUIDE_MESSAGE); return undefined; }
+    if (window.innerWidth < 768) return undefined;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       setGuideText(DESKTOP_GUIDE_MESSAGE);
       return undefined;
@@ -215,7 +158,7 @@ function MainWorldV3Scene({ tunerPreview }: { tunerPreview: boolean }) {
     };
     timeout = window.setTimeout(typeNext, 360);
     return () => window.clearTimeout(timeout);
-  }, [tunerPreview]);
+  }, []);
   const setParallax = useCallback((x: number, y: number) => {
     window.cancelAnimationFrame(parallaxFrame.current ?? 0);
     parallaxFrame.current = window.requestAnimationFrame(() => { shell.current?.style.setProperty('--mw3-parallax-x', x.toFixed(3)); shell.current?.style.setProperty('--mw3-parallax-y', y.toFixed(3)); });
@@ -235,19 +178,19 @@ function MainWorldV3Scene({ tunerPreview }: { tunerPreview: boolean }) {
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
-      <div className="mw3-navigation" data-tuner-id="navigation"><a className="mw3-brand" data-tuner-id="brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={() => { setActiveNav(item.id); announce(); }}><WorldIcon name={item.icon} /><span>{item.label}</span></button>)}</nav></div>
-      <section className="mw3-profile" data-tuner-id="profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${isPlaying ? 'is-playing' : ''}`} data-tuner-id="desktop-audio" aria-label={isPlaying ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" data-tuner-id="notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" data-tuner-id="profile" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
+      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={() => { setActiveNav(item.id); announce(); }}><WorldIcon name={item.icon} /><span>{item.label}</span></button>)}</nav></div>
+      <section className="mw3-profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
-    <section className="mw3-hero" data-tuner-id="hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow" data-tuner-id="hero-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title" data-tuner-id="hero-title">{hasDesktopAmbient ? <span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>의 여정을</span> : <span><b>구</b><b>글</b><b>러</b>의 여정을</span>}<span><em>시작</em>해볼까요?</span></h1><p className="mw3-description" data-tuner-id="hero-description">호기심을 가이드 삼아 배우고, 만들고, 성장하며<br />세상에 긍정적인 변화를 만들어요.</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" data-tuner-id="primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />새로운 여정 시작하기</button><button type="button" className="mw3-secondary-cta" data-tuner-id="secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div><button type="button" className="mw3-text-action" data-tuner-id="text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란? <span>›</span></button></section>
-    <aside className="mw3-guide" data-tuner-id="guide" aria-label="구글러 길잡이 안내">{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}>{tunerPreview ? DESKTOP_GUIDE_MESSAGE : <span>{guideText}</span>}</p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>
+    <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title">{hasDesktopAmbient ? <span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>의 여정을</span> : <span><b>구</b><b>글</b><b>러</b>의 여정을</span>}<span><em>시작</em>해볼까요?</span></h1><p className="mw3-description">호기심을 가이드 삼아 배우고, 만들고, 성장하며<br />세상에 긍정적인 변화를 만들어요.</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />새로운 여정 시작하기</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div><button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란? <span>›</span></button></section>
+    <aside className="mw3-guide" aria-label="구글러 길잡이 안내">{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>
     {hasDesktopControls && <DesktopProfileCluster isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
-    <section className="mw3-summary" data-tuner-id="summary" aria-label="여정 요약">
-      <button type="button" className="mw3-card mw3-card--journey" data-tuner-id="journey-card" onClick={() => announce('나의 여정을 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="route" />나의 여정</span><span className="mw3-card-content"><span className="mw3-avatar-frame" data-tuner-id="journey-avatar"><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" />{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-avatar-tooltip" role="tooltip"><b>루나가 장비를 고르는 중</b><small>탐험가의 다음 모습이 곧 공개돼요.</small></span>}</span><span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span></span></button>
-      <article className="mw3-card mw3-card--continue" data-tuner-id="continue-card"><h2 className="mw3-card-title" data-tuner-id="continue-title"><WorldIcon name="archive" />이어하기</h2><div className="mw3-card-content"><span className="mw3-island-frame" data-tuner-id="island-thumbnail"><img src={asset('visual-reset/main/assets/data-island-thumbnail.png')} alt="데이터 섬" /></span><span className="mw3-card-copy"><strong>데이터 섬의 비밀</strong><small>3. 데이터를 시각화해요</small><b className="mw3-percent">65%</b><span className="mw3-progress mw3-progress--blue" data-tuner-id="continue-progress"><i /></span></span><button type="button" className="mw3-resume" data-tuner-id="resume-button" onClick={() => announce('데이터 섬으로 떠날 준비 중이에요.')}>계속하기</button></div>{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-continue-tooltip" role="tooltip"><b>데이터 섬이 숨을 고르는 중</b><small>다음 탐험 장면을 세심하게 다듬고 있어요.</small></span>}</article>
-      <button type="button" className={`mw3-card mw3-card--badges${hasDesktopAmbient ? '' : ' mw3-card--compact-badges'}`} data-tuner-id="badges-card" onClick={() => announce('새로운 배지를 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="badge" />{hasDesktopAmbient ? '획득 배지' : '최근 획득 배지'}</span><span className="mw3-badge-row" data-tuner-id="badge-row">{hasDesktopAmbient ? desktopBadges.map((badge, index) => <span className="mw3-badge-item" data-tuner-id={index === 0 ? 'badge-blue' : undefined} key={badge.asset}><img src={asset(`visual-reset/main/assets/${badge.asset}`)} alt={badge.name} /><small>{badge.name}</small><span className="mw3-world-tooltip" role="tooltip"><b>{badge.name}</b><small>{badge.lore}</small></span></span>) : <><span><img src={asset('visual-reset/main/assets/badge-blue.png')} alt="파란 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-gold.png')} alt="금색 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-silver.png')} alt="은색 배지" /></span></>}<b data-tuner-id="badge-more" aria-label="더 많은 배지">…</b></span></button>
+    <section className="mw3-summary" aria-label="여정 요약">
+      <button type="button" className="mw3-card mw3-card--journey" onClick={() => announce('나의 여정을 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="route" />나의 여정</span><span className="mw3-card-content"><span className="mw3-avatar-frame"><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" />{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-avatar-tooltip" role="tooltip"><b>루나가 장비를 고르는 중</b><small>탐험가의 다음 모습이 곧 공개돼요.</small></span>}</span><span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span></span></button>
+      <article className="mw3-card mw3-card--continue"><h2 className="mw3-card-title"><WorldIcon name="archive" />이어하기</h2><div className="mw3-card-content"><span className="mw3-island-frame"><img src={asset('visual-reset/main/assets/data-island-thumbnail.png')} alt="데이터 섬" /></span><span className="mw3-card-copy"><strong>데이터 섬의 비밀</strong><small>3. 데이터를 시각화해요</small><b className="mw3-percent">65%</b><span className="mw3-progress mw3-progress--blue"><i /></span></span><button type="button" className="mw3-resume" onClick={() => announce('데이터 섬으로 떠날 준비 중이에요.')}>계속하기</button></div>{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-continue-tooltip" role="tooltip"><b>데이터 섬이 숨을 고르는 중</b><small>다음 탐험 장면을 세심하게 다듬고 있어요.</small></span>}</article>
+      <button type="button" className={`mw3-card mw3-card--badges${hasDesktopAmbient ? '' : ' mw3-card--compact-badges'}`} onClick={() => announce('새로운 배지를 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="badge" />{hasDesktopAmbient ? '획득 배지' : '최근 획득 배지'}</span><span className="mw3-badge-row">{hasDesktopAmbient ? desktopBadges.map((badge) => <span className="mw3-badge-item" key={badge.asset}><img src={asset(`visual-reset/main/assets/${badge.asset}`)} alt={badge.name} /><small>{badge.name}</small><span className="mw3-world-tooltip" role="tooltip"><b>{badge.name}</b><small>{badge.lore}</small></span></span>) : <><span><img src={asset('visual-reset/main/assets/badge-blue.png')} alt="파란 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-gold.png')} alt="금색 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-silver.png')} alt="은색 배지" /></span></>}<b aria-label="더 많은 배지">…</b></span></button>
     </section>
-    <section className="mw3-audio" data-tuner-id="audio-dock" aria-label="BGM 컨트롤"><div className="mw3-track"><WorldIcon name="music" /><strong>BGM</strong><span className="mw3-song">달빛 항해자의 마을</span></div><button type="button" className="mw3-audio-play" aria-label={isPlaying ? 'BGM 일시정지' : 'BGM 재생'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name={isPlaying ? 'pause' : 'play'} /></button><span className={`mw3-equalizer ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? '움직이는 이퀄라이저' : '정지된 이퀄라이저'}><i /><i /><i /><i /></span><div className="mw3-sfx"><WorldIcon name="speaker" /><span>효과음 켜짐</span><button type="button" role="switch" aria-checked={sfxOn} aria-label="효과음 켜기 또는 끄기" className={sfxOn ? 'is-on' : ''} onClick={toggleSfx}><i /></button></div></section>
+    <section className="mw3-audio" aria-label="BGM 컨트롤"><div className="mw3-track"><WorldIcon name="music" /><strong>BGM</strong><span className="mw3-song">달빛 항해자의 마을</span></div><button type="button" className="mw3-audio-play" aria-label={isPlaying ? 'BGM 일시정지' : 'BGM 재생'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name={isPlaying ? 'pause' : 'play'} /></button><span className={`mw3-equalizer ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? '움직이는 이퀄라이저' : '정지된 이퀄라이저'}><i /><i /><i /><i /></span><div className="mw3-sfx"><WorldIcon name="speaker" /><span>효과음 켜짐</span><button type="button" role="switch" aria-checked={sfxOn} aria-label="효과음 켜기 또는 끄기" className={sfxOn ? 'is-on' : ''} onClick={toggleSfx}><i /></button></div></section>
     <div className={`mw3-toast ${toast ? 'is-visible' : ''}`} role="status" aria-live="polite">{toast}</div>
   </main>;
 }
