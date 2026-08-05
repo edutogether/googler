@@ -39,4 +39,14 @@ describe('public MainWorldV3 route', () => {
     expect(document.querySelector('.mw3-shell')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: '프로필과 오디오 컨트롤' })).toBeInTheDocument();
   });
+
+  it('renders the single Journey implementation only through the local preview query', () => {
+    window.history.replaceState({}, '', '/googler/?preview=journey');
+    render(<App />);
+
+    expect(document.querySelector('.journey-preview')).toBeInTheDocument();
+    expect(document.querySelector('.mw3-shell')).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Be a Googler' })).toBeInTheDocument();
+    expect(screen.getByText('모험 시작하기')).toBeInTheDocument();
+  });
 });
