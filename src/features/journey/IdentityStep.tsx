@@ -70,20 +70,20 @@ export function IdentityStep({ onContinue, onSfx, initialLegalName = '', initial
   };
 
   return (
-    <section className="journey-card mx-auto max-w-3xl rounded-[2rem] p-6 text-[#202124] md:p-8">
+    <section className="journey-card journey-identity mx-auto max-w-3xl rounded-[2rem] p-6 text-[#202124] md:p-8">
       <p className="text-sm font-bold text-[#1a73e8]">여정 준비 3 / 8</p>
       <h1 className="mt-1 text-3xl font-black">나만의 구글러 만들기</h1>
       <p className="mt-2 text-[#5f6368]">모험에서 사용할 이름과 함께할 캐릭터를 정해볼까요?</p>
       <div className="mt-7 grid gap-6 md:grid-cols-[2fr_3fr]">
-        <aside aria-labelledby="journey-profile-preview-title" className="relative rounded-2xl bg-[#f8f9fa] p-6 text-center">
+        <aside aria-labelledby="journey-profile-preview-title" className="journey-identity__passport relative rounded-2xl bg-[#f8f9fa] p-6 text-center">
           <p id="journey-profile-preview-title" className="text-sm font-bold text-[#5f6368]">모험 프로필 미리보기 · 다른 구글러에게는 이렇게 보여요</p>
-          <button onClick={() => setPickerOpen(true)} className="mt-4 text-7xl" aria-label="캐릭터 선택">
+          <button onClick={() => setPickerOpen(true)} className="journey-identity__avatar mt-4 text-7xl" aria-label="캐릭터 선택">
             {publicProfile.avatarId}
           </button>
           <h2 className="mt-3 text-xl font-black">{displayName || '여정 이름을 기다리는 중'}</h2>
           <TypingJourneyTitle />
           <p className="text-sm text-[#5f6368]">{publicProfile.title}{settled && ' · 추천 완료'}</p>
-          <button onClick={recommendAnotherAvatar} className="mt-4 rounded-xl border border-[#dadce0] px-4 py-2 text-sm font-bold">
+          <button onClick={recommendAnotherAvatar} className="journey-identity__recommend mt-4 rounded-xl border border-[#dadce0] px-4 py-2 text-sm font-bold">
             새로운 동료 찾기
           </button>
           {pickerOpen && (
@@ -111,14 +111,14 @@ export function IdentityStep({ onContinue, onSfx, initialLegalName = '', initial
             </div>
           )}
         </aside>
-        <div className="space-y-5" aria-label="이름과 캐릭터 입력">
+        <div className="journey-identity__form space-y-5" aria-label="이름과 캐릭터 입력">
           <div>
             <h2 className="font-black">용사님의 이름</h2>
             <p className="mt-1 text-sm text-[#5f6368]">이 이름은 본인과 운영자만 확인해요. 수료 확인과 운영 안내에만 사용돼요.</p>
             <input
               value={privateProfile.legalName}
               onChange={(event) => setPrivateProfile((profile) => ({ ...profile, legalName: event.target.value }))}
-              className="mt-3 w-full rounded-xl border border-[#dadce0] px-4 py-3"
+              className="journey-identity__input mt-3 w-full rounded-xl border border-[#dadce0] px-4 py-3"
               placeholder="실명 또는 운영 확인 이름"
             />
           </div>
@@ -132,10 +132,10 @@ export function IdentityStep({ onContinue, onSfx, initialLegalName = '', initial
                   setPublicProfile((profile) => ({ ...profile, displayName: event.target.value }));
                   setHasTypedName(true);
                 }}
-                className="min-w-0 flex-1 rounded-xl border border-[#dadce0] px-4 py-3"
+                className="journey-identity__input min-w-0 flex-1 rounded-xl border border-[#dadce0] px-4 py-3"
                 aria-label="공개 여정 이름"
               />
-              <button onClick={chooseSuggestedName} className="rounded-xl bg-[#e8f0fe] px-3 text-sm font-bold text-[#1967d2]">
+              <button onClick={chooseSuggestedName} className="journey-identity__suggest rounded-xl bg-[#e8f0fe] px-3 text-sm font-bold text-[#1967d2]">
                 새로운 모험 이름
               </button>
             </div>
@@ -143,7 +143,7 @@ export function IdentityStep({ onContinue, onSfx, initialLegalName = '', initial
           </div>
         </div>
       </div>
-      <button disabled={!validDisplayName} onClick={onContinue} className="mt-8 rounded-xl bg-[#1a73e8] px-6 py-3 font-bold text-white disabled:bg-[#dadce0]">
+      <button disabled={!validDisplayName} onClick={onContinue} className="journey-identity__continue mt-8 rounded-xl bg-[#1a73e8] px-6 py-3 font-bold text-white disabled:bg-[#dadce0]">
         이 모습으로 모험 시작하기
       </button>
     </section>

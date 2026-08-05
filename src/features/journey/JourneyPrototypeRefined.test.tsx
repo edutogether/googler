@@ -20,9 +20,13 @@ describe('JourneyPrototypeRefined sound effects', () => {
 
   it('plays journeyStart only after the learner starts a new journey', () => {
     render(<JourneyPrototypeRefined />);
+    expect(document.querySelector('.journey-preview--entry')).toBeInTheDocument();
+    expect(document.querySelector('.journey-entry')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '이전 단계' })).toBeNull();
     expect(audio.playSfx).not.toHaveBeenCalled();
     fireEvent.click(screen.getByText('모험 시작하기'));
+    expect(document.querySelector('.journey-preview--identity')).toBeInTheDocument();
+    expect(document.querySelector('.journey-identity__passport')).toBeInTheDocument();
     expect(audio.startBgm).toHaveBeenCalledOnce();
     expect(audio.playSfx).toHaveBeenCalledWith('journeyStart');
   });
