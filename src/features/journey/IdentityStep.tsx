@@ -143,11 +143,9 @@ export function IdentityStep({ onContinue, onSfx, initialLegalName = '', initial
           </div>
         </div>
       </div>
-      <div className="journey-identity__completion">
-        <button disabled={!validDisplayName} onClick={onContinue} className="journey-identity__continue rounded-xl bg-[#1a73e8] px-6 py-3 font-bold text-white disabled:bg-[#dadce0]">
-          이 모습으로 모험 시작하기
-        </button>
-      </div>
+      <button disabled={!validDisplayName} onClick={onContinue} className="journey-identity__continue mt-8 rounded-xl bg-[#1a73e8] px-6 py-3 font-bold text-white disabled:bg-[#dadce0]">
+        이 모습으로 모험 시작하기
+      </button>
     </section>
   );
 }
