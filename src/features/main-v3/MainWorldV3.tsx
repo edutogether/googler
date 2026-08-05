@@ -128,7 +128,7 @@ function DesktopProfileCluster({
   </section>;
 }
 
-type TunerMessage = { type: 'visual-tuner-update'; selectedId?: string; overrides?: Record<string, Record<string, string>>; text?: Record<string, string> };
+type TunerMessage = { type: 'visual-tuner-update'; selectedId?: string; interactionMode?: 'select' | 'inspect'; overrides?: Record<string, Record<string, string>>; text?: Record<string, string> };
 
 const tunerStyleProperties = ['width', 'height', 'margin', 'padding', 'gap', 'opacity', 'border', 'borderRadius', 'boxShadow', 'fontSize', 'lineHeight', 'letterSpacing', 'fontWeight', 'maxWidth', 'backgroundPositionX', 'backgroundPositionY', 'backgroundSize', 'textAlign', 'visibility'] as const;
 
@@ -136,6 +136,8 @@ function useTunerPreview(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return undefined;
     const saved = new Map<HTMLElement, { text: string; styles: Record<string, string> }>();
+    let selectedId = '';
+    let interactionMode: 'select' | 'inspect' = 'select';
     const remember = (element: HTMLElement) => {
       if (!saved.has(element)) saved.set(element, { text: element.textContent ?? '', styles: Object.fromEntries([...tunerStyleProperties, 'translate', 'outline', 'outlineOffset', 'whiteSpace'].map((property) => [property, element.style.getPropertyValue(property)])) });
     };
@@ -143,6 +145,13 @@ function useTunerPreview(enabled: boolean) {
       [...tunerStyleProperties, 'translate', 'outline', 'outlineOffset', 'whiteSpace'].forEach((property) => element.style.setProperty(property, original.styles[property]));
       element.textContent = original.text;
     });
+    const publishBounds = () => {
+      if (!selectedId) return;
+      const element = document.querySelector<HTMLElement>(`[data-tuner-id="${selectedId}"]`);
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+      window.parent.postMessage({ type: 'visual-tuner-bounds', id: selectedId, bounds: { x: rect.left + window.scrollX, y: rect.top + window.scrollY, width: rect.width, height: rect.height, label: selectedId } }, window.location.origin);
+    };
     const receive = (event: MessageEvent<TunerMessage>) => {
       if (event.origin !== window.location.origin || event.data?.type !== 'visual-tuner-update') return;
       clear();
@@ -152,15 +161,21 @@ function useTunerPreview(enabled: boolean) {
         tunerStyleProperties.forEach((property) => { if (values[property]) element.style.setProperty(property, values[property]); });
       }));
       Object.entries(event.data.text ?? {}).forEach(([id, value]) => document.querySelectorAll<HTMLElement>(`[data-tuner-id="${id}"]`).forEach((element) => { remember(element); element.textContent = value; element.style.whiteSpace = 'pre-line'; }));
-      if (event.data.selectedId) document.querySelectorAll<HTMLElement>('[data-tuner-id]').forEach((element) => { if (element.dataset.tunerId === event.data.selectedId) { remember(element); element.style.outline = '2px solid #266fe7'; element.style.outlineOffset = '3px'; } });
+      selectedId = event.data.selectedId ?? '';
+      interactionMode = event.data.interactionMode ?? 'select';
+      requestAnimationFrame(publishBounds);
     };
     const select = (event: MouseEvent) => {
-      const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-tuner-id]') : null;
-      if (!target) return;
+      if (interactionMode !== 'select') return;
+      const elements = event.target instanceof Element ? document.elementsFromPoint(event.clientX, event.clientY).map((element) => element.closest<HTMLElement>('[data-tuner-id]')).filter((element): element is HTMLElement => Boolean(element)) : [];
+      const unique = [...new Map(elements.map((element) => [element.dataset.tunerId, element])).values()];
+      const target = event.altKey && unique.length > 1 ? unique[(unique.findIndex((element) => element.dataset.tunerId === selectedId) + 1) % unique.length] : unique[0];
+      if (!target?.dataset.tunerId) return;
       event.preventDefault(); event.stopPropagation(); window.parent.postMessage({ type: 'visual-tuner-select', id: target.dataset.tunerId }, window.location.origin);
     };
-    window.addEventListener('message', receive); document.addEventListener('click', select, true);
-    return () => { clear(); window.removeEventListener('message', receive); document.removeEventListener('click', select, true); };
+    const resized = () => requestAnimationFrame(publishBounds);
+    window.addEventListener('message', receive); document.addEventListener('click', select, true); window.addEventListener('resize', resized); window.addEventListener('scroll', resized, true);
+    return () => { clear(); window.removeEventListener('message', receive); document.removeEventListener('click', select, true); window.removeEventListener('resize', resized); window.removeEventListener('scroll', resized, true); };
   }, [enabled]);
 }
 

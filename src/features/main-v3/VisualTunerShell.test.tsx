@@ -68,4 +68,29 @@ describe('개발 전용 비주얼튜너', () => {
     fireEvent.click(screen.getByRole('button', { name: '미리보기 새 창' }));
     expect(window.open).toHaveBeenCalled();
   });
+
+  it('선택과 잘못된 입력은 override를 만들지 않고, 목록 선택은 즉시 반영한다', () => {
+    render(<MainWorldV3 />);
+    const selects = screen.getAllByRole('combobox');
+    fireEvent.change(selects[2], { target: { value: 'primary-cta' } });
+    expect(screen.getByText('선택됨:')).toHaveTextContent('주요 CTA');
+    const xInput = screen.getAllByPlaceholderText('px')[0];
+    fireEvent.change(xInput, { target: { value: '잘못된 값' } });
+    expect(xInput).toHaveValue('');
+  });
+
+  it('방향키와 길게 누르기 버튼은 조정값을 만들고 Undo로 한 단계 복구한다', async () => {
+    render(<MainWorldV3 />);
+    const xInput = screen.getAllByPlaceholderText('px')[0];
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    fireEvent.keyUp(window, { key: 'ArrowRight' });
+    expect(xInput).toHaveValue('1px');
+    fireEvent.keyDown(window, { key: 'ArrowRight', shiftKey: true });
+    fireEvent.keyUp(window, { key: 'ArrowRight' });
+    expect(xInput).toHaveValue('11px');
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'X 이동 증가' }));
+    fireEvent.pointerUp(screen.getByRole('button', { name: 'X 이동 증가' }));
+    expect(xInput).toHaveValue('12px');
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeEnabled();
+  });
 });
