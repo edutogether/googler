@@ -451,7 +451,7 @@
 
   .mw3-eyebrow { color: #273128; font-weight: 780; letter-spacing: -.022em; text-shadow: 0 1px 0 rgb(255 255 255 / .36); }
   .mw3-eyebrow span { color: var(--mw3-pc-gold); }
-  .mw3-hero h1 { color: var(--mw3-pc-text); font-weight: 850; line-height: .995; letter-spacing: -.06em; }
+  .mw3-hero h1 { color: var(--mw3-pc-text); font-weight: 850; line-height: 1.04; letter-spacing: -.047em; }
   .mw3-hero h1 > span { font-weight: 850; line-height: inherit; }
   .mw3-hero h1 b { display: inline-block; font-weight: inherit; letter-spacing: -.085em; vertical-align: baseline; }
   .mw3-hero h1 b:nth-child(1),
@@ -466,8 +466,8 @@
   .mw3-primary-cta,
   .mw3-secondary-cta { transition: transform var(--mw3-pc-motion), box-shadow var(--mw3-pc-motion), filter var(--mw3-pc-motion); }
   .mw3-hero { display: flex; flex-direction: column; }
-  .mw3-text-action { order: 0; align-self: flex-start; margin-top: 26px; }
-  .mw3-cta-row { order: 1; margin-top: 12px; }
+  .mw3-text-action { order: 0; align-self: flex-start; margin-top: 22px; }
+  .mw3-cta-row { order: 1; margin-top: 15px; }
   .mw3-primary-cta {
     border-color: rgb(255 255 255 / .3);
     background: linear-gradient(150deg, #5496f1, #276ac6);
