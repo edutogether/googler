@@ -43,7 +43,7 @@ describe('MainWorldV3 final preview', () => {
     expect(hero).toHaveTextContent('Googler의 여정을');
     expect(hero).toHaveTextContent('시작해볼까요?');
     expect(screen.getByLabelText('구글러 길잡이 안내')).toHaveTextContent('');
-    expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕, 너는 호기심이 많은 구글러구나! 나와 같이 놀며 배워볼까?');
+    expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕?\n너는 호기심이 많은\n구글러구나!\n우리 같이 놀며\n배워볼까?');
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
     expect(screen.getByText('데이터 섬의 비밀')).toBeInTheDocument();
     expect(document.querySelectorAll('.mw3-audio')).toHaveLength(1);
@@ -136,7 +136,7 @@ describe('MainWorldV3 final preview', () => {
 
     vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('min-width') || query.includes('prefers-reduced-motion') })));
     render(<MainWorldV3 />);
-    expect(document.querySelectorAll('.mw3-guide p')[1]).toHaveTextContent('안녕, 너는 호기심이 많은 구글러구나! 나와 같이 놀며 배워볼까?');
+    expect(document.querySelectorAll('.mw3-guide p')[1]).toHaveTextContent('안녕? 너는 호기심이 많은 구글러구나! 우리 같이 놀며 배워볼까?');
   });
 
   it('uses one looping BGM instance and makes actions announce a toast', async () => {
