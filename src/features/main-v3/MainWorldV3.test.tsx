@@ -98,9 +98,11 @@ describe('MainWorldV3 final preview', () => {
     expect(profile).not.toHaveAttribute('hidden');
     expect(within(profile as HTMLElement).getByRole('button', { name: '알림 보기' })).toBeInTheDocument();
     expect(within(profile as HTMLElement).getByRole('button', { name: '호기심 많은 구글러 프로필 보기' })).toBeInTheDocument();
+    expect(within(profile as HTMLElement).getByRole('button', { name: /BGM 켜기|BGM 끄기/ })).toBeInTheDocument();
     expect(profile?.querySelector('.mw3-profile-button img')).toBeInTheDocument();
     expect(screen.getAllByText('호기심 많은 구글러')).toHaveLength(2);
     expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
+    expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
   });
 
   it('keeps compact desktop controls and badge discovery available at the 1024 CSS breakpoint', () => {
