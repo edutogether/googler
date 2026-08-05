@@ -8,6 +8,7 @@ const BGM_SOURCE = asset('audio/bgm/moonlit-voyager-village-loop.mp3');
 export const MAIN_V3_BGM_STORAGE_KEY = 'be-a-googler:main-v3-bgm';
 export const MAIN_V3_SFX_STORAGE_KEY = 'be-a-googler:main-v3-sfx';
 const DEFAULT_VOLUME = 0.28;
+const DESKTOP_GUIDE_MESSAGE = '안녕, 너는 호기심이 많은 구글러구나! 나와 같이 놀며 배워볼까?';
 
 const navigation = [
   { id: 'explore', label: '탐험 시작', icon: 'compass' }, { id: 'town', label: '학습 마을', icon: 'map' },
@@ -128,10 +129,32 @@ function DesktopProfileCluster({
 
 export default function MainWorldV3() {
   const { isPlaying, volume, resumeOnGesture, toggle, setVolume } = useWorldAudio();
-  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
+  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { resumeOnGesture(); window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [resumeOnGesture, sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   useEffect(() => () => window.cancelAnimationFrame(parallaxFrame.current ?? 0), []);
+  useEffect(() => {
+    if (window.innerWidth < 768) return undefined;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setGuideText(DESKTOP_GUIDE_MESSAGE);
+      return undefined;
+    }
+
+    let timeout: number | undefined;
+    let index = 0;
+    const typeNext = () => {
+      index += 1;
+      setGuideText(DESKTOP_GUIDE_MESSAGE.slice(0, index));
+      timeout = window.setTimeout(index >= DESKTOP_GUIDE_MESSAGE.length ? restart : typeNext, index >= DESKTOP_GUIDE_MESSAGE.length ? 1800 : 46);
+    };
+    const restart = () => {
+      index = 0;
+      setGuideText('');
+      timeout = window.setTimeout(typeNext, 360);
+    };
+    timeout = window.setTimeout(typeNext, 360);
+    return () => window.clearTimeout(timeout);
+  }, []);
   const setParallax = useCallback((x: number, y: number) => {
     window.cancelAnimationFrame(parallaxFrame.current ?? 0);
     parallaxFrame.current = window.requestAnimationFrame(() => { shell.current?.style.setProperty('--mw3-parallax-x', x.toFixed(3)); shell.current?.style.setProperty('--mw3-parallax-y', y.toFixed(3)); });
@@ -146,6 +169,7 @@ export default function MainWorldV3() {
   // CSS media queries use the layout viewport. Keep compact desktop controls
   // available when a classic scrollbar makes window.innerWidth slightly smaller.
   const hasDesktopControls = window.matchMedia?.('(min-width: 1000px)').matches ?? hasDesktopAmbient;
+  const hasDesktopGuide = window.matchMedia?.('(min-width: 768px)').matches ?? window.innerWidth >= 768;
   return <main className="mw3-shell" ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
@@ -155,7 +179,7 @@ export default function MainWorldV3() {
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
     <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title">{hasDesktopAmbient ? <span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>의 여정을</span> : <span><b>구</b><b>글</b><b>러</b>의 여정을</span>}<span><em>시작</em>해볼까요?</span></h1><p className="mw3-description">호기심을 가이드 삼아 배우고, 만들고, 성장하며<br />세상에 긍정적인 변화를 만들어요.</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />새로운 여정 시작하기</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div><button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란? <span>›</span></button></section>
-    <aside className="mw3-guide" aria-label="구글러 길잡이 안내"><p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p></aside>
+    <aside className="mw3-guide" aria-label="구글러 길잡이 안내">{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>
     {hasDesktopControls && <DesktopProfileCluster isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     <section className="mw3-summary" aria-label="여정 요약">
       <button type="button" className="mw3-card mw3-card--journey" onClick={() => announce('나의 여정을 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="route" />나의 여정</span><span className="mw3-card-content"><span className="mw3-avatar-frame"><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" />{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-avatar-tooltip" role="tooltip"><b>루나가 장비를 고르는 중</b><small>탐험가의 다음 모습이 곧 공개돼요.</small></span>}</span><span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span></span></button>

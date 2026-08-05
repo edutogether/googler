@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../../App';
 import MainWorldV3, { MAIN_V3_BGM_STORAGE_KEY, MAIN_V3_SFX_STORAGE_KEY } from './MainWorldV3';
@@ -42,7 +42,8 @@ describe('MainWorldV3 final preview', () => {
     const hero = screen.getByRole('heading', { level: 1 });
     expect(hero).toHaveTextContent('Googler의 여정을');
     expect(hero).toHaveTextContent('시작해볼까요?');
-    expect(screen.getByText(/나는 구글러 길잡이/)).toBeInTheDocument();
+    expect(screen.getByLabelText('구글러 길잡이 안내')).toHaveTextContent('');
+    expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕, 너는 호기심이 많은 구글러구나! 나와 같이 놀며 배워볼까?');
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
     expect(screen.getByText('데이터 섬의 비밀')).toBeInTheDocument();
     expect(document.querySelectorAll('.mw3-audio')).toHaveLength(1);
@@ -118,6 +119,24 @@ describe('MainWorldV3 final preview', () => {
     expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
 
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+  });
+
+  it('types the desktop guide message and keeps the full message when reduced motion is requested', () => {
+    vi.useFakeTimers();
+    try {
+      render(<MainWorldV3 />);
+
+      const guide = document.querySelector('.mw3-guide p') as HTMLElement;
+      expect(guide).toHaveTextContent('');
+      act(() => vi.advanceTimersByTime(406));
+      expect(guide).toHaveTextContent('안');
+    } finally {
+      vi.useRealTimers();
+    }
+
+    vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('min-width') || query.includes('prefers-reduced-motion') })));
+    render(<MainWorldV3 />);
+    expect(document.querySelectorAll('.mw3-guide p')[1]).toHaveTextContent('안녕, 너는 호기심이 많은 구글러구나! 나와 같이 놀며 배워볼까?');
   });
 
   it('uses one looping BGM instance and makes actions announce a toast', async () => {
