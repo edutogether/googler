@@ -137,6 +137,8 @@ describe('MainWorldV3 final preview', () => {
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
     expect(document.querySelectorAll('.mw3-mobile-google-mark')).toHaveLength(2);
     expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고, 만들고, 성장하며세상에 긍정적인 변화를 만들어요.');
+    expect(document.querySelectorAll('.mw3-title-line')).toHaveLength(2);
+    expect(document.querySelectorAll('.mw3-description-line')).toHaveLength(2);
 
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
   });
