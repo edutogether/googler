@@ -121,6 +121,24 @@ describe('MainWorldV3 final preview', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
   });
 
+  it('uses the compact mobile composition without a guide bubble or bottom audio dock', () => {
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('max-width') })));
+    render(<MainWorldV3 />);
+
+    expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler 의 여정을');
+    expect(screen.getByText('호기심으로 배우고, 만들고,', { exact: false })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '새로운 여정' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '이어하기' })).toBeInTheDocument();
+    expect(document.querySelector('.mw3-guide')).toBeNull();
+    expect(document.querySelector('.mw3-audio')).toBeNull();
+    expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+  });
+
   it('types the desktop guide message and keeps the full message when reduced motion is requested', () => {
     vi.useFakeTimers();
     try {
