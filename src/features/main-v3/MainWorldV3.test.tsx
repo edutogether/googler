@@ -128,13 +128,15 @@ describe('MainWorldV3 final preview', () => {
     render(<MainWorldV3 />);
 
     expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler 의 여정을');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler의 여정을');
     expect(screen.getByText('호기심으로 배우고, 만들고,', { exact: false })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '새로운 여정' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '이어하기' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-guide')).toBeNull();
     expect(document.querySelector('.mw3-audio')).toBeNull();
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
+    expect(document.querySelectorAll('.mw3-mobile-google-mark')).toHaveLength(2);
+    expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고, 만들고, 성장하며세상에 긍정적인 변화를 만들어요.');
 
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
   });
