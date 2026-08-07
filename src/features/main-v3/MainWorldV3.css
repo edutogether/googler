@@ -688,7 +688,7 @@
   .mw3-cta-row { gap: clamp(8px, .546875vw, 14px); margin-top: clamp(20px, 1.328125vw, 34px); }
   .mw3-primary-cta,
   .mw3-secondary-cta { min-height: var(--mw3-pc-cta-height); padding-inline: clamp(16px, 1.09375vw, 28px); font-size: clamp(13px, .6640625vw, 17px); }
-  .mw3-guide { top: clamp(260px, 28.75vh, 414px); left: 59%; width: clamp(144px, 7.34375vw, 188px); padding: clamp(16px, .9375vw, 24px) clamp(16px, .8203125vw, 21px); border-radius: clamp(19px, 1.015625vw, 26px); transform: none; }
+  .mw3-guide { top: clamp(260px, 28.75vh, 414px); left: clamp(52%, 56.8vw, 59%); width: clamp(144px, 7.34375vw, 188px); padding: clamp(16px, .8203125vw, 21px) clamp(16px, .9375vw, 24px); border-radius: clamp(19px, 1.015625vw, 26px); transform: none; }
   .mw3-guide p { min-height: clamp(92px, 9.027777vh, 130px); font-size: clamp(13px, .625vw, 16px); line-height: 1.56; }
   .mw3-guide::after { right: clamp(-9px, -.3515625vw, -5px); bottom: clamp(18px, 1.3671875vw, 25px); width: clamp(14px, .78125vw, 20px); height: clamp(14px, .78125vw, 20px); }
 
