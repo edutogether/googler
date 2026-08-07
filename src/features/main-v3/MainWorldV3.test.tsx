@@ -88,6 +88,9 @@ describe('MainWorldV3 final preview', () => {
     expect(screen.getByRole('button', { name: '계속하기' })).toBeInTheDocument();
     expect(screen.getByText('획득 배지')).toBeInTheDocument();
     expect(document.querySelectorAll('.mw3-badge-item')).toHaveLength(6);
+    const badgeLayout = document.querySelector('.mw3-badge-layout') as HTMLElement;
+    expect(badgeLayout.querySelectorAll('.mw3-badge-row .mw3-badge-item')).toHaveLength(6);
+    expect(badgeLayout.querySelector('.mw3-badge-more')).toHaveTextContent('…');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-sfx')).toBeNull();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio [role="switch"]')).toBeNull();
   });
@@ -140,6 +143,7 @@ describe('MainWorldV3 final preview', () => {
     expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고, 만들고, 성장하며세상에 긍정적인 변화를 만들어요.');
     expect(document.querySelectorAll('.mw3-title-line')).toHaveLength(2);
     expect(document.querySelectorAll('.mw3-description-line')).toHaveLength(2);
+    expect(document.querySelector('.mw3-badge-layout')).toBeNull();
 
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
   });
