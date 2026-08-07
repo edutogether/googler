@@ -7,13 +7,23 @@ const asset = (path: string) => `${base}${path}`;
 const BGM_SOURCE = asset('audio/bgm/moonlit-voyager-village-loop.mp3');
 export const MAIN_V3_BGM_STORAGE_KEY = 'be-a-googler:main-v3-bgm';
 export const MAIN_V3_SFX_STORAGE_KEY = 'be-a-googler:main-v3-sfx';
-const DEFAULT_VOLUME = 0.28;
-const DESKTOP_GUIDE_MESSAGE = '안녕?\n호기심이 아주 많은\n구글러구나!\n나와 같이\n즐겁게 배워볼래?';
+const DEFAULT_VOLUME = 1;
+const DESKTOP_GUIDE_MESSAGE = '안녕 ?\n호기심이 아주 많은\n구글러구나 !\n나와 같이 구글을\n즐겁게 배워볼래 ?';
 
 const navigation = [
-  { id: 'explore', label: '탐험 시작', icon: 'compass' }, { id: 'town', label: '학습 마을', icon: 'map' },
-  { id: 'missions', label: '미션', icon: 'scroll' }, { id: 'guides', label: '길잡이', icon: 'book' }, { id: 'archive', label: '보관함', icon: 'archive' },
+  { id: 'explore', label: '홈', mobileLabel: '탐험 시작', icon: 'home', mobileIcon: 'compass' },
+  { id: 'town', label: '퀘스트', mobileLabel: '학습 마을', icon: 'scroll', mobileIcon: 'map' },
+  { id: 'missions', label: '플래너', mobileLabel: '미션', icon: 'calendar', mobileIcon: 'scroll' },
+  { id: 'guides', label: '도감', mobileLabel: '길잡이', icon: 'book', mobileIcon: 'book' },
+  { id: 'archive', label: '커뮤니티', mobileLabel: '보관함', icon: 'users', mobileIcon: 'archive' },
 ] as const;
+
+const menuPreviews = {
+  town: { title: '퀘스트', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.' },
+  missions: { title: '플래너', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '매일의 작은 모험을 한눈에 볼 수 있게 다듬고 있어요.' },
+  guides: { title: '도감', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심으로 찾은 지식과 이야기를 차곡차곡 모으고 있어요.' },
+  archive: { title: '커뮤니티', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간을 준비하고 있어요.' },
+} as const;
 
 const desktopBadges = [
   { asset: 'badge-blue.png', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
@@ -24,13 +34,6 @@ const desktopBadges = [
   { asset: 'badge-coral.png', name: '반짝이는 생각', lore: '새로운 아이디어를 세상에 밝혔어요.' },
 ] as const;
 
-function getStoredBgm() {
-  try {
-    const value = JSON.parse(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY) ?? '{}') as { enabled?: boolean; volume?: number };
-    return { enabled: value.enabled === true, volume: typeof value.volume === 'number' ? value.volume : DEFAULT_VOLUME };
-  } catch { return { enabled: false, volume: DEFAULT_VOLUME }; }
-}
-function saveBgm(enabled: boolean, volume: number) { try { window.localStorage.setItem(MAIN_V3_BGM_STORAGE_KEY, JSON.stringify({ enabled, volume })); } catch { /* optional */ } }
 function getSfx() { try { return window.localStorage.getItem(MAIN_V3_SFX_STORAGE_KEY) !== 'false'; } catch { return true; } }
 function saveSfx(enabled: boolean) { try { window.localStorage.setItem(MAIN_V3_SFX_STORAGE_KEY, String(enabled)); } catch { /* optional */ } }
 
@@ -41,19 +44,19 @@ function useWorldAudio() {
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
   useEffect(() => {
-    const stored = getStoredBgm();
     const audio = new Audio(BGM_SOURCE);
-    audio.loop = true; audio.preload = 'auto'; audio.volume = stored.volume; setVolumeState(stored.volume);
-    audioRef.current = audio; enabled.current = true; saveBgm(true, stored.volume);
+    audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
+    audioRef.current = audio; enabled.current = true;
+    try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
     const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;
     let removeFirstGesture = () => {};
-    const fail = () => { removeFirstGesture(); enabled.current = false; saveBgm(false, audio.volume); setIsPlaying(false); };
+    const fail = () => { setIsPlaying(false); };
     const ended = () => { if (enabled.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
     const resumeAfterFirstGesture = (event: Event) => {
       if (event.target instanceof Element && event.target.closest('.mw3-mini-bgm')) return;
-      removeFirstGesture();
-      if (enabled.current && audio.paused) void audio.play().then(sync).catch(() => setIsPlaying(false));
+      if (!enabled.current || !audio.paused) { removeFirstGesture(); return; }
+      void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail);
     };
     const armFirstGestureFallback = () => {
       gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, { capture: true, once: true }));
@@ -63,16 +66,16 @@ function useWorldAudio() {
     void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(() => setIsPlaying(false));
     return () => { removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
-  const resumeOnGesture = useCallback(() => { const audio = audioRef.current; if (audio && enabled.current && audio.paused) void audio.play().catch(() => { enabled.current = false; saveBgm(false, audio.volume); setIsPlaying(false); }); }, []);
+  const resumeOnGesture = useCallback(() => { const audio = audioRef.current; if (audio && enabled.current && audio.paused) void audio.play().then(sync).catch(() => setIsPlaying(false)); }, [sync]);
   const toggle = useCallback(() => {
     const audio = audioRef.current; if (!audio) return;
-    if (!audio.paused) { enabled.current = false; saveBgm(false, audio.volume); audio.pause(); audio.currentTime = 0; return; }
-    audio.currentTime = 0; enabled.current = true; saveBgm(true, audio.volume); void audio.play().catch(() => { enabled.current = false; saveBgm(false, audio.volume); setIsPlaying(false); });
-  }, []);
+    if (!audio.paused) { enabled.current = false; audio.pause(); audio.currentTime = 0; return; }
+    audio.currentTime = 0; enabled.current = true; void audio.play().then(sync).catch(() => setIsPlaying(false));
+  }, [sync]);
   const setVolume = useCallback((nextVolume: number) => {
     const audio = audioRef.current; if (!audio) return;
     const clamped = Math.min(1, Math.max(0, nextVolume));
-    audio.volume = clamped; setVolumeState(clamped); saveBgm(enabled.current, clamped); sync();
+    audio.volume = clamped; setVolumeState(clamped); sync();
   }, [sync]);
   return { isPlaying, volume, resumeOnGesture, toggle, setVolume };
 }
@@ -133,7 +136,7 @@ export default function MainWorldV3() {
 
 function MainWorldV3Scene() {
   const { isPlaying, volume, resumeOnGesture, toggle, setVolume } = useWorldAudio();
-  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
+  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [previewMenu, setPreviewMenu] = useState<keyof typeof menuPreviews | null>(null); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>(); const previewDialog = useRef<HTMLDivElement | null>(null); const previewClose = useRef<HTMLButtonElement | null>(null);
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { resumeOnGesture(); window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [resumeOnGesture, sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   useEffect(() => () => window.cancelAnimationFrame(parallaxFrame.current ?? 0), []);
@@ -149,7 +152,7 @@ function MainWorldV3Scene() {
     const typeNext = () => {
       index += 1;
       setGuideText(DESKTOP_GUIDE_MESSAGE.slice(0, index));
-      timeout = window.setTimeout(index >= DESKTOP_GUIDE_MESSAGE.length ? restart : typeNext, index >= DESKTOP_GUIDE_MESSAGE.length ? 1800 : 46);
+      timeout = window.setTimeout(index >= DESKTOP_GUIDE_MESSAGE.length ? restart : typeNext, index >= DESKTOP_GUIDE_MESSAGE.length ? 3300 : 46);
     };
     const restart = () => {
       index = 0;
@@ -175,16 +178,42 @@ function MainWorldV3Scene() {
   // available when a classic scrollbar makes window.innerWidth slightly smaller.
   const hasDesktopControls = window.matchMedia?.('(min-width: 1000px)').matches ?? hasDesktopAmbient;
   const hasDesktopGuide = window.matchMedia?.('(min-width: 768px)').matches ?? window.innerWidth >= 768;
+  const closeMenuPreview = useCallback(() => { setPreviewMenu(null); setActiveNav('explore'); }, []);
+  useEffect(() => {
+    if (!previewMenu) return undefined;
+    const frame = window.requestAnimationFrame(() => previewClose.current?.focus());
+    const handlePreviewKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); closeMenuPreview(); return; }
+      if (event.key !== 'Tab') return;
+      const focusable = previewDialog.current?.querySelectorAll<HTMLElement>('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])') ?? [];
+      if (!focusable.length) return;
+      event.preventDefault();
+      (event.shiftKey ? focusable[focusable.length - 1] : focusable[0]).focus();
+    };
+    window.addEventListener('keydown', handlePreviewKeydown);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener('keydown', handlePreviewKeydown); };
+  }, [closeMenuPreview, previewMenu]);
+  const activateNavigation = (item: (typeof navigation)[number]) => {
+    setActiveNav(item.id);
+    if (!isMobile && item.id !== 'explore') {
+      setPreviewMenu(item.id as keyof typeof menuPreviews);
+      resumeOnGesture(); playUiSound('click', sfxOn);
+      return;
+    }
+    setPreviewMenu(null);
+    announce(item.id === 'explore' ? '홈에서 새로운 모험을 이어가요.' : undefined);
+  };
   return <main className="mw3-shell" ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
-      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={() => { setActiveNav(item.id); announce(); }}><WorldIcon name={item.icon} /><span>{item.label}</span></button>)}</nav></div>
+      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={() => activateNavigation(item)}><WorldIcon name={isMobile ? item.mobileIcon : item.icon} /><span>{isMobile ? item.mobileLabel : item.label}</span></button>)}</nav></div>
       <section className="mw3-profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
-    <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title"><span className="mw3-title-line mw3-title-line--first">{isMobile || hasDesktopAmbient ? <span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>{isMobile ? '의 여정을' : '의 여정을'}</span> : <span><b>구</b><b>글</b><b>러</b>의 여정을</span>}</span><span className="mw3-title-line mw3-title-line--second"><em>시작</em>해볼까요?</span></h1><p className="mw3-description">{isMobile ? <><span className="mw3-description-line">호기심으로 배우고, 만들고, 성장하며</span><span className="mw3-description-line">세상에 긍정적인 변화를 만들어요.</span></> : <>호기심을 가이드 삼아 배우고, 만들고, 성장하며<br />세상에 긍정적인 변화를 만들어요.</>}</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />{isMobile ? '새로운 여정' : '새로운 여정 시작하기'}</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div>{!isMobile && <button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란? <span>›</span></button>}</section>
+    <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title"><span className="mw3-title-line mw3-title-line--first"><span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>{isMobile ? '의 여정을' : ' 의 여정을'}</span></span><span className="mw3-title-line mw3-title-line--second">{isMobile ? <><em>시작</em>해볼까요?</> : '시작해볼까요 ?'}</span></h1><p className="mw3-description">{isMobile ? <><span className="mw3-description-line">호기심으로 배우고, 만들고, 성장하며</span><span className="mw3-description-line">세상에 긍정적인 변화를 만들어요.</span></> : <>호기심을 가이드 삼아 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.</>}</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />{isMobile ? '새로운 여정' : '새로운 여정 시작하기'}</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div>{!isMobile && <button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란? <span>›</span></button>}</section>
+    {previewMenu && !isMobile && <div className="mw3-menu-preview-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeMenuPreview(); }}><div className="mw3-menu-preview" ref={previewDialog} role="dialog" aria-modal="true" aria-labelledby="mw3-menu-preview-title" aria-describedby="mw3-menu-preview-description"><button ref={previewClose} type="button" className="mw3-menu-preview-close" aria-label={`${menuPreviews[previewMenu].title} 미리보기 닫기`} onClick={closeMenuPreview}>×</button><span className="mw3-menu-preview-icon"><WorldIcon name={menuPreviews[previewMenu].icon} /></span><p>{menuPreviews[previewMenu].eyebrow}</p><h2 id="mw3-menu-preview-title">{menuPreviews[previewMenu].title}</h2><div className="mw3-menu-preview-panel" aria-hidden="true"><i /><i /><i /></div><p id="mw3-menu-preview-description">{menuPreviews[previewMenu].detail}<br />새로운 기능을 준비하고 있어요. 곧 만나보세요!</p></div></div>}
     {!isMobile && <aside className="mw3-guide" aria-label="구글러 길잡이 안내">{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>}
     {hasDesktopControls && <DesktopProfileCluster isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     <section className="mw3-summary" aria-label="여정 요약">

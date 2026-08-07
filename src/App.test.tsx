@@ -27,7 +27,7 @@ describe('public MainWorldV3 route', () => {
 
     expect(document.querySelector('.mw3-shell')).toBeInTheDocument();
     expect(document.querySelector('.vr2-shell')).toBeNull();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler의 여정을');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler 의 여정을');
     expect(screen.getByText('획득 배지')).toBeInTheDocument();
     expect(MockAudio.instances).toHaveLength(1);
   });

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../../App';
 import MainWorldV3, { MAIN_V3_BGM_STORAGE_KEY, MAIN_V3_SFX_STORAGE_KEY } from './MainWorldV3';
@@ -18,6 +18,7 @@ class MockAudio extends EventTarget {
 beforeEach(() => { MockAudio.instances = []; MockAudio.rejectNextPlay = false; window.localStorage.clear(); vi.stubGlobal('Audio', MockAudio); });
 
 afterEach(() => {
+  cleanup();
   window.history.replaceState({}, '', '/');
   vi.unstubAllGlobals();
 });
@@ -36,14 +37,14 @@ describe('MainWorldV3 final preview', () => {
 
     const shell = document.querySelector('.mw3-shell');
     expect(shell).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
+    expect(screen.getAllByRole('button', { name: /홈|퀘스트|플래너|도감|커뮤니티/ })).toHaveLength(5);
     expect(screen.getAllByText('호기심 많은 구글러')).toHaveLength(2);
     expect(screen.getAllByText('Lv. 7 탐험가')).toHaveLength(3);
     const hero = screen.getByRole('heading', { level: 1 });
-    expect(hero).toHaveTextContent('Googler의 여정을');
-    expect(hero).toHaveTextContent('시작해볼까요?');
+    expect(hero).toHaveTextContent('Googler 의 여정을');
+    expect(hero).toHaveTextContent('시작해볼까요 ?');
     expect(screen.getByLabelText('구글러 길잡이 안내')).toHaveTextContent('');
-    expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕?\n호기심이 아주 많은\n구글러구나!\n나와 같이\n즐겁게 배워볼래?');
+    expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕 ?\n호기심이 아주 많은\n구글러구나 !\n나와 같이 구글을\n즐겁게 배워볼래 ?');
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
     expect(screen.getByText('데이터 섬의 비밀')).toBeInTheDocument();
     expect(document.querySelectorAll('.mw3-audio')).toHaveLength(1);
@@ -102,7 +103,7 @@ describe('MainWorldV3 final preview', () => {
     expect(within(profile as HTMLElement).getByRole('button', { name: /BGM 켜기|BGM 끄기/ })).toBeInTheDocument();
     expect(profile?.querySelector('.mw3-profile-button img')).toBeInTheDocument();
     expect(screen.getAllByText('호기심 많은 구글러')).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
+    expect(screen.getAllByRole('button', { name: /홈|퀘스트|플래너|도감|커뮤니티/ })).toHaveLength(5);
     expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
   });
 
@@ -158,7 +159,7 @@ describe('MainWorldV3 final preview', () => {
 
     vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('min-width') || query.includes('prefers-reduced-motion') })));
     render(<MainWorldV3 />);
-    expect(document.querySelectorAll('.mw3-guide p')[1]).toHaveTextContent('안녕? 호기심이 아주 많은 구글러구나! 나와 같이 즐겁게 배워볼래?');
+    expect(document.querySelectorAll('.mw3-guide p')[1]).toHaveTextContent('안녕 ? 호기심이 아주 많은 구글러구나 ! 나와 같이 구글을 즐겁게 배워볼래 ?');
   });
 
   it('uses one looping BGM instance and makes actions announce a toast', async () => {
@@ -168,10 +169,12 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.src).toContain('/audio/bgm/moonlit-voyager-village-loop.mp3');
     expect(audio.loop).toBe(true);
     expect(audio.preload).toBe('auto');
-    expect(audio.volume).toBe(.28);
-    fireEvent.click(screen.getByRole('button', { name: '학습 마을' }));
-    expect(document.querySelector('.mw3-toast')).toHaveTextContent('이 길은 아직 준비 중이에요');
-    expect(screen.getByRole('button', { name: '학습 마을' })).toHaveAttribute('aria-current', 'page');
+    expect(audio.volume).toBe(1);
+    fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
+    expect(screen.getByRole('dialog', { name: '퀘스트' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: '퀘스트' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정이 곧 열립니다.');
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
@@ -186,7 +189,19 @@ describe('MainWorldV3 final preview', () => {
     fireEvent.click(sfx);
     expect(sfx).toHaveAttribute('aria-checked', 'false');
     expect(window.localStorage.getItem(MAIN_V3_SFX_STORAGE_KEY)).toBe('false');
-    expect(JSON.parse(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY) ?? '{}')).toMatchObject({ enabled: true, volume: .28 });
+    expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
+  });
+
+  it('opens each desktop-only menu preview and restores the home tab from its close button', () => {
+    render(<MainWorldV3 />);
+
+    for (const label of ['퀘스트', '플래너', '도감', '커뮤니티']) {
+      fireEvent.click(screen.getByRole('button', { name: label }));
+      expect(screen.getByRole('dialog', { name: label })).toHaveTextContent('새로운 기능을 준비하고 있어요. 곧 만나보세요!');
+      fireEvent.click(screen.getByRole('button', { name: `${label} 미리보기 닫기` }));
+      expect(screen.queryByRole('dialog', { name: label })).toBeNull();
+      expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
+    }
   });
 
   it('retries blocked autoplay once on the first non-music pointer gesture', async () => {
