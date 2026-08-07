@@ -62,7 +62,7 @@ describe('MainWorldV3 final preview', () => {
     for (const asset of [
       'profile-avatar.png',
       'journey-avatar-medallion.png',
-      'data-island-thumbnail.png',
+      'data-island-thumbnail-v2.png',
       'badge-blue.png',
       'badge-gold.png',
       'badge-silver.png',
