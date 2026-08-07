@@ -335,6 +335,33 @@
     --mw3-pc-motion: 180ms cubic-bezier(.2, .8, .2, 1);
     --mw3-parallax-x: 0;
     --mw3-parallax-y: 0;
+    /* 2560 × 1440 is the PC master. Smaller PC windows interpolate from it,
+       while the lower bounds preserve reachability on compact / 4:3 screens. */
+    --mw3-pc-header-height: clamp(46px, 2.8125vw, 72px);
+    --mw3-pc-edge-x: clamp(18px, 1.171875vw, 30px);
+    --mw3-pc-edge-y: clamp(14px, .859375vw, 22px);
+    --mw3-pc-nav-width: clamp(600px, 38.28125vw, 980px);
+    --mw3-pc-nav-padding: clamp(16px, 1.09375vw, 28px);
+    --mw3-pc-profile-width: clamp(460px, 27.34375vw, 700px);
+    --mw3-pc-hero-x: clamp(78px, 6.484375vw, 166px);
+    --mw3-pc-hero-y: clamp(104px, 11.458333vh, 165px);
+    --mw3-pc-hero-width: clamp(420px, 22.8515625vw, 585px);
+    --mw3-pc-title-size: clamp(42px, 2.8125vw, 72px);
+    --mw3-pc-eyebrow-size: clamp(14px, .703125vw, 18px);
+    --mw3-pc-body-size: clamp(13px, .6640625vw, 17px);
+    --mw3-pc-cta-height: clamp(46px, 2.421875vw, 62px);
+    --mw3-pc-card-height: clamp(112px, 12.361111vh, 178px);
+    --mw3-pc-card-pad-y: clamp(12px, .703125vw, 18px);
+    --mw3-pc-card-pad-x: clamp(14px, .78125vw, 20px);
+    --mw3-pc-card-radius: clamp(16px, .9375vw, 24px);
+    --mw3-pc-summary-side: clamp(22px, 1.953125vw, 50px);
+    --mw3-pc-summary-bottom: clamp(16px, 1.944444vh, 28px);
+    --mw3-pc-summary-gap: clamp(10px, 1.3671875vw, 35px);
+    --mw3-pc-avatar-size: clamp(60px, 3.4375vw, 88px);
+    --mw3-pc-island-width: clamp(76px, 5.234375vw, 134px);
+    --mw3-pc-island-height: clamp(52px, 3.5546875vw, 91px);
+    --mw3-pc-badge-width: clamp(34px, 2.3828125vw, 61px);
+    --mw3-pc-badge-height: clamp(36px, 2.5vw, 64px);
   }
 
   .mw3-shell::before {
@@ -630,6 +657,66 @@
   .mw3-menu-preview-panel i:nth-child(1) { height: 31px; }.mw3-menu-preview-panel i:nth-child(2) { height: 43px; background: linear-gradient(180deg, rgb(239 186 78 / .8), rgb(208 140 52 / .48)); }.mw3-menu-preview-panel i:nth-child(3) { height: 24px; }
   .mw3-menu-preview-panel + p { max-width: 300px; margin-inline: auto; }
 
+  /*
+   * 2560 × 1440 PC proportional layout system.
+   * The master values above are reached at 2560; every other PC viewport uses
+   * the same ratios until a readable minimum is reached.
+   */
+  .mw3-header { top: var(--mw3-pc-edge-y); right: var(--mw3-pc-edge-x); left: var(--mw3-pc-edge-x); }
+  .mw3-navigation { width: var(--mw3-pc-nav-width); min-height: var(--mw3-pc-header-height); padding-inline: var(--mw3-pc-nav-padding); border-radius: calc(var(--mw3-pc-header-height) / 2); }
+  .mw3-brand { padding-right: clamp(12px, .859375vw, 22px); }
+  .mw3-brand img { height: clamp(28px, 1.5234375vw, 39px); }
+  .mw3-divider { height: clamp(22px, 1.25vw, 32px); }
+  .mw3-navigation nav { margin-left: clamp(8px, .546875vw, 14px); }
+  .mw3-navigation button { min-width: clamp(64px, 3.4375vw, 88px); gap: clamp(5px, .3125vw, 8px); padding-inline: clamp(4px, .2734375vw, 7px); font-size: clamp(12px, .625vw, 16px); }
+  .mw3-navigation button .mw3-icon { width: clamp(15px, .78125vw, 20px); height: clamp(15px, .78125vw, 20px); }
+
+  .mw3-desktop-profile { top: var(--mw3-pc-edge-y); right: var(--mw3-pc-edge-x); width: var(--mw3-pc-profile-width); min-height: var(--mw3-pc-header-height); padding-inline: clamp(8px, .46875vw, 12px); border-radius: calc(var(--mw3-pc-header-height) / 2); }
+  .mw3-desktop-profile > .mw3-divider { margin-inline: clamp(6px, .4296875vw, 11px); }
+  .mw3-mini-audio { width: clamp(220px, 12.8125vw, 328px); grid-template-columns: clamp(36px, 1.71875vw, 44px) minmax(0, 1fr) clamp(32px, 1.640625vw, 42px); gap: clamp(5px, .3125vw, 8px); }
+  .mw3-mini-bgm-control,
+  .mw3-mini-bgm { width: clamp(36px, 1.71875vw, 44px); height: clamp(36px, 1.71875vw, 44px); }
+  .mw3-mini-equalizer { width: clamp(32px, 1.640625vw, 42px); height: clamp(19px, .9375vw, 24px); grid-template-columns: repeat(6, clamp(2px, .1171875vw, 3px)); gap: clamp(2px, .1171875vw, 3px); }
+  .mw3-mini-song { font-size: clamp(12px, .5859375vw, 15px); }
+  .mw3-desktop-profile .mw3-profile-button { min-height: clamp(38px, 1.71875vw, 44px); }
+
+  .mw3-hero { top: var(--mw3-pc-hero-y); left: var(--mw3-pc-hero-x); width: var(--mw3-pc-hero-width); transform: none; }
+  .mw3-eyebrow { font-size: var(--mw3-pc-eyebrow-size); }
+  .mw3-hero h1 { font-size: var(--mw3-pc-title-size); line-height: 1; }
+  .mw3-description { font-size: var(--mw3-pc-body-size); line-height: 1.62; }
+  .mw3-text-action { min-height: clamp(32px, 1.5625vw, 40px); margin-top: clamp(20px, 1.328125vw, 34px); padding-inline: clamp(8px, .4296875vw, 11px); font-size: clamp(12px, .5859375vw, 15px); }
+  .mw3-cta-row { gap: clamp(8px, .546875vw, 14px); margin-top: clamp(20px, 1.328125vw, 34px); }
+  .mw3-primary-cta,
+  .mw3-secondary-cta { min-height: var(--mw3-pc-cta-height); padding-inline: clamp(16px, 1.09375vw, 28px); font-size: clamp(13px, .6640625vw, 17px); }
+  .mw3-guide { top: clamp(260px, 28.75vh, 414px); left: 59%; width: clamp(144px, 7.34375vw, 188px); padding: clamp(16px, .9375vw, 24px) clamp(16px, .8203125vw, 21px); border-radius: clamp(19px, 1.015625vw, 26px); transform: none; }
+  .mw3-guide p { min-height: clamp(92px, 9.027777vh, 130px); font-size: clamp(13px, .625vw, 16px); line-height: 1.56; }
+  .mw3-guide::after { right: clamp(-9px, -.3515625vw, -5px); bottom: clamp(18px, 1.3671875vw, 25px); width: clamp(14px, .78125vw, 20px); height: clamp(14px, .78125vw, 20px); }
+
+  .mw3-summary { right: var(--mw3-pc-summary-side); bottom: var(--mw3-pc-summary-bottom); left: var(--mw3-pc-summary-side); gap: var(--mw3-pc-summary-gap); }
+  .mw3-card { min-height: var(--mw3-pc-card-height); padding: var(--mw3-pc-card-pad-y) var(--mw3-pc-card-pad-x); border-radius: var(--mw3-pc-card-radius); }
+  .mw3-card-title { gap: clamp(5px, .3125vw, 8px); margin-bottom: clamp(8px, .5078125vw, 13px); font-size: clamp(12px, .625vw, 16px); }
+  .mw3-card-title .mw3-icon { width: clamp(15px, .78125vw, 20px); height: clamp(15px, .78125vw, 20px); }
+  .mw3-card-content { gap: clamp(9px, .5859375vw, 15px); }
+  .mw3-avatar-frame,
+  .mw3-avatar-frame img { width: var(--mw3-pc-avatar-size); height: var(--mw3-pc-avatar-size); }
+  .mw3-island-frame { width: var(--mw3-pc-island-width); height: var(--mw3-pc-island-height); }
+  .mw3-card-copy { gap: clamp(3px, .1953125vw, 5px); }
+  .mw3-card-copy strong { font-size: clamp(12px, .625vw, 16px); }
+  .mw3-card-copy small,
+  .mw3-percent { font-size: clamp(11px, .5859375vw, 15px); }
+  .mw3-progress { height: clamp(7px, .390625vw, 10px); }
+  .mw3-card--journey .mw3-card-content { gap: clamp(10px, .625vw, 16px); }
+  .mw3-card--continue .mw3-card-content { gap: clamp(8px, .5078125vw, 13px); }
+  .mw3-card--continue .mw3-progress { width: min(100%, clamp(144px, 8.828125vw, 226px)); }
+  .mw3-resume { min-height: clamp(30px, 1.40625vw, 36px); padding-inline: clamp(9px, .5078125vw, 13px); font-size: clamp(11px, .5078125vw, 13px); }
+  .mw3-card--badges .mw3-badge-layout { grid-template-columns: minmax(0, 1fr) clamp(28px, 1.40625vw, 36px); column-gap: clamp(4px, .234375vw, 6px); }
+  .mw3-card--badges .mw3-badge-layout .mw3-badge-row { gap: clamp(3px, .234375vw, 6px); }
+  .mw3-badge-item { grid-template-rows: minmax(var(--mw3-pc-badge-height), auto) auto; gap: clamp(2px, .1171875vw, 3px); }
+  .mw3-badge-item img { width: var(--mw3-pc-badge-width); height: var(--mw3-pc-badge-height); }
+  .mw3-badge-item > small { font-size: clamp(7px, .3515625vw, 9px); }
+  .mw3-card--badges .mw3-badge-more { margin-top: clamp(8px, .546875vw, 14px); }
+  .mw3-card--badges .mw3-badge-more > b { width: clamp(22px, 1.09375vw, 28px); height: clamp(22px, 1.09375vw, 28px); font-size: clamp(15px, .7421875vw, 19px); }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-delay: 0ms !important; }
   }
@@ -649,26 +736,7 @@
   @media (prefers-reduced-motion: reduce) { .mw3-mini-song-track { animation: none; } .mw3-mini-song-track > span:last-child { display: none; } }
 }
 
-@media (min-width: 1000px) and (max-width: 1450px) {
-  .mw3-navigation { width: min(53vw, 760px); }
-  .mw3-hero { top: 108px; transform: none; width: min(40vw, 560px); }
-  .mw3-hero h1 { font-size: clamp(56px, 4.15vw, 62px); }
-  .mw3-eyebrow { font-size: 18px; }
-  .mw3-description { font-size: 16px; line-height: 1.6; }
-  .mw3-primary-cta, .mw3-secondary-cta { min-height: 58px; font-size: 16px; }
-  .mw3-card-copy strong { font-size: 15px; }
-  .mw3-card-copy small { font-size: 12px; }
-  .mw3-mini-audio { width: 220px; grid-template-columns: 40px minmax(0, 1fr) 36px; gap: 5px; }
-  .mw3-summary { bottom: 18px; }
-  .mw3-badge-row { grid-template-columns: repeat(6, minmax(0, 1fr)) 42px; gap: 2px; }
-  .mw3-badge-item img { width: 42px; height: 44px; }
-  .mw3-badge-item > small { font-size: 8px; }
-  .mw3-badge-row > b { width: 42px; height: 42px; font-size: 12px; }
-  .mw3-desktop-profile { padding-inline: 10px; }
-  .mw3-desktop-profile > .mw3-divider { margin-inline: 8px; }
-  .mw3-navigation { padding-inline: 21px; }
-  .mw3-navigation button { padding-inline: 7px; }
-}
+/* Compact desktop geometry is inherited from the single 2560 master scale system. */
 
 @media (min-width: 1451px) {
   .mw3-card--continue .mw3-progress { width: calc(100% + 86px); }
