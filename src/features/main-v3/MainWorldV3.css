@@ -585,6 +585,8 @@
   .mw3-card--badges .mw3-badge-row > b { width: 28px; height: 28px; margin-top: 16px; color: #65665f; border: 0; border-radius: 50%; background: rgb(255 255 255 / .36); box-shadow: inset 0 1px rgb(255 255 255 / .62); font-size: 19px; font-weight: 800; }
   .mw3-avatar-frame { border-color: transparent; background: transparent; box-shadow: none; }
   .mw3-island-frame { border-color: transparent; background: transparent; box-shadow: none; }
+  .mw3-card--continue .mw3-island-frame { overflow: hidden; }
+  .mw3-card--continue .mw3-island-frame img { transform: scale(1.08); transform-origin: 51% 52%; }
   .mw3-card:hover .mw3-avatar-frame { filter: brightness(1.035); box-shadow: inset 0 1px rgb(255 255 255 / .98), inset 0 -2px 5px rgb(171 123 42 / .13), 0 5px 12px rgb(126 87 25 / .13); }
   .mw3-card:hover .mw3-island-frame { filter: brightness(1.045); }
   .mw3-card--journey .mw3-card-content { gap: 16px; }
