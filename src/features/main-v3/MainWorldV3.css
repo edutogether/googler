@@ -574,19 +574,15 @@
   .mw3-continue-tooltip { left: 34%; }
   .mw3-badge-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 52px; align-items: start; gap: 5px; }
   .mw3-badge-item { position: relative; display: grid; min-width: 0; place-items: center; gap: 3px; }
-  .mw3-badge-item { --mw3-badge-opaque-offset: 0%; }
-  .mw3-badge-item:nth-child(2) { --mw3-badge-opaque-offset: -5.7%; }
-  .mw3-badge-item:nth-child(3) { --mw3-badge-opaque-offset: -9.5%; }
-  .mw3-badge-item img { width: clamp(38px, 3.4vw, 61px); height: clamp(40px, 3.6vw, 64px); object-fit: contain; mix-blend-mode: normal; filter: drop-shadow(0 3px 4px rgb(69 54 33 / .12)); transform: translateX(var(--mw3-badge-opaque-offset)); transition: transform var(--mw3-pc-motion), filter var(--mw3-pc-motion); }
+  .mw3-badge-item img { width: clamp(38px, 3.4vw, 61px); height: clamp(40px, 3.6vw, 64px); object-fit: contain; mix-blend-mode: normal; filter: drop-shadow(0 3px 4px rgb(69 54 33 / .12)); transition: transform var(--mw3-pc-motion), filter var(--mw3-pc-motion); }
   .mw3-badge-item > small { overflow: hidden; width: 100%; color: #4d554e; font-size: 9px; font-weight: 760; letter-spacing: -.06em; line-height: 1.15; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-  .mw3-badge-item:hover img { filter: drop-shadow(0 6px 8px rgb(72 92 128 / .22)); transform: translateX(var(--mw3-badge-opaque-offset)) translateY(-3px) scale(1.06); }
+  .mw3-badge-item:hover img { filter: drop-shadow(0 6px 8px rgb(72 92 128 / .22)); transform: translateY(-3px) scale(1.06); }
   .mw3-badge-item:hover .mw3-world-tooltip { opacity: 1; transform: translate(-50%, 0) scale(1); }
   .mw3-badge-row > b { width: 52px; height: 52px; margin-top: 4px; font-size: 14px; }
   .mw3-card--badges .mw3-badge-row > b { width: 28px; height: 28px; margin-top: 16px; color: #65665f; border: 0; border-radius: 50%; background: rgb(255 255 255 / .36); box-shadow: inset 0 1px rgb(255 255 255 / .62); font-size: 19px; font-weight: 800; }
   .mw3-avatar-frame { border-color: transparent; background: transparent; box-shadow: none; }
   .mw3-island-frame { border-color: transparent; background: transparent; box-shadow: none; }
   .mw3-card--continue .mw3-island-frame { overflow: hidden; }
-  .mw3-card--continue .mw3-island-frame img { transform: scale(1.08); transform-origin: 51% 52%; }
   .mw3-card:hover .mw3-avatar-frame { filter: brightness(1.035); box-shadow: inset 0 1px rgb(255 255 255 / .98), inset 0 -2px 5px rgb(171 123 42 / .13), 0 5px 12px rgb(126 87 25 / .13); }
   .mw3-card:hover .mw3-island-frame { filter: brightness(1.045); }
   .mw3-card--journey .mw3-card-content { gap: 16px; }
