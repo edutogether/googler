@@ -48,7 +48,13 @@ describe('MainWorldV3 final preview', () => {
     expect(screen.getByLabelText('구글러 길잡이 안내')).toHaveTextContent('');
     expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕 ?\n호기심이 아주 많은\n구글러구나 !\n나와 같이 구글을\n즐겁게 배워볼래 ?');
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
-    expect(screen.getByText('데이터 섬의 비밀')).toBeInTheDocument();
+    expect(document.querySelector('.mw3-card--continue .mw3-card-copy strong')).toHaveTextContent('데이터 섬의 비밀');
+    const journeyTooltip = document.querySelector('.mw3-avatar-tooltip') as HTMLElement;
+    expect(journeyTooltip).toHaveTextContent('호기심 많은 탐험가');
+    expect(journeyTooltip.querySelector('.mw3-tooltip-thumbnail--avatar')).toHaveAttribute('src', expect.stringContaining('journey-avatar-medallion.png'));
+    const islandTooltip = document.querySelector('.mw3-continue-tooltip') as HTMLElement;
+    expect(islandTooltip).toHaveTextContent('데이터 섬의 비밀');
+    expect(islandTooltip.querySelector('.mw3-tooltip-thumbnail--island')).toHaveAttribute('src', expect.stringContaining('data-island-thumbnail-v6.png'));
     expect(document.querySelectorAll('.mw3-audio')).toHaveLength(1);
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio')).toBeInTheDocument();
     const miniAudio = document.querySelector('.mw3-desktop-profile .mw3-mini-audio') as HTMLElement;
@@ -95,6 +101,9 @@ describe('MainWorldV3 final preview', () => {
     expect(Array.from(badgeLayout.querySelectorAll('.mw3-badge-trigger > small')).map((label) => label.textContent)).toEqual([
       '데이터 항해', '용기 있는 시작', '협업의 톱니', '초록 나침반', '별빛 지도', '반짝이는 생각',
     ]);
+    expect(badgeLayout.querySelectorAll('.mw3-badge-info .mw3-tooltip-thumbnail--badge')).toHaveLength(6);
+    expect(badgeLayout.querySelectorAll('.mw3-badge-info .mw3-tooltip-copy')).toHaveLength(6);
+    expect(badgeLayout.querySelector('.mw3-badge-placeholder')).toBeNull();
     expect(badgeLayout.querySelector('.mw3-badge-more')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '더 많은 배지 보기' }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정을 이어가며 배지를 더 모아보세요!');
