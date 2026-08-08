@@ -43,6 +43,8 @@ describe('MainWorldV3 final preview', () => {
     const hero = screen.getByRole('heading', { level: 1 });
     expect(hero).toHaveTextContent('Googler 의 여정을');
     expect(hero).toHaveTextContent('시작해볼까요 ?');
+    expect(document.querySelectorAll('.mw3-description-line')).toHaveLength(1);
+    expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.');
     expect(screen.getByLabelText('구글러 길잡이 안내')).toHaveTextContent('');
     expect(document.querySelector('.mw3-guide p')).toHaveAttribute('aria-label', '안녕 ?\n호기심이 아주 많은\n구글러구나 !\n나와 같이 구글을\n즐겁게 배워볼래 ?');
     expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
@@ -62,10 +64,10 @@ describe('MainWorldV3 final preview', () => {
     for (const asset of [
       'profile-avatar.png',
       'journey-avatar-medallion.png',
-      'data-island-thumbnail-v4.png',
-      'badge-blue-v4.png',
-      'badge-gold-v4.png',
-      'badge-silver-v4.png',
+      'data-island-thumbnail-v5.png',
+      'badge-blue-v5.png',
+      'badge-gold-v5.png',
+      'badge-silver-v5.png',
       'badge-emerald.png',
       'badge-violet.png',
       'badge-coral.png',
@@ -170,6 +172,7 @@ describe('MainWorldV3 final preview', () => {
   });
 
   it('uses one looping BGM instance and makes actions announce a toast', async () => {
+    window.localStorage.setItem(MAIN_V3_BGM_STORAGE_KEY, JSON.stringify({ enabled: false, volume: .2 }));
     render(<MainWorldV3 />);
     const audio = MockAudio.instances[0];
     expect(MockAudio.instances).toHaveLength(1);
@@ -177,6 +180,7 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.loop).toBe(true);
     expect(audio.preload).toBe('auto');
     expect(audio.volume).toBe(1);
+    expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
     expect(screen.getByRole('dialog', { name: '퀘스트' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
