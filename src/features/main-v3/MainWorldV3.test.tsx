@@ -64,7 +64,7 @@ describe('MainWorldV3 final preview', () => {
     for (const asset of [
       'profile-avatar.png',
       'journey-avatar-medallion.png',
-      'data-island-thumbnail-v5.png',
+      'data-island-thumbnail-v6.png',
       'badge-blue-v5.png',
       'badge-gold-v5.png',
       'badge-silver-v5.png',
@@ -95,7 +95,9 @@ describe('MainWorldV3 final preview', () => {
     expect(Array.from(badgeLayout.querySelectorAll('.mw3-badge-item > small')).map((label) => label.textContent)).toEqual([
       '데이터 항해', '용기 있는 시작', '협업의 톱니', '초록 나침반', '별빛 지도', '반짝이는 생각',
     ]);
-    expect(badgeLayout.querySelector('.mw3-badge-more')).toHaveTextContent('…');
+    expect(badgeLayout.querySelector('.mw3-badge-more')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '더 많은 배지 보기' }));
+    expect(document.querySelector('.mw3-toast')).toHaveTextContent('배지를 더 모아보세요!');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-sfx')).toBeNull();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio [role="switch"]')).toBeNull();
   });
@@ -112,7 +114,7 @@ describe('MainWorldV3 final preview', () => {
     expect(profile?.querySelector('.mw3-profile-button img')).toBeInTheDocument();
     expect(screen.getAllByText('호기심 많은 구글러')).toHaveLength(2);
     expect(screen.getAllByRole('button', { name: /홈|퀘스트|플래너|도감|커뮤니티/ })).toHaveLength(5);
-    expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
+    expect(screen.getByRole('button', { name: '더 많은 배지 보기' })).toBeInTheDocument();
   });
 
   it('keeps compact desktop controls and badge discovery available at the 1024 CSS breakpoint', () => {
@@ -160,8 +162,12 @@ describe('MainWorldV3 final preview', () => {
 
       const guide = document.querySelector('.mw3-guide p') as HTMLElement;
       expect(guide).toHaveTextContent('');
+      expect(document.querySelector('.mw3-guide')).toHaveClass('is-cycling-out');
       act(() => vi.advanceTimersByTime(406));
-      expect(guide).toHaveTextContent('안');
+      expect(guide).toHaveTextContent('안녕');
+      expect(document.querySelector('.mw3-guide')).not.toHaveClass('is-cycling-out');
+      act(() => vi.advanceTimersByTime(100));
+      expect(document.querySelector('.mw3-guide')).toHaveStyle('--mw3-guide-lines: 2');
     } finally {
       vi.useRealTimers();
     }
