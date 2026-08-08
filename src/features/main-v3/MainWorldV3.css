@@ -785,8 +785,8 @@
   .mw3-card-content { gap: clamp(9px, .5859375vw, 15px); }
   .mw3-avatar-frame,
   .mw3-avatar-frame img { width: var(--mw3-pc-avatar-size); height: var(--mw3-pc-avatar-size); }
-  .mw3-card--journey .mw3-avatar-frame img { width: 92%; height: 92%; object-position: center calc(50% - 1px); transform: translateY(-1px); }
-  .mw3-card--journey:hover .mw3-avatar-frame img { transform: translateY(-1px) scale(1.065); }
+  .mw3-card--journey .mw3-avatar-frame img { width: 92%; height: 92%; object-position: center calc(50% - 2px); transform: translateY(-2px); }
+  .mw3-card--journey:hover .mw3-avatar-frame img { transform: translateY(-2px) scale(1.065); }
   .mw3-island-frame { width: var(--mw3-pc-island-width); height: var(--mw3-pc-island-height); }
   .mw3-card--continue .mw3-island-frame img { object-fit: contain; object-position: left center; filter: saturate(.82) contrast(.95) brightness(1.02); }
   .mw3-card-copy { gap: clamp(3px, .1953125vw, 5px); }
