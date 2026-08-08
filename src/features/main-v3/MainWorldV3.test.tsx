@@ -92,12 +92,12 @@ describe('MainWorldV3 final preview', () => {
     expect(document.querySelectorAll('.mw3-badge-item')).toHaveLength(6);
     const badgeLayout = document.querySelector('.mw3-badge-layout') as HTMLElement;
     expect(badgeLayout.querySelectorAll('.mw3-badge-row .mw3-badge-item')).toHaveLength(6);
-    expect(Array.from(badgeLayout.querySelectorAll('.mw3-badge-item > small')).map((label) => label.textContent)).toEqual([
+    expect(Array.from(badgeLayout.querySelectorAll('.mw3-badge-trigger > small')).map((label) => label.textContent)).toEqual([
       '데이터 항해', '용기 있는 시작', '협업의 톱니', '초록 나침반', '별빛 지도', '반짝이는 생각',
     ]);
     expect(badgeLayout.querySelector('.mw3-badge-more')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '더 많은 배지 보기' }));
-    expect(document.querySelector('.mw3-toast')).toHaveTextContent('배지를 더 모아보세요!');
+    expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정을 이어가며 배지를 더 모아보세요!');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-sfx')).toBeNull();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio [role="switch"]')).toBeNull();
   });
@@ -168,6 +168,8 @@ describe('MainWorldV3 final preview', () => {
       expect(document.querySelector('.mw3-guide')).not.toHaveClass('is-cycling-out');
       act(() => vi.advanceTimersByTime(100));
       expect(document.querySelector('.mw3-guide')).toHaveStyle('--mw3-guide-lines: 2');
+      act(() => vi.advanceTimersByTime(8_000));
+      expect(guide).toHaveTextContent('안녕 ? 호기심이 아주 많은 구글러구나 ! 나와 같이 구글을 즐겁게 배워볼래 ?');
     } finally {
       vi.useRealTimers();
     }
@@ -188,10 +190,12 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
-    expect(screen.getByRole('dialog', { name: '퀘스트' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toHaveTextContent('퀘스트');
+    expect(document.querySelector('.mw3-hero')).toBeNull();
+    expect(document.querySelector('.mw3-summary')).toBeNull();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.queryByRole('dialog', { name: '퀘스트' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
+    expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
     fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정이 곧 열립니다.');
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
@@ -209,16 +213,20 @@ describe('MainWorldV3 final preview', () => {
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
   });
 
-  it('opens each desktop-only menu preview and restores the home tab from its close button', () => {
+  it('opens each desktop-only menu as an in-main construction screen and restores home', () => {
     render(<MainWorldV3 />);
 
     for (const label of ['퀘스트', '플래너', '도감', '커뮤니티']) {
       fireEvent.click(screen.getByRole('button', { name: label }));
-      expect(screen.getByRole('dialog', { name: label })).toHaveTextContent('새로운 기능을 준비하고 있어요. 곧 만나보세요!');
-      fireEvent.click(screen.getByRole('button', { name: `${label} 미리보기 닫기` }));
-      expect(screen.queryByRole('dialog', { name: label })).toBeNull();
-      expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
+      expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toHaveTextContent('구글러를 위한 새로운 모험을 열심히 만들고 있어요. 조금만 기다려주세요!');
+      expect(document.querySelector('.mw3-hero')).toBeNull();
+      expect(document.querySelector('.mw3-summary')).toBeNull();
+      expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');
     }
+
+    fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
+    expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
+    expect(document.querySelector('.mw3-hero')).toBeInTheDocument();
   });
 
   it('retries blocked autoplay once on the first non-music pointer gesture', async () => {
