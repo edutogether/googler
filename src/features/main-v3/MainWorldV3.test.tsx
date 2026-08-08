@@ -43,6 +43,7 @@ describe('MainWorldV3 final preview', () => {
     const hero = screen.getByRole('heading', { level: 1 });
     expect(hero).toHaveTextContent('Googler 의 여정을');
     expect(hero).toHaveTextContent('시작해볼까요 ?');
+    expect(screen.getByRole('button', { name: /여정이란 \?/ })).toHaveTextContent('여정이란 ? ›');
     expect(document.querySelectorAll('.mw3-description-line')).toHaveLength(1);
     expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.');
     expect(screen.getByLabelText('구글러 길잡이 안내')).toHaveTextContent('');
@@ -105,6 +106,8 @@ describe('MainWorldV3 final preview', () => {
     expect(badgeLayout.querySelectorAll('.mw3-badge-info .mw3-tooltip-copy')).toHaveLength(6);
     expect(badgeLayout.querySelector('.mw3-badge-placeholder')).toBeNull();
     expect(badgeLayout.querySelector('.mw3-badge-more')).toBeNull();
+    expect(badgeLayout.querySelector('.mw3-badge-item--last .mw3-badge-next')).toBeNull();
+    expect(badgeLayout.querySelector('.mw3-badge-row > .mw3-badge-next')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '더 많은 배지 보기' }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정을 이어가며 배지를 더 모아보세요!');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-sfx')).toBeNull();
@@ -236,7 +239,7 @@ describe('MainWorldV3 final preview', () => {
       fireEvent.click(screen.getByRole('button', { name: label }));
       const construction = screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' });
       expect(construction).toHaveTextContent(constructionDetails[label]);
-      expect(construction).toHaveTextContent(/구글러를 위한 새로운 모험을 열심히 만들고 있어요\.\s*조금만 기다려 주세요!/);
+      expect(construction).toHaveTextContent(/구글러를 위한 새로운 모험을 열심히 만들고 있어요\.\s*조금만 기다려 주세요 !/);
       expect(document.querySelector('.mw3-hero')).toBeNull();
       expect(document.querySelector('.mw3-summary')).toBeNull();
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');

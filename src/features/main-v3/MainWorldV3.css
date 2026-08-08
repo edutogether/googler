@@ -577,11 +577,16 @@
   .mw3-world-tooltip small { display: block; overflow: hidden; margin-top: 3px; color: #5b635b; font-size: 11px; font-weight: 620; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
   .mw3-island-frame:hover .mw3-continue-tooltip,
   .mw3-island-frame:focus-within .mw3-continue-tooltip { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  .mw3-continue-tooltip,
+  .mw3-avatar-tooltip { width: clamp(248px, 12.109375vw, 310px); padding: 10px 11px; }
   .mw3-continue-tooltip { bottom: calc(100% + 9px); left: 50%; }
+  .mw3-continue-tooltip b { color: #395f4c; font-size: clamp(11px, .5859375vw, 15px); line-height: 1.2; }
+  .mw3-continue-tooltip small { color: #5b635b; font-size: clamp(9px, .46875vw, 12px); line-height: 1.25; }
   .mw3-card--journey:hover .mw3-avatar-tooltip,
   .mw3-card--journey:focus-visible .mw3-avatar-tooltip { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  .mw3-avatar-tooltip { bottom: calc(100% + 10px); left: calc(50% + clamp(10px, .78125vw, 20px)); }
-  .mw3-badge-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 52px; align-items: start; gap: 5px; }
+  .mw3-avatar-tooltip { --mw3-avatar-tooltip-inset: clamp(40px, 2.8125vw, 72px); bottom: calc(100% + 10px); left: calc(50% + var(--mw3-avatar-tooltip-inset)); }
+  .mw3-avatar-tooltip::after { left: calc(50% - var(--mw3-avatar-tooltip-inset)); }
+  .mw3-badge-row { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 52px; align-items: start; gap: 5px; }
   .mw3-badge-item { position: relative; display: grid; min-width: 0; place-items: center; gap: 3px; }
   .mw3-badge-trigger { display: grid; width: 100%; min-width: 0; place-items: center; gap: 3px; padding: 0; color: inherit; border: 0; background: transparent; cursor: pointer; font: inherit; }
   .mw3-badge-trigger img { width: clamp(38px, 3.4vw, 61px); height: clamp(40px, 3.6vw, 64px); object-fit: contain; mix-blend-mode: normal; filter: drop-shadow(0 3px 4px rgb(69 54 33 / .12)); transition: transform var(--mw3-pc-motion), filter var(--mw3-pc-motion); }
