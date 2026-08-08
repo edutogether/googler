@@ -225,6 +225,35 @@ describe('MainWorldV3 final preview', () => {
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
   });
 
+  it('keeps a manually disabled BGM off across in-page menus and resets it on a new document load', async () => {
+    const firstDocument = render(<MainWorldV3 />);
+    const firstAudio = MockAudio.instances[0];
+    const firstCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+
+    await waitFor(() => expect(firstAudio.play).toHaveBeenCalledTimes(1));
+    fireEvent.click(within(firstCluster).getByRole('button', { name: 'BGM 끄기' }));
+    expect(firstAudio.pause).toHaveBeenCalledTimes(1);
+    expect(firstAudio.currentTime).toBe(0);
+
+    for (const label of ['퀘스트', '플래너', '도감', '커뮤니티']) {
+      fireEvent.click(screen.getByRole('button', { name: label }));
+      expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+      expect(firstAudio.play).toHaveBeenCalledTimes(1);
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
+    expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(firstAudio.play).toHaveBeenCalledTimes(1);
+
+    firstDocument.unmount();
+    render(<MainWorldV3 />);
+    const reloadedAudio = MockAudio.instances[1];
+    const reloadedCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+    expect(reloadedAudio.volume).toBe(1);
+    await waitFor(() => expect(reloadedAudio.play).toHaveBeenCalledTimes(1));
+    expect(within(reloadedCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
+  });
+
   it('opens each desktop-only menu as an in-main construction screen and restores home', () => {
     render(<MainWorldV3 />);
 
