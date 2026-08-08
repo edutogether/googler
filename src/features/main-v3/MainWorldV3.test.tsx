@@ -281,7 +281,7 @@ describe('MainWorldV3 final preview', () => {
       const scene = screen.getByRole('img', { name: scenes[label].alt });
       expect(scene).toHaveAttribute('src', expect.stringContaining(scenes[label].asset));
       expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
-      expect(document.querySelector('.mw3-construction')).toBeNull();
+      expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
       expect(document.querySelector('.mw3-hero')).toBeNull();
       expect(document.querySelector('.mw3-summary')).toBeNull();
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');
@@ -304,7 +304,7 @@ describe('MainWorldV3 final preview', () => {
     const plannerScene = screen.getByRole('img', { name: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' });
     expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440.png'));
     expect(document.querySelector('.mw3-shell')).toHaveClass('mw3-shell--planner');
-    expect(document.querySelector('.mw3-construction')).toBeNull();
+    expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-guide')).toBeNull();
     expect(document.querySelector('.mw3-summary')).toBeNull();

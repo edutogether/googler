@@ -950,51 +950,43 @@
   .mw3-toast { top: 132px; font-size: 13px; }
 }
 
-/* Planner keeps the shared desktop header while reserving a narrow, sky-toned safe edge above its artwork. */
+/* Desktop scenes preserve their approved 16:9 composition beneath the shared shell. */
 @media (min-width: 1000px) {
-  .mw3-shell--planner {
-    --mw3-planner-safe-y: clamp(24px, 1.40625vw, 36px);
-    background: linear-gradient(180deg, #62afe2 0%, #91c9e8 56%, #826044 100%);
-  }
-
-  .mw3-shell--planner .mw3-planner-scene {
-    inset: var(--mw3-planner-safe-y) 0 0;
-    width: 100%;
-    height: calc(100% - var(--mw3-planner-safe-y));
-    object-position: center top;
-    filter: saturate(.91) contrast(.97) brightness(.985);
-  }
-
-  .mw3-shell--planner::before {
-    z-index: -2;
-    inset: 0;
-    display: block;
-    width: auto;
-    background: linear-gradient(122deg, rgb(255 247 226 / .10), rgb(244 249 255 / .035) 57%, rgb(255 245 226 / .06));
-  }
-
+  .mw3-shell--planner,
   .mw3-shell--quest,
   .mw3-shell--encyclopedia,
   .mw3-shell--community {
-    --mw3-scene-safe-y: clamp(24px, 1.40625vw, 36px);
+    --mw3-scene-safe-y: clamp(16px, .7vw, 18px);
   }
 
+  .mw3-shell--planner { background: #62afe2; }
   .mw3-shell--quest { background: #9fd8f2; }
   .mw3-shell--encyclopedia { background: #aac6cb; }
   .mw3-shell--community { background: #72bce8; }
 
+  .mw3-shell--planner .mw3-scene,
   .mw3-shell--quest .mw3-scene,
   .mw3-shell--encyclopedia .mw3-scene,
   .mw3-shell--community .mw3-scene {
     inset: var(--mw3-scene-safe-y) 0 0;
     width: 100%;
     height: calc(100% - var(--mw3-scene-safe-y));
+    object-fit: cover;
     object-position: center top;
+    image-rendering: auto;
   }
 
+  .mw3-shell--planner::before,
   .mw3-shell--quest::before,
   .mw3-shell--encyclopedia::before,
   .mw3-shell--community::before {
     display: none;
+  }
+
+  .mw3-shell--planner .mw3-construction,
+  .mw3-shell--quest .mw3-construction,
+  .mw3-shell--encyclopedia .mw3-construction,
+  .mw3-shell--community .mw3-construction {
+    z-index: 4;
   }
 }
