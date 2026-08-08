@@ -216,9 +216,18 @@ describe('MainWorldV3 final preview', () => {
   it('opens each desktop-only menu as an in-main construction screen and restores home', () => {
     render(<MainWorldV3 />);
 
-    for (const label of ['퀘스트', '플래너', '도감', '커뮤니티']) {
+    const constructionDetails = {
+      퀘스트: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.',
+      플래너: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.',
+      도감: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.',
+      커뮤니티: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.',
+    } as const;
+
+    for (const label of Object.keys(constructionDetails) as Array<keyof typeof constructionDetails>) {
       fireEvent.click(screen.getByRole('button', { name: label }));
-      expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toHaveTextContent('구글러를 위한 새로운 모험을 열심히 만들고 있어요. 조금만 기다려주세요!');
+      const construction = screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' });
+      expect(construction).toHaveTextContent(constructionDetails[label]);
+      expect(construction).toHaveTextContent(/구글러를 위한 새로운 모험을 열심히 만들고 있어요\.\s*조금만 기다려 주세요!/);
       expect(document.querySelector('.mw3-hero')).toBeNull();
       expect(document.querySelector('.mw3-summary')).toBeNull();
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');
