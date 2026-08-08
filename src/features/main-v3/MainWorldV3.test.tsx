@@ -267,12 +267,11 @@ describe('MainWorldV3 final preview', () => {
     expect(within(reloadedCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
   });
 
-  it('opens each desktop-only menu as an in-main construction screen and restores home', () => {
+  it('opens the non-planner desktop menus as in-main construction screens and restores home', () => {
     render(<MainWorldV3 />);
 
     const constructionDetails = {
       퀘스트: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.',
-      플래너: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.',
       도감: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.',
       커뮤니티: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.',
     } as const;
@@ -290,6 +289,34 @@ describe('MainWorldV3 final preview', () => {
     fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
     expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
     expect(document.querySelector('.mw3-hero')).toBeInTheDocument();
+  });
+
+  it('shows the approved planner visual scene while keeping global controls and BGM intent', async () => {
+    render(<MainWorldV3 />);
+    const audio = MockAudio.instances[0];
+    const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+
+    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
+    fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' }));
+    fireEvent.click(screen.getByRole('button', { name: '플래너' }));
+
+    const plannerScene = screen.getByRole('img', { name: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' });
+    expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440.png'));
+    expect(document.querySelector('.mw3-shell')).toHaveClass('mw3-shell--planner');
+    expect(document.querySelector('.mw3-construction')).toBeNull();
+    expect(document.querySelector('.mw3-hero')).toBeNull();
+    expect(document.querySelector('.mw3-guide')).toBeNull();
+    expect(document.querySelector('.mw3-summary')).toBeNull();
+    expect(screen.getByRole('button', { name: '플래너' })).toHaveAttribute('aria-current', 'page');
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(MockAudio.instances).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole('button', { name: '홈' }));
+    expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
+    expect(document.querySelector('.mw3-shell')).not.toHaveClass('mw3-shell--planner');
+    expect(document.querySelector('.mw3-hero')).toBeInTheDocument();
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(MockAudio.instances).toHaveLength(1);
   });
 
   it('retries blocked autoplay once on the first non-music pointer gesture', async () => {
