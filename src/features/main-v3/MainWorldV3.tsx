@@ -18,11 +18,11 @@ const navigation = [
   { id: 'archive', label: '커뮤니티', mobileLabel: '보관함', icon: 'users', mobileIcon: 'archive' },
 ] as const;
 
-const menuPreviews = {
-  town: { title: '퀘스트', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.' },
-  missions: { title: '플래너', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.' },
-  guides: { title: '도감', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.' },
-  archive: { title: '커뮤니티', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.' },
+const desktopScenes = {
+  town: { name: 'quest', asset: 'visual-reset/quest/be-a-googler-quest-1672x941.png', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' },
+  missions: { name: 'planner', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440.png', alt: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' },
+  guides: { name: 'encyclopedia', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1672x941.png', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션' },
+  archive: { name: 'community', asset: 'visual-reset/community/be-a-googler-community-1672x941.png', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판' },
 } as const;
 
 const desktopBadges = [
@@ -188,10 +188,8 @@ function MainWorldV3Scene() {
   // available when a classic scrollbar makes window.innerWidth slightly smaller.
   const hasDesktopControls = window.matchMedia?.('(min-width: 1000px)').matches ?? hasDesktopAmbient;
   const hasDesktopGuide = window.matchMedia?.('(min-width: 768px)').matches ?? window.innerWidth >= 768;
-  const isPlannerView = !isMobile && activeNav === 'missions';
-  const isConstructionView = !isMobile && activeNav !== 'explore' && !isPlannerView;
+  const desktopScene = !isMobile ? desktopScenes[activeNav as keyof typeof desktopScenes] ?? null : null;
   const showsMainWorld = isMobile || activeNav === 'explore';
-  const constructionMenu = isConstructionView ? menuPreviews[activeNav as keyof typeof menuPreviews] : null;
   const activateNavigation = (item: (typeof navigation)[number]) => {
     setActiveNav(item.id);
     if (!isMobile) {
@@ -201,10 +199,9 @@ function MainWorldV3Scene() {
     }
     announce(item.id === 'explore' ? '홈에서 새로운 모험을 이어가요.' : undefined);
   };
-  const returnToMainWorld = () => { setActiveNav('explore'); playUiSound('click', sfxOn); };
-  return <main className={`mw3-shell${isPlannerView ? ' mw3-shell--planner' : ''}`} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
-    {isPlannerView && <img className="mw3-planner-scene" src={asset('visual-reset/planner/be-a-googler-dakku-planner-2560x1440.png')} alt="다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션" />}
+    {desktopScene && <img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(desktopScene.asset)} alt={desktopScene.alt} />}
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
@@ -213,7 +210,6 @@ function MainWorldV3Scene() {
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
     {showsMainWorld && <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title"><span className="mw3-title-line mw3-title-line--first"><span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>{isMobile ? '의 여정을' : ' 의 여정을'}</span></span><span className="mw3-title-line mw3-title-line--second">{isMobile ? <><em>시작</em>해볼까요?</> : '시작해볼까요 ?'}</span></h1><p className="mw3-description">{isMobile ? <><span className="mw3-description-line">호기심으로 배우고 성장하며,</span><span className="mw3-description-line">세상에 긍정적인 변화를 만들어요.</span></> : <span className="mw3-description-line">호기심으로 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.</span>}</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />{isMobile ? '새로운 여정' : '새로운 여정 시작하기'}</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div>{!isMobile && <button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란 ? <span>›</span></button>}</section>}
-    {constructionMenu && <section className="mw3-construction" aria-labelledby="mw3-construction-title"><span className="mw3-construction-icon" aria-hidden="true"><WorldIcon name={constructionMenu.icon} /></span><p>{constructionMenu.eyebrow}</p><h2 id="mw3-construction-title">새로운 여정이<br />준비되고 있어요.</h2><small>{constructionMenu.detail}</small><span>구글러를 위한 새로운 모험을 열심히 만들고 있어요.<br />조금만 기다려 주세요 !</span><button type="button" onClick={returnToMainWorld}>메인 월드로 돌아가기 <i aria-hidden="true">›</i></button></section>}
     {showsMainWorld && !isMobile && <aside className={`mw3-guide${guideVisible ? '' : ' is-cycling-out'}`} aria-label="구글러 길잡이 안내" style={{ '--mw3-guide-lines': Math.max(1, guideText.split('\n').length) } as CSSProperties}>{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>}
     {hasDesktopControls && <DesktopProfileCluster bgmEnabled={bgmEnabled} isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     {showsMainWorld && <section className="mw3-summary" aria-label="여정 요약">

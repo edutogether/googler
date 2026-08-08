@@ -209,11 +209,11 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
-    expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toHaveTextContent('퀘스트');
+    expect(screen.getByRole('img', { name: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' })).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-1672x941.png'));
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-summary')).toBeNull();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
-    fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
+    fireEvent.click(screen.getByRole('button', { name: '홈' }));
     expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
     fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정이 곧 열립니다.');
@@ -248,7 +248,7 @@ describe('MainWorldV3 final preview', () => {
       expect(firstAudio.play).toHaveBeenCalledTimes(1);
     }
 
-    fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
+    fireEvent.click(screen.getByRole('button', { name: '홈' }));
     expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
     expect(firstAudio.play).toHaveBeenCalledTimes(1);
 
@@ -267,26 +267,27 @@ describe('MainWorldV3 final preview', () => {
     expect(within(reloadedCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
   });
 
-  it('opens the non-planner desktop menus as in-main construction screens and restores home', () => {
+  it('shows the provided desktop scenes for quest, encyclopedia, and community, then restores home', () => {
     render(<MainWorldV3 />);
 
-    const constructionDetails = {
-      퀘스트: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.',
-      도감: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.',
-      커뮤니티: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.',
+    const scenes = {
+      퀘스트: { shellClass: 'mw3-shell--quest', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도', asset: 'visual-reset/quest/be-a-googler-quest-1672x941.png' },
+      도감: { shellClass: 'mw3-shell--encyclopedia', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1672x941.png' },
+      커뮤니티: { shellClass: 'mw3-shell--community', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판', asset: 'visual-reset/community/be-a-googler-community-1672x941.png' },
     } as const;
 
-    for (const label of Object.keys(constructionDetails) as Array<keyof typeof constructionDetails>) {
+    for (const label of Object.keys(scenes) as Array<keyof typeof scenes>) {
       fireEvent.click(screen.getByRole('button', { name: label }));
-      const construction = screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' });
-      expect(construction).toHaveTextContent(constructionDetails[label]);
-      expect(construction).toHaveTextContent(/구글러를 위한 새로운 모험을 열심히 만들고 있어요\.\s*조금만 기다려 주세요 !/);
+      const scene = screen.getByRole('img', { name: scenes[label].alt });
+      expect(scene).toHaveAttribute('src', expect.stringContaining(scenes[label].asset));
+      expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
+      expect(document.querySelector('.mw3-construction')).toBeNull();
       expect(document.querySelector('.mw3-hero')).toBeNull();
       expect(document.querySelector('.mw3-summary')).toBeNull();
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');
     }
 
-    fireEvent.click(screen.getByRole('button', { name: '메인 월드로 돌아가기' }));
+    fireEvent.click(screen.getByRole('button', { name: '홈' }));
     expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
     expect(document.querySelector('.mw3-hero')).toBeInTheDocument();
   });
