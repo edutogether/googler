@@ -39,23 +39,24 @@ function saveSfx(enabled: boolean) { try { window.localStorage.setItem(MAIN_V3_S
 
 function useWorldAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const enabled = useRef(true);
+  const bgmEnabledRef = useRef(true);
+  const [bgmEnabled, setBgmEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
   useEffect(() => {
     const audio = new Audio(BGM_SOURCE);
     audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
-    audioRef.current = audio; enabled.current = true;
+    audioRef.current = audio; bgmEnabledRef.current = true; setBgmEnabled(true);
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
     const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;
     let removeFirstGesture = () => {};
     const fail = () => { setIsPlaying(false); };
-    const ended = () => { if (enabled.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
+    const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
     const resumeAfterFirstGesture = (event: Event) => {
       if (event.target instanceof Element && event.target.closest('.mw3-mini-bgm')) return;
-      if (!enabled.current || !audio.paused) { removeFirstGesture(); return; }
+      if (!bgmEnabledRef.current || !audio.paused) { removeFirstGesture(); return; }
       void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail);
     };
     const armFirstGestureFallback = () => {
@@ -66,18 +67,18 @@ function useWorldAudio() {
     void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(() => setIsPlaying(false));
     return () => { removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
-  const resumeOnGesture = useCallback(() => { const audio = audioRef.current; if (audio && enabled.current && audio.paused) void audio.play().then(sync).catch(() => setIsPlaying(false)); }, [sync]);
+  const resumeOnGesture = useCallback(() => { const audio = audioRef.current; if (audio && bgmEnabledRef.current && audio.paused) void audio.play().then(sync).catch(() => setIsPlaying(false)); }, [sync]);
   const toggle = useCallback(() => {
     const audio = audioRef.current; if (!audio) return;
-    if (!audio.paused) { enabled.current = false; audio.pause(); audio.currentTime = 0; return; }
-    audio.currentTime = 0; enabled.current = true; void audio.play().then(sync).catch(() => setIsPlaying(false));
+    if (bgmEnabledRef.current) { bgmEnabledRef.current = false; setBgmEnabled(false); audio.pause(); audio.currentTime = 0; return; }
+    audio.currentTime = 0; bgmEnabledRef.current = true; setBgmEnabled(true); void audio.play().then(sync).catch(() => setIsPlaying(false));
   }, [sync]);
   const setVolume = useCallback((nextVolume: number) => {
     const audio = audioRef.current; if (!audio) return;
     const clamped = Math.min(1, Math.max(0, nextVolume));
     audio.volume = clamped; setVolumeState(clamped); sync();
   }, [sync]);
-  return { isPlaying, volume, resumeOnGesture, toggle, setVolume };
+  return { bgmEnabled, isPlaying, volume, resumeOnGesture, toggle, setVolume };
 }
 
 function playUiSound(kind: 'click' | 'chime', on: boolean) {
@@ -89,12 +90,14 @@ function playUiSound(kind: 'click' | 'chime', on: boolean) {
 }
 
 function DesktopProfileCluster({
+  bgmEnabled,
   isPlaying,
   volume,
   onToggleBgm,
   onVolumeChange,
   onProfile,
 }: {
+  bgmEnabled: boolean;
   isPlaying: boolean;
   volume: number;
   onToggleBgm: () => void;
@@ -110,7 +113,7 @@ function DesktopProfileCluster({
   return <section className="mw3-desktop-profile" aria-label="프로필과 오디오 컨트롤">
     <div className="mw3-mini-audio" aria-label="BGM 미니 컨트롤">
       <div className="mw3-mini-bgm-control" data-volume-tray-dismissed={volumeTrayDismissed} onMouseEnter={() => setVolumeTrayDismissed(false)} onMouseLeave={() => setVolumeTrayDismissed(true)} onFocusCapture={() => setVolumeTrayDismissed(false)} onKeyDown={dismissVolumeTray}>
-        <button type="button" className={`mw3-mini-bgm ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? 'BGM 끄기' : 'BGM 켜기'} onClick={onToggleBgm}><WorldIcon name="music" /></button>
+        <button type="button" className={`mw3-mini-bgm ${bgmEnabled ? 'is-enabled' : ''} ${isPlaying ? 'is-playing' : ''}`} aria-label={bgmEnabled ? 'BGM 끄기' : 'BGM 켜기'} onClick={onToggleBgm}><WorldIcon name="music" /></button>
         <div className="mw3-mini-volume-panel" aria-label="BGM 볼륨"><input type="range" min="0" max="1" step="0.01" value={volume} aria-label="BGM 볼륨 조절" onChange={(event) => onVolumeChange(Number(event.target.value))} /></div>
       </div>
       <span className="mw3-mini-song" aria-label="Be a Googler - 달빛 항해자의 마을"><span className="mw3-mini-song-track" aria-hidden="true"><span>Be a Googler - 달빛 항해자의 마을</span><span>Be a Googler - 달빛 항해자의 마을</span></span></span>
@@ -135,7 +138,7 @@ export default function MainWorldV3() {
 }
 
 function MainWorldV3Scene() {
-  const { isPlaying, volume, resumeOnGesture, toggle, setVolume } = useWorldAudio();
+  const { bgmEnabled, isPlaying, volume, resumeOnGesture, toggle, setVolume } = useWorldAudio();
   const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { resumeOnGesture(); window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [resumeOnGesture, sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -189,26 +192,26 @@ function MainWorldV3Scene() {
   const activateNavigation = (item: (typeof navigation)[number]) => {
     setActiveNav(item.id);
     if (!isMobile) {
-      resumeOnGesture(); playUiSound('click', sfxOn);
+      playUiSound('click', sfxOn);
       if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.');
       return;
     }
     announce(item.id === 'explore' ? '홈에서 새로운 모험을 이어가요.' : undefined);
   };
-  const returnToMainWorld = () => { setActiveNav('explore'); resumeOnGesture(); playUiSound('click', sfxOn); };
+  const returnToMainWorld = () => { setActiveNav('explore'); playUiSound('click', sfxOn); };
   return <main className="mw3-shell" ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
       <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={() => activateNavigation(item)}><WorldIcon name={isMobile ? item.mobileIcon : item.icon} /><span>{isMobile ? item.mobileLabel : item.label}</span></button>)}</nav></div>
-      <section className="mw3-profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
+      <section className="mw3-profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${bgmEnabled ? 'is-enabled' : ''} ${isPlaying ? 'is-playing' : ''}`} aria-label={bgmEnabled ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
     {!isConstructionView && <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title"><span className="mw3-title-line mw3-title-line--first"><span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>{isMobile ? '의 여정을' : ' 의 여정을'}</span></span><span className="mw3-title-line mw3-title-line--second">{isMobile ? <><em>시작</em>해볼까요?</> : '시작해볼까요 ?'}</span></h1><p className="mw3-description">{isMobile ? <><span className="mw3-description-line">호기심으로 배우고 성장하며,</span><span className="mw3-description-line">세상에 긍정적인 변화를 만들어요.</span></> : <span className="mw3-description-line">호기심으로 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.</span>}</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />{isMobile ? '새로운 여정' : '새로운 여정 시작하기'}</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div>{!isMobile && <button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란 ? <span>›</span></button>}</section>}
     {constructionMenu && <section className="mw3-construction" aria-labelledby="mw3-construction-title"><span className="mw3-construction-icon" aria-hidden="true"><WorldIcon name={constructionMenu.icon} /></span><p>{constructionMenu.eyebrow}</p><h2 id="mw3-construction-title">새로운 여정이<br />준비되고 있어요.</h2><small>{constructionMenu.detail}</small><span>구글러를 위한 새로운 모험을 열심히 만들고 있어요.<br />조금만 기다려 주세요 !</span><button type="button" onClick={returnToMainWorld}>메인 월드로 돌아가기 <i aria-hidden="true">›</i></button></section>}
     {!isConstructionView && !isMobile && <aside className={`mw3-guide${guideVisible ? '' : ' is-cycling-out'}`} aria-label="구글러 길잡이 안내" style={{ '--mw3-guide-lines': Math.max(1, guideText.split('\n').length) } as CSSProperties}>{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>}
-    {hasDesktopControls && <DesktopProfileCluster isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
+    {hasDesktopControls && <DesktopProfileCluster bgmEnabled={bgmEnabled} isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     {!isConstructionView && <section className="mw3-summary" aria-label="여정 요약">
       <button type="button" className="mw3-card mw3-card--journey" onClick={() => announce('나의 여정을 준비 중이에요.')}>
         <span className="mw3-card-title"><WorldIcon name="compass" />나의 여정</span>

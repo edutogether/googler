@@ -245,6 +245,12 @@ describe('MainWorldV3 final preview', () => {
     expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
     expect(firstAudio.play).toHaveBeenCalledTimes(1);
 
+    fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
+    fireEvent.click(within(firstCluster).getByRole('button', { name: '호기심 많은 구글러 프로필 보기' }));
+    fireEvent.pointerDown(document.body);
+    expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(firstAudio.play).toHaveBeenCalledTimes(1);
+
     firstDocument.unmount();
     render(<MainWorldV3 />);
     const reloadedAudio = MockAudio.instances[1];
@@ -285,6 +291,8 @@ describe('MainWorldV3 final preview', () => {
     const audio = MockAudio.instances[0];
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
     await Promise.resolve();
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-bgm')).toHaveAttribute('aria-label', 'BGM 끄기');
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).not.toHaveClass('is-playing');
     fireEvent.pointerDown(document.body);
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
