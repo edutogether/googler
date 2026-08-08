@@ -63,9 +63,9 @@ describe('MainWorldV3 final preview', () => {
       'profile-avatar.png',
       'journey-avatar-medallion.png',
       'data-island-thumbnail-v3.png',
-      'badge-blue-v2.png',
-      'badge-gold-v2.png',
-      'badge-silver-v2.png',
+      'badge-blue-v3.png',
+      'badge-gold-v3.png',
+      'badge-silver-v3.png',
       'badge-emerald.png',
       'badge-violet.png',
       'badge-coral.png',
@@ -90,6 +90,9 @@ describe('MainWorldV3 final preview', () => {
     expect(document.querySelectorAll('.mw3-badge-item')).toHaveLength(6);
     const badgeLayout = document.querySelector('.mw3-badge-layout') as HTMLElement;
     expect(badgeLayout.querySelectorAll('.mw3-badge-row .mw3-badge-item')).toHaveLength(6);
+    expect(Array.from(badgeLayout.querySelectorAll('.mw3-badge-item > small')).map((label) => label.textContent)).toEqual([
+      '데이터 항해', '용기 있는 시작', '협업의 톱니', '초록 나침반', '별빛 지도', '반짝이는 생각',
+    ]);
     expect(badgeLayout.querySelector('.mw3-badge-more')).toHaveTextContent('…');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-sfx')).toBeNull();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio [role="switch"]')).toBeNull();

@@ -26,9 +26,9 @@ const menuPreviews = {
 } as const;
 
 const desktopBadges = [
-  { asset: 'badge-blue-v2.png', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
-  { asset: 'badge-gold-v2.png', name: '용기 있는 시작', lore: '새로운 여정을 힘차게 열었어요.' },
-  { asset: 'badge-silver-v2.png', name: '협업의 톱니', lore: '함께 배우는 힘을 발견했어요.' },
+  { asset: 'badge-blue-v3.png', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
+  { asset: 'badge-gold-v3.png', name: '용기 있는 시작', lore: '새로운 여정을 힘차게 열었어요.' },
+  { asset: 'badge-silver-v3.png', name: '협업의 톱니', lore: '함께 배우는 힘을 발견했어요.' },
   { asset: 'badge-emerald.png', name: '초록 나침반', lore: '호기심의 방향을 스스로 찾았어요.' },
   { asset: 'badge-violet.png', name: '별빛 지도', lore: '배움의 별자리를 연결했어요.' },
   { asset: 'badge-coral.png', name: '반짝이는 생각', lore: '새로운 아이디어를 세상에 밝혔어요.' },

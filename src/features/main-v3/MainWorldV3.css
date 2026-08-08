@@ -360,8 +360,8 @@
     --mw3-pc-avatar-size: clamp(60px, 3.4375vw, 88px);
     --mw3-pc-island-width: clamp(76px, 5.234375vw, 134px);
     --mw3-pc-island-height: clamp(52px, 3.5546875vw, 91px);
-    --mw3-pc-badge-width: clamp(34px, 2.3828125vw, 61px);
-    --mw3-pc-badge-height: clamp(36px, 2.5vw, 64px);
+    --mw3-pc-badge-width: clamp(36px, 2.65625vw, 68px);
+    --mw3-pc-badge-height: clamp(39px, 2.6953125vw, 69px);
   }
 
   .mw3-shell::before {
@@ -697,6 +697,7 @@
   .mw3-card-content { gap: clamp(9px, .5859375vw, 15px); }
   .mw3-avatar-frame,
   .mw3-avatar-frame img { width: var(--mw3-pc-avatar-size); height: var(--mw3-pc-avatar-size); }
+  .mw3-card--journey .mw3-avatar-frame img { width: 92%; height: 92%; }
   .mw3-island-frame { width: var(--mw3-pc-island-width); height: var(--mw3-pc-island-height); }
   .mw3-card-copy { gap: clamp(3px, .1953125vw, 5px); }
   .mw3-card-copy strong { font-size: clamp(12px, .625vw, 16px); }
@@ -709,9 +710,10 @@
   .mw3-resume { min-height: clamp(30px, 1.40625vw, 36px); padding-inline: clamp(9px, .5078125vw, 13px); font-size: clamp(11px, .5078125vw, 13px); }
   .mw3-card--badges .mw3-badge-layout { grid-template-columns: minmax(0, 1fr) clamp(28px, 1.40625vw, 36px); column-gap: clamp(4px, .234375vw, 6px); }
   .mw3-card--badges .mw3-badge-layout .mw3-badge-row { gap: clamp(3px, .234375vw, 6px); }
+  .mw3-card--badges .mw3-badge-row > .mw3-badge-item { width: 100%; height: auto; }
   .mw3-badge-item { grid-template-rows: minmax(var(--mw3-pc-badge-height), auto) auto; gap: clamp(2px, .1171875vw, 3px); }
   .mw3-badge-item img { width: var(--mw3-pc-badge-width); height: var(--mw3-pc-badge-height); }
-  .mw3-badge-item > small { font-size: clamp(7px, .3515625vw, 9px); }
+  .mw3-badge-item > small { width: 100%; overflow: visible; font-size: clamp(9px, .4296875vw, 11px); line-height: 1.18; letter-spacing: -.045em; text-overflow: clip; white-space: normal; word-break: keep-all; }
   .mw3-card--badges .mw3-badge-more { margin-top: clamp(8px, .546875vw, 14px); }
   .mw3-card--badges .mw3-badge-more > b { width: clamp(22px, 1.09375vw, 28px); height: clamp(22px, 1.09375vw, 28px); font-size: clamp(15px, .7421875vw, 19px); }
 
