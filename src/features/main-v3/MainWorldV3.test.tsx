@@ -53,6 +53,13 @@ describe('MainWorldV3 final preview', () => {
     const journeyTooltip = document.querySelector('.mw3-avatar-tooltip') as HTMLElement;
     expect(journeyTooltip).toHaveTextContent('호기심 많은 탐험가');
     expect(journeyTooltip.querySelector('.mw3-tooltip-thumbnail--avatar')).toHaveAttribute('src', expect.stringContaining('journey-avatar-medallion.png'));
+    const journeyCard = document.querySelector('.mw3-card--journey') as HTMLElement;
+    expect(journeyCard.tagName).toBe('ARTICLE');
+    expect(within(journeyCard).getByRole('button', { name: '나의 여정 열기' })).toBeInTheDocument();
+    const avatarTrigger = within(journeyCard).getByRole('button', { name: '탐험가 프로필 안내 보기' });
+    expect(avatarTrigger).toContainElement(journeyTooltip);
+    avatarTrigger.focus();
+    expect(avatarTrigger).toHaveFocus();
     const islandTooltip = document.querySelector('.mw3-continue-tooltip') as HTMLElement;
     expect(islandTooltip).toHaveTextContent('데이터 섬의 비밀');
     expect(islandTooltip.querySelector('.mw3-tooltip-thumbnail--island')).toHaveAttribute('src', expect.stringContaining('data-island-thumbnail-v6.png'));
@@ -295,6 +302,20 @@ describe('MainWorldV3 final preview', () => {
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).not.toHaveClass('is-playing');
     fireEvent.pointerDown(document.body);
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
+  });
+
+  it('uses the first CTA click to recover blocked autoplay without a second interaction', async () => {
+    MockAudio.rejectNextPlay = true;
+    render(<MainWorldV3 />);
+    const audio = MockAudio.instances[0];
+    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
+    await Promise.resolve();
+
+    fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
+
+    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-bgm')).toHaveAttribute('aria-label', 'BGM 끄기');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
   });
 });

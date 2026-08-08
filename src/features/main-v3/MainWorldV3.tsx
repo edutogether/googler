@@ -51,23 +51,24 @@ function useWorldAudio() {
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
     const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;
     let removeFirstGesture = () => {};
+    let retryInFlight = false;
     const fail = () => { setIsPlaying(false); };
     const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
     const resumeAfterFirstGesture = (event: Event) => {
       if (event.target instanceof Element && event.target.closest('.mw3-mini-bgm')) return;
       if (!bgmEnabledRef.current || !audio.paused) { removeFirstGesture(); return; }
-      void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail);
+      if (retryInFlight) return;
+      retryInFlight = true;
+      void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail).finally(() => { retryInFlight = false; });
     };
     const armFirstGestureFallback = () => {
-      gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, { capture: true, once: true }));
+      gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, true));
       removeFirstGesture = () => gestureEvents.forEach((eventName) => window.removeEventListener(eventName, resumeAfterFirstGesture, true));
     };
-    armFirstGestureFallback();
-    void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(() => setIsPlaying(false));
+    void audio.play().then(() => { sync(); }).catch(() => { fail(); armFirstGestureFallback(); });
     return () => { removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
-  const resumeOnGesture = useCallback(() => { const audio = audioRef.current; if (audio && bgmEnabledRef.current && audio.paused) void audio.play().then(sync).catch(() => setIsPlaying(false)); }, [sync]);
   const toggle = useCallback(() => {
     const audio = audioRef.current; if (!audio) return;
     if (bgmEnabledRef.current) { bgmEnabledRef.current = false; setBgmEnabled(false); audio.pause(); audio.currentTime = 0; return; }
@@ -78,7 +79,7 @@ function useWorldAudio() {
     const clamped = Math.min(1, Math.max(0, nextVolume));
     audio.volume = clamped; setVolumeState(clamped); sync();
   }, [sync]);
-  return { bgmEnabled, isPlaying, volume, resumeOnGesture, toggle, setVolume };
+  return { bgmEnabled, isPlaying, volume, toggle, setVolume };
 }
 
 function playUiSound(kind: 'click' | 'chime', on: boolean) {
@@ -138,9 +139,9 @@ export default function MainWorldV3() {
 }
 
 function MainWorldV3Scene() {
-  const { bgmEnabled, isPlaying, volume, resumeOnGesture, toggle, setVolume } = useWorldAudio();
+  const { bgmEnabled, isPlaying, volume, toggle, setVolume } = useWorldAudio();
   const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
-  const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { resumeOnGesture(); window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [resumeOnGesture, sfxOn]);
+  const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   useEffect(() => () => window.cancelAnimationFrame(parallaxFrame.current ?? 0), []);
   useEffect(() => {
@@ -213,13 +214,17 @@ function MainWorldV3Scene() {
     {!isConstructionView && !isMobile && <aside className={`mw3-guide${guideVisible ? '' : ' is-cycling-out'}`} aria-label="구글러 길잡이 안내" style={{ '--mw3-guide-lines': Math.max(1, guideText.split('\n').length) } as CSSProperties}>{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>}
     {hasDesktopControls && <DesktopProfileCluster bgmEnabled={bgmEnabled} isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     {!isConstructionView && <section className="mw3-summary" aria-label="여정 요약">
-      <button type="button" className="mw3-card mw3-card--journey" onClick={() => announce('나의 여정을 준비 중이에요.')}>
+      {hasDesktopAmbient ? <article className="mw3-card mw3-card--journey">
+        <button type="button" className="mw3-card-click-target" aria-label="나의 여정 열기" onClick={() => announce('나의 여정을 준비 중이에요.')} />
         <span className="mw3-card-title"><WorldIcon name="compass" />나의 여정</span>
         <span className="mw3-card-content">
-          <span className="mw3-avatar-frame"><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" />{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-avatar-tooltip" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--avatar" src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="" /><span className="mw3-tooltip-copy"><b>호기심 많은 탐험가</b><small>새로운 여정을 차근차근 만들어가고 있어요.</small></span></span>}</span>
+          <button type="button" className="mw3-avatar-frame mw3-avatar-trigger" aria-label="탐험가 프로필 안내 보기" aria-describedby="mw3-avatar-tooltip" onClick={() => announce('나의 여정을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" /><span id="mw3-avatar-tooltip" className="mw3-world-tooltip mw3-avatar-tooltip" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--avatar" src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="" /><span className="mw3-tooltip-copy"><b>호기심 많은 탐험가</b><small>새로운 여정을 차근차근 만들어가고 있어요.</small></span></span></button>
           <span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span>
         </span>
-      </button>
+      </article> : <button type="button" className="mw3-card mw3-card--journey" onClick={() => announce('나의 여정을 준비 중이에요.')}>
+        <span className="mw3-card-title"><WorldIcon name="compass" />나의 여정</span>
+        <span className="mw3-card-content"><span className="mw3-avatar-frame"><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" /></span><span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span></span>
+      </button>}
       <article className="mw3-card mw3-card--continue"><h2 className="mw3-card-title"><WorldIcon name="play" />이어하기</h2><div className="mw3-card-content"><span className="mw3-island-frame"><img src={asset('visual-reset/main/assets/data-island-thumbnail-v6.png')} alt="데이터 섬" />{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-continue-tooltip" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--island" src={asset('visual-reset/main/assets/data-island-thumbnail-v6.png')} alt="" /><span className="mw3-tooltip-copy"><b>데이터 섬의 비밀</b><small>다음 탐험 장면을 세심하게 다듬고 있어요.</small></span></span>}</span><span className="mw3-card-copy"><strong>{isMobile ? '데이터 섬' : '데이터 섬의 비밀'}</strong><small>3. 데이터를 시각화해요</small><span className="mw3-progress mw3-progress--blue"><i /></span><b className="mw3-percent">65%</b></span><button type="button" className="mw3-resume" onClick={() => announce('데이터 섬으로 떠날 준비 중이에요.')}>계속하기</button></div></article>
       {hasDesktopAmbient ? <article className="mw3-card mw3-card--badges" aria-label="획득 배지"><span className="mw3-card-title"><WorldIcon name="badge" />획득 배지</span><span className="mw3-badge-layout"><span className="mw3-badge-row">{desktopBadges.map((badge, index) => <span className={`mw3-badge-item${index === desktopBadges.length - 1 ? ' mw3-badge-item--last' : ''}`} key={badge.asset}><button type="button" className="mw3-badge-trigger" aria-label={`${badge.name}: ${badge.lore}`}><img src={asset(`visual-reset/main/assets/${badge.asset}`)} alt="" /><small>{badge.name}</small></button><span className="mw3-badge-info" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--badge" src={asset(`visual-reset/main/assets/${badge.asset}`)} alt="" /><span className="mw3-tooltip-copy"><b>{badge.name}</b><small>{badge.lore}</small></span></span></span>)}<button type="button" className="mw3-badge-next" aria-label="더 많은 배지 보기" onClick={() => announce('새로운 여정을 이어가며 배지를 더 모아보세요!')}><span aria-hidden="true">›</span></button></span></span></article> : <button type="button" className="mw3-card mw3-card--badges mw3-card--compact-badges" onClick={() => announce('새로운 배지를 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="badge" />{isMobile ? '획득 배지' : '최근 획득 배지'}</span><span className="mw3-badge-row"><span><img src={asset('visual-reset/main/assets/badge-blue-v2.png')} alt="파란 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-gold-v2.png')} alt="금색 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-silver-v2.png')} alt="은색 배지" /></span><b aria-label="더 많은 배지">…</b></span></button>}
     </section>}

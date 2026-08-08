@@ -584,8 +584,12 @@
   .mw3-avatar-tooltip b { color: #395f4c; font-size: clamp(11px, .5859375vw, 15px); line-height: 1.2; }
   .mw3-continue-tooltip small,
   .mw3-avatar-tooltip small { color: #5b635b; font-size: clamp(9px, .46875vw, 12px); line-height: 1.25; }
-  .mw3-card--journey:hover .mw3-avatar-tooltip,
-  .mw3-card--journey:focus-visible .mw3-avatar-tooltip { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  .mw3-card--journey { position: relative; }
+  .mw3-card-click-target { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
+  .mw3-card-click-target:focus-visible { outline: 3px solid rgb(39 121 230 / .72); outline-offset: 3px; }
+  .mw3-avatar-trigger { z-index: 2; padding: 0; color: inherit; border: 0; cursor: pointer; font: inherit; }
+  .mw3-avatar-trigger:hover .mw3-avatar-tooltip,
+  .mw3-avatar-trigger:focus .mw3-avatar-tooltip { opacity: 1; transform: translate(-50%, 0) scale(1); }
   .mw3-avatar-tooltip { --mw3-avatar-tooltip-inset: clamp(40px, 2.8125vw, 72px); bottom: calc(100% + 10px); left: calc(50% + var(--mw3-avatar-tooltip-inset)); }
   .mw3-avatar-tooltip::after { left: calc(50% - var(--mw3-avatar-tooltip-inset)); }
   .mw3-badge-row { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 52px; align-items: start; gap: 5px; }
@@ -781,7 +785,8 @@
   .mw3-card-content { gap: clamp(9px, .5859375vw, 15px); }
   .mw3-avatar-frame,
   .mw3-avatar-frame img { width: var(--mw3-pc-avatar-size); height: var(--mw3-pc-avatar-size); }
-  .mw3-card--journey .mw3-avatar-frame img { width: 92%; height: 92%; }
+  .mw3-card--journey .mw3-avatar-frame img { width: 92%; height: 92%; object-position: center calc(50% - 1px); transform: translateY(-1px); }
+  .mw3-card--journey:hover .mw3-avatar-frame img { transform: translateY(-1px) scale(1.065); }
   .mw3-island-frame { width: var(--mw3-pc-island-width); height: var(--mw3-pc-island-height); }
   .mw3-card--continue .mw3-island-frame img { object-fit: contain; object-position: left center; filter: saturate(.82) contrast(.95) brightness(1.02); }
   .mw3-card-copy { gap: clamp(3px, .1953125vw, 5px); }
