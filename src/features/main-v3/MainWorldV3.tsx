@@ -19,10 +19,10 @@ const navigation = [
 ] as const;
 
 const desktopScenes = {
-  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-1672x941.png', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' },
+  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-master.png', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' },
   missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440.png', alt: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' },
-  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1672x941.png', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션' },
-  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-1672x941.png', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판' },
+  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-master.png', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션' },
+  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-master.png', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판' },
 } as const;
 
 const desktopBadges = [
@@ -201,7 +201,7 @@ function MainWorldV3Scene() {
   };
   return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
-    {desktopScene && <img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(desktopScene.asset)} alt={desktopScene.alt} />}
+    {desktopScene && <><img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(desktopScene.asset)} alt={desktopScene.alt} /><div className="mw3-scene-veil" aria-hidden="true" /></>}
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">

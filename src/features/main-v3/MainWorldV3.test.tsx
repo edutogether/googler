@@ -209,7 +209,7 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
-    expect(screen.getByRole('img', { name: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' })).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-1672x941.png'));
+    expect(screen.getByRole('img', { name: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' })).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-master.png'));
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-summary')).toBeNull();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
@@ -271,9 +271,9 @@ describe('MainWorldV3 final preview', () => {
     render(<MainWorldV3 />);
 
     const scenes = {
-      퀘스트: { shellClass: 'mw3-shell--quest', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도', asset: 'visual-reset/quest/be-a-googler-quest-1672x941.png' },
-      도감: { shellClass: 'mw3-shell--encyclopedia', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1672x941.png' },
-      커뮤니티: { shellClass: 'mw3-shell--community', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판', asset: 'visual-reset/community/be-a-googler-community-1672x941.png' },
+      퀘스트: { shellClass: 'mw3-shell--quest', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-master.png' },
+      도감: { shellClass: 'mw3-shell--encyclopedia', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-master.png' },
+      커뮤니티: { shellClass: 'mw3-shell--community', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판', asset: 'visual-reset/community/be-a-googler-community-2560x1440-master.png' },
     } as const;
 
     for (const label of Object.keys(scenes) as Array<keyof typeof scenes>) {
@@ -282,6 +282,7 @@ describe('MainWorldV3 final preview', () => {
       expect(scene).toHaveAttribute('src', expect.stringContaining(scenes[label].asset));
       expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
       expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
+      expect(document.querySelector('.mw3-scene-veil')).toBeInTheDocument();
       expect(document.querySelector('.mw3-hero')).toBeNull();
       expect(document.querySelector('.mw3-summary')).toBeNull();
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');
