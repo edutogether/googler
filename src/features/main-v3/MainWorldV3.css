@@ -951,15 +951,8 @@
   .mw3-toast { top: 132px; font-size: 13px; }
 }
 
-/* Desktop scenes preserve the approved artwork beneath the shared shell. */
+/* Desktop scenes carry their own expanded horizons beneath the shared shell. */
 @media (min-width: 1000px) {
-  .mw3-shell--planner,
-  .mw3-shell--quest,
-  .mw3-shell--encyclopedia,
-  .mw3-shell--community {
-    --mw3-quest-artifact-mask: clamp(100px, 8vw, 205px);
-  }
-
   .mw3-shell--planner { background: #62afe2; }
   .mw3-shell--quest { background: #9fd8f2; }
   .mw3-shell--encyclopedia { background: #aac6cb; }
@@ -981,18 +974,7 @@
   .mw3-shell--quest .mw3-scene-veil,
   .mw3-shell--encyclopedia .mw3-scene-veil,
   .mw3-shell--community .mw3-scene-veil {
-    position: absolute;
-    z-index: -2;
-    inset: 0;
-    display: block;
-    pointer-events: none;
-    background: linear-gradient(135deg, rgb(255 255 255 / .25), rgb(255 251 240 / .11) 56%, rgb(235 246 255 / .16));
-  }
-
-  .mw3-shell--quest .mw3-scene-veil {
-    background:
-      linear-gradient(180deg, #8cb2dd 0%, #96bfe4 70%, rgb(172 211 236 / .86) 82%, rgb(172 211 236 / 0) 100%) center top / 100% var(--mw3-quest-artifact-mask) no-repeat,
-      linear-gradient(135deg, rgb(255 255 255 / .25), rgb(255 251 240 / .11) 56%, rgb(235 246 255 / .16));
+    display: none;
   }
 
   .mw3-shell--planner::before,

@@ -19,10 +19,10 @@ const navigation = [
 ] as const;
 
 const desktopScenes = {
-  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-master.png', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' },
-  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440.png', alt: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' },
-  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-master.png', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션' },
-  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-master.png', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판' },
+  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-wide-v2.png', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' },
+  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440-wide-v2.png', alt: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' },
+  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-wide-v2.png', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션' },
+  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-wide-v2.png', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판' },
 } as const;
 
 const desktopBadges = [
