@@ -951,12 +951,12 @@
   .mw3-toast { top: 132px; font-size: 13px; }
 }
 
-/* Desktop scenes carry their own expanded horizons beneath the shared shell. */
+/* Desktop scenes use a single fill rule, then a restrained page-specific veil. */
 @media (min-width: 1000px) {
-  .mw3-shell--planner { background: #62afe2; }
-  .mw3-shell--quest { background: #9fd8f2; }
-  .mw3-shell--encyclopedia { background: #aac6cb; }
-  .mw3-shell--community { background: #72bce8; }
+  .mw3-shell--planner { --mw3-scene-filter: saturate(.84) contrast(.955) brightness(.975); --mw3-scene-veil: linear-gradient(140deg, rgb(254 247 232 / .18), rgb(119 90 53 / .12) 54%, rgb(250 242 225 / .1)); background: #6d9bc0; }
+  .mw3-shell--quest { --mw3-scene-filter: saturate(.88) contrast(.97) brightness(.985); --mw3-scene-veil: linear-gradient(140deg, rgb(247 250 245 / .16), rgb(82 121 153 / .12) 54%, rgb(234 242 248 / .1)); background: #90bed8; }
+  .mw3-shell--encyclopedia { --mw3-scene-filter: saturate(.86) contrast(.96) brightness(.975); --mw3-scene-veil: linear-gradient(140deg, rgb(250 244 225 / .17), rgb(97 92 65 / .13) 54%, rgb(238 246 238 / .08)); background: #94a8a0; }
+  .mw3-shell--community { --mw3-scene-filter: saturate(.88) contrast(.965) brightness(.98); --mw3-scene-veil: linear-gradient(140deg, rgb(244 249 247 / .15), rgb(72 119 143 / .11) 54%, rgb(239 246 243 / .09)); background: #74a6c2; }
 
   .mw3-shell--planner .mw3-scene,
   .mw3-shell--quest .mw3-scene,
@@ -965,16 +965,23 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    object-position: center top;
+    object-fit: cover;
+    object-position: center;
     image-rendering: auto;
+    filter: var(--mw3-scene-filter);
   }
 
   .mw3-shell--planner .mw3-scene-veil,
   .mw3-shell--quest .mw3-scene-veil,
   .mw3-shell--encyclopedia .mw3-scene-veil,
   .mw3-shell--community .mw3-scene-veil {
-    display: none;
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    background: var(--mw3-scene-veil);
+    backdrop-filter: saturate(.9) contrast(.98);
   }
 
   .mw3-shell--planner::before,
@@ -989,16 +996,5 @@
   .mw3-shell--encyclopedia .mw3-construction,
   .mw3-shell--community .mw3-construction {
     z-index: 4;
-  }
-}
-
-/* 16:10 keeps the approved vertical composition; only the surplus side edges crop. */
-@media (min-width: 1000px) and (max-aspect-ratio: 8 / 5) {
-  .mw3-shell--planner .mw3-scene,
-  .mw3-shell--quest .mw3-scene,
-  .mw3-shell--encyclopedia .mw3-scene,
-  .mw3-shell--community .mw3-scene {
-    object-fit: cover;
-    object-position: center;
   }
 }
