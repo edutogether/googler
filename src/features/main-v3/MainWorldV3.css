@@ -10,6 +10,13 @@
 }
 
 .mw3-background { position: absolute; z-index: -3; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
+
+/* Shared by both the desktop and mobile .mw3-construction rules below: the
+   delay gives visitors a brief unobstructed look at the new scene before
+   the "coming soon" card covers it, instead of the card blocking the view
+   from the very first frame. */
+@keyframes mw3-construction-reveal { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes mw3-construction-reveal-mobile { from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
 .mw3-light-field { position: absolute; z-index: -2; top: 10%; left: -9%; width: min(62vw, 960px); height: 64%; background: radial-gradient(ellipse at 48% 44%, rgb(255 255 255 / .68), rgb(255 252 244 / .3) 46%, transparent 73%); pointer-events: none; }
 .mw3-scene { position: absolute; z-index: -3; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
 .mw3-scene-backdrop { display: none; }
@@ -734,7 +741,7 @@
   .mw3-menu-preview-panel i:nth-child(1) { height: 31px; }.mw3-menu-preview-panel i:nth-child(2) { height: 43px; background: linear-gradient(180deg, rgb(239 186 78 / .8), rgb(208 140 52 / .48)); }.mw3-menu-preview-panel i:nth-child(3) { height: 24px; }
   .mw3-menu-preview-panel + p { max-width: 300px; margin-inline: auto; }
 
-  .mw3-construction { position: absolute; z-index: 3; top: clamp(220px, 27vh, 388px); left: 50%; display: grid; width: min(440px, 34vw); justify-items: center; padding: clamp(24px, 1.5625vw, 40px); color: #304037; border: 1px solid rgb(255 255 255 / .86); border-radius: clamp(22px, 1.5625vw, 40px); background: linear-gradient(145deg, rgb(255 254 249 / .92), rgb(234 246 255 / .76)); box-shadow: 0 24px 56px rgb(42 62 68 / .17), inset 0 1px rgb(255 255 255 / .98); backdrop-filter: blur(20px) saturate(1.05); text-align: center; transform: translateX(-50%); }
+  .mw3-construction { position: absolute; z-index: 3; top: clamp(220px, 27vh, 388px); left: 50%; display: grid; width: min(440px, 34vw); justify-items: center; padding: clamp(24px, 1.5625vw, 40px); color: #304037; border: 1px solid rgb(255 255 255 / .86); border-radius: clamp(22px, 1.5625vw, 40px); background: linear-gradient(145deg, rgb(255 254 249 / .92), rgb(234 246 255 / .76)); box-shadow: 0 24px 56px rgb(42 62 68 / .17), inset 0 1px rgb(255 255 255 / .98); backdrop-filter: blur(20px) saturate(1.05); text-align: center; transform: translateX(-50%); animation: mw3-construction-reveal 380ms cubic-bezier(.2, .8, .2, 1) 260ms both; }
   .mw3-construction-icon { display: grid; width: clamp(52px, 3.28125vw, 84px); height: clamp(52px, 3.28125vw, 84px); margin-bottom: 12px; place-items: center; color: #3a7fd1; border-radius: clamp(18px, 1.09375vw, 28px); background: linear-gradient(145deg, rgb(224 242 255 / .92), rgb(255 250 232 / .82)); box-shadow: inset 0 1px rgb(255 255 255 / .98), 0 8px 18px rgb(52 116 183 / .12); }
   .mw3-construction-icon .mw3-icon { width: 52%; height: 52%; stroke-width: 1.8; }
   .mw3-construction > p { margin: 0; color: #59766e; font-size: clamp(12px, .625vw, 16px); font-weight: 750; }
@@ -1099,6 +1106,7 @@
     backdrop-filter: blur(16px) saturate(1.05);
     text-align: center;
     transform: translate(-50%, -50%);
+    animation: mw3-construction-reveal-mobile 380ms cubic-bezier(.2, .8, .2, 1) 260ms both;
   }
   .mw3-construction-icon { display: grid; width: 48px; height: 48px; margin-bottom: 10px; place-items: center; color: #3a7fd1; border-radius: 16px; background: linear-gradient(145deg, rgb(224 242 255 / .92), rgb(255 250 232 / .82)); box-shadow: inset 0 1px rgb(255 255 255 / .98), 0 6px 14px rgb(52 116 183 / .12); }
   .mw3-construction-icon .mw3-icon { width: 52%; height: 52%; stroke-width: 1.8; }
