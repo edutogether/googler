@@ -208,6 +208,9 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.preload).toBe('auto');
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
+    const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(audio.play).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
     await waitFor(() => expect(document.querySelector('.mw3-quest-scene')).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png')), { timeout: 2000 });
     expect(document.querySelector('.mw3-hero')).toBeNull();
@@ -217,8 +220,8 @@ describe('MainWorldV3 final preview', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page'), { timeout: 2000 });
     fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정이 곧 열립니다.');
+    fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' }));
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
-    const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
     expect(within(desktopCluster).getByLabelText('움직이는 이퀄라이저')).toHaveClass('is-playing');
     fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' }));
     expect(audio.pause).toHaveBeenCalledTimes(1);
@@ -232,30 +235,31 @@ describe('MainWorldV3 final preview', () => {
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
   });
 
-  it('keeps a manually disabled BGM off across in-page menus and resets it on a new document load', async () => {
+  it('keeps a manually enabled BGM on across in-page menus and resets to off on a new document load', async () => {
     const firstDocument = render(<MainWorldV3 />);
     const firstAudio = MockAudio.instances[0];
     const firstCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
 
+    expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(firstAudio.play).not.toHaveBeenCalled();
+    fireEvent.click(within(firstCluster).getByRole('button', { name: 'BGM 켜기' }));
     await waitFor(() => expect(firstAudio.play).toHaveBeenCalledTimes(1));
-    fireEvent.click(within(firstCluster).getByRole('button', { name: 'BGM 끄기' }));
-    expect(firstAudio.pause).toHaveBeenCalledTimes(1);
-    expect(firstAudio.currentTime).toBe(0);
+    expect(within(firstCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
 
     for (const label of ['퀘스트', '플래너', '도감', '커뮤니티']) {
       fireEvent.click(screen.getByRole('button', { name: label }));
-      expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+      expect(within(firstCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
       expect(firstAudio.play).toHaveBeenCalledTimes(1);
     }
 
     fireEvent.click(screen.getByRole('button', { name: '홈' }));
-    expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(within(firstCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
     expect(firstAudio.play).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
     fireEvent.click(within(firstCluster).getByRole('button', { name: '호기심 많은 구글러 프로필 보기' }));
     fireEvent.pointerDown(document.body);
-    expect(within(firstCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    expect(within(firstCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
     expect(firstAudio.play).toHaveBeenCalledTimes(1);
 
     firstDocument.unmount();
@@ -263,8 +267,8 @@ describe('MainWorldV3 final preview', () => {
     const reloadedAudio = MockAudio.instances[1];
     const reloadedCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
     expect(reloadedAudio.volume).toBe(1);
-    await waitFor(() => expect(reloadedAudio.play).toHaveBeenCalledTimes(1));
-    expect(within(reloadedCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
+    expect(reloadedAudio.play).not.toHaveBeenCalled();
+    expect(within(reloadedCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
   });
 
   it('shows the provided desktop scenes for quest, encyclopedia, and community, then restores home', async () => {
@@ -303,6 +307,7 @@ describe('MainWorldV3 final preview', () => {
     const audio = MockAudio.instances[0];
     const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
 
+    fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' }));
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
     fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' }));
     fireEvent.click(screen.getByRole('button', { name: '플래너' }));
@@ -331,30 +336,15 @@ describe('MainWorldV3 final preview', () => {
     expect(MockAudio.instances).toHaveLength(1);
   });
 
-  it('retries blocked autoplay once on the first non-music pointer gesture', async () => {
+  it('flips to enabled without crashing even if the browser rejects the play() call', async () => {
     MockAudio.rejectNextPlay = true;
     render(<MainWorldV3 />);
     const audio = MockAudio.instances[0];
+    const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+    expect(audio.play).not.toHaveBeenCalled();
+    fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' }));
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
-    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-bgm')).toHaveAttribute('aria-label', 'BGM 끄기');
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).not.toHaveClass('is-playing');
-    fireEvent.pointerDown(document.body);
-    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
-    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
-  });
-
-  it('uses the first CTA click to recover blocked autoplay without a second interaction', async () => {
-    MockAudio.rejectNextPlay = true;
-    render(<MainWorldV3 />);
-    const audio = MockAudio.instances[0];
-    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
-    await Promise.resolve();
-
-    fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
-
-    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
-    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-bgm')).toHaveAttribute('aria-label', 'BGM 끄기');
-    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
   });
 });

@@ -39,8 +39,8 @@ function saveSfx(enabled: boolean) { try { window.localStorage.setItem(MAIN_V3_S
 
 function useWorldAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const bgmEnabledRef = useRef(true);
-  const [bgmEnabled, setBgmEnabled] = useState(true);
+  const bgmEnabledRef = useRef(false);
+  const [bgmEnabled, setBgmEnabled] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
@@ -50,34 +50,18 @@ function useWorldAudio() {
     // without triggering autoplay audio; real users never set this.
     const qaMuted = new URLSearchParams(window.location.search).get('qa-mute') === '1';
     if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
-    let cancelled = false;
     audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
     audioRef.current = audio;
-    // Mobile starts with BGM off — autoplay music on a phone is a heavier
-    // ask than on desktop, so wait for the visitor to turn it on themselves.
-    const startsOff = window.innerWidth < 1000;
-    bgmEnabledRef.current = !startsOff; setBgmEnabled(!startsOff);
+    // BGM starts off on every device — an autoplay attempt that gets
+    // silently blocked by the browser, then suddenly fires on the
+    // visitor's next unrelated click, reads as a startling glitch rather
+    // than music. Playback only ever starts from an explicit tap on the
+    // BGM button, via toggle() below.
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
-    const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;
-    let removeFirstGesture = () => {};
-    let retryInFlight = false;
     const fail = () => { setIsPlaying(false); };
     const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
-    const resumeAfterFirstGesture = (event: Event) => {
-      if (event.target instanceof Element && event.target.closest('.mw3-mini-bgm')) return;
-      if (!bgmEnabledRef.current || !audio.paused) { removeFirstGesture(); return; }
-      if (retryInFlight) return;
-      retryInFlight = true;
-      void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail).finally(() => { retryInFlight = false; });
-    };
-    const armFirstGestureFallback = () => {
-      if (cancelled) return;
-      gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, true));
-      removeFirstGesture = () => gestureEvents.forEach((eventName) => window.removeEventListener(eventName, resumeAfterFirstGesture, true));
-    };
-    if (!startsOff) void audio.play().then(() => { sync(); }).catch(() => { fail(); armFirstGestureFallback(); });
-    return () => { cancelled = true; removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
+    return () => { audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
   const toggle = useCallback(() => {
     const audio = audioRef.current; if (!audio) return;
