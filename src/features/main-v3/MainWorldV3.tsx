@@ -239,20 +239,20 @@ function MainWorldV3Scene() {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { switchPage(); return; }
     transitionTimers.current.forEach((id) => window.clearTimeout(id));
     setTransitionPhase('cover');
-    // Timings mirror the CSS: .mw3-transition-veil fades over 460ms, so each
-    // wait is set slightly longer than the transition it's waiting out,
-    // otherwise the veil would be yanked away mid-fade.
+    // Timings mirror the CSS: .mw3-transition-veil fades over 620ms and the
+    // progress bar fills over 1300ms, so each wait is set slightly longer
+    // than what it's waiting out, otherwise it gets cut off mid-motion.
     transitionTimers.current = [window.setTimeout(() => {
       switchPage();
       setTransitionPhase('loading');
       transitionTimers.current.push(window.setTimeout(() => {
         setTransitionPhase('reveal');
-        transitionTimers.current.push(window.setTimeout(() => setTransitionPhase('idle'), 480));
-      }, 560));
-    }, 480)];
+        transitionTimers.current.push(window.setTimeout(() => setTransitionPhase('idle'), 640));
+      }, 1340));
+    }, 640)];
   };
-  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
-    {transitionPhase !== 'idle' && <div className={`mw3-transition-veil mw3-transition-veil--${transitionPhase}`} aria-hidden="true"><img className="mw3-transition-backdrop" src={asset(isMobile ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp')} alt="" /><div className="mw3-transition-loader"><div className="mw3-transition-dots"><i /><i /><i /></div><div className="mw3-transition-track"><i /></div><span>다음 여정으로 이동 중…</span></div></div>}
+  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} data-transition={transitionPhase} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+    {transitionPhase !== 'idle' && <div className={`mw3-transition-veil mw3-transition-veil--${transitionPhase}`} aria-hidden="true"><img className="mw3-transition-backdrop" src={asset(isMobile ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp')} alt="" /><div className="mw3-transition-loader"><div className="mw3-transition-dots"><i /><i /><i /></div><div className="mw3-transition-track"><i /></div><span>다음 여정으로 이동 중…</span></div><div className="mw3-transition-flash" /></div>}
     <img className="mw3-background" src={asset(isMobile ? 'visual-reset/main/be-a-googler-main-mobile-opt.webp' : 'visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {desktopScene && <><img className="mw3-scene-backdrop" src={asset(desktopScene.asset)} alt="" aria-hidden="true" /><img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(isMobile ? desktopScene.mobileAsset : desktopScene.asset)} alt="" aria-hidden="true" /><div className="mw3-scene-veil" aria-hidden="true" /></>}
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
