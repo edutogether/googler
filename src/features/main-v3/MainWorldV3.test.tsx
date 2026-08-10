@@ -157,7 +157,7 @@ describe('MainWorldV3 final preview', () => {
     vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('max-width') })));
     render(<MainWorldV3 />);
 
-    expect(screen.getAllByRole('button', { name: /탐험 시작|학습 마을|미션|길잡이|보관함/ })).toHaveLength(5);
+    expect(screen.getAllByRole('button', { name: /^(홈|퀘스트|플래너|도감|커뮤니티)$/ })).toHaveLength(5);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler의 여정을');
     expect(screen.getByText('호기심으로 배우고 성장하며,')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '새로운 여정' })).toBeInTheDocument();
@@ -209,7 +209,7 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
-    expect(screen.getByRole('img', { name: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' })).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-wide-v2.png'));
+    expect(document.querySelector('.mw3-quest-scene')).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png'));
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-summary')).toBeNull();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
@@ -271,15 +271,17 @@ describe('MainWorldV3 final preview', () => {
     render(<MainWorldV3 />);
 
     const scenes = {
-      퀘스트: { shellClass: 'mw3-shell--quest', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-wide-v2.png' },
-      도감: { shellClass: 'mw3-shell--encyclopedia', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-wide-v2.png' },
-      커뮤니티: { shellClass: 'mw3-shell--community', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판', asset: 'visual-reset/community/be-a-googler-community-2560x1440-wide-v2.png' },
+      퀘스트: { shellClass: 'mw3-shell--quest', sceneClass: 'mw3-quest-scene', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png' },
+      도감: { shellClass: 'mw3-shell--encyclopedia', sceneClass: 'mw3-encyclopedia-scene', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10.png' },
+      커뮤니티: { shellClass: 'mw3-shell--community', sceneClass: 'mw3-community-scene', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11.png' },
     } as const;
 
     for (const label of Object.keys(scenes) as Array<keyof typeof scenes>) {
       fireEvent.click(screen.getByRole('button', { name: label }));
-      const scene = screen.getByRole('img', { name: scenes[label].alt });
+      const scene = document.querySelector(`.${scenes[label].sceneClass}`) as HTMLImageElement;
       expect(scene).toHaveAttribute('src', expect.stringContaining(scenes[label].asset));
+      expect(scene).toHaveAttribute('alt', '');
+      expect(scene).toHaveAttribute('aria-hidden', 'true');
       expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
       expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
       expect(document.querySelector('.mw3-scene-veil')).toBeInTheDocument();
@@ -302,8 +304,10 @@ describe('MainWorldV3 final preview', () => {
     fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' }));
     fireEvent.click(screen.getByRole('button', { name: '플래너' }));
 
-    const plannerScene = screen.getByRole('img', { name: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' });
-    expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440-wide-v2.png'));
+    const plannerScene = document.querySelector('.mw3-planner-scene') as HTMLImageElement;
+    expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7.png'));
+    expect(plannerScene).toHaveAttribute('alt', '');
+    expect(plannerScene).toHaveAttribute('aria-hidden', 'true');
     expect(document.querySelector('.mw3-shell')).toHaveClass('mw3-shell--planner');
     expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-hero')).toBeNull();

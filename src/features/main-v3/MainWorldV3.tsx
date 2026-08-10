@@ -11,18 +11,18 @@ const DEFAULT_VOLUME = 1;
 const DESKTOP_GUIDE_MESSAGE = '안녕 ?\n호기심이 아주 많은\n구글러구나 !\n나와 같이 구글을\n즐겁게 배워볼래 ?';
 
 const navigation = [
-  { id: 'explore', label: '홈', mobileLabel: '탐험 시작', icon: 'home', mobileIcon: 'compass' },
-  { id: 'town', label: '퀘스트', mobileLabel: '학습 마을', icon: 'scroll', mobileIcon: 'map' },
-  { id: 'missions', label: '플래너', mobileLabel: '미션', icon: 'calendar', mobileIcon: 'scroll' },
-  { id: 'guides', label: '도감', mobileLabel: '길잡이', icon: 'book', mobileIcon: 'book' },
-  { id: 'archive', label: '커뮤니티', mobileLabel: '보관함', icon: 'users', mobileIcon: 'archive' },
+  { id: 'explore', label: '홈', mobileLabel: '홈', icon: 'home', mobileIcon: 'home' },
+  { id: 'town', label: '퀘스트', mobileLabel: '퀘스트', icon: 'scroll', mobileIcon: 'scroll' },
+  { id: 'missions', label: '플래너', mobileLabel: '플래너', icon: 'calendar', mobileIcon: 'calendar' },
+  { id: 'guides', label: '도감', mobileLabel: '도감', icon: 'book', mobileIcon: 'book' },
+  { id: 'archive', label: '커뮤니티', mobileLabel: '커뮤니티', icon: 'users', mobileIcon: 'users' },
 ] as const;
 
 const desktopScenes = {
-  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-wide-v2.png', alt: '퀘스트: 구름 위의 떠 있는 섬을 잇는 모험 진행 지도' },
-  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440-wide-v2.png', alt: '다꾸 플래너: 2026년 8월의 교사 여정과 추천 미션' },
-  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-wide-v2.png', alt: '도감: 모험 배지를 모아 보는 고서 컬렉션' },
-  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 수 있는 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-wide-v2.png', alt: '커뮤니티: 탐험가와 로봇이 함께하는 광장 게시판' },
+  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png', mobileAsset: 'visual-reset/quest/be-a-googler-quest-1080x2340-mobile-v1.png' },
+  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가의 여정을 계획할 플래너를 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7.png', mobileAsset: 'visual-reset/planner/be-a-googler-dakku-planner-1080x2340-mobile-v1.png' },
+  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10.png', mobileAsset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1080x2340-mobile-v1.png' },
+  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11.png', mobileAsset: 'visual-reset/community/be-a-googler-community-1080x2340-mobile-v1.png' },
 } as const;
 
 const desktopBadges = [
@@ -46,6 +46,11 @@ function useWorldAudio() {
   const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
   useEffect(() => {
     const audio = new Audio(BGM_SOURCE);
+    // Automated visual QA opts in with ?qa-mute=1 to capture screenshots
+    // without triggering autoplay audio; real users never set this.
+    const qaMuted = new URLSearchParams(window.location.search).get('qa-mute') === '1';
+    if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
+    let cancelled = false;
     audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
     audioRef.current = audio; bgmEnabledRef.current = true; setBgmEnabled(true);
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
@@ -63,11 +68,12 @@ function useWorldAudio() {
       void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail).finally(() => { retryInFlight = false; });
     };
     const armFirstGestureFallback = () => {
+      if (cancelled) return;
       gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, true));
       removeFirstGesture = () => gestureEvents.forEach((eventName) => window.removeEventListener(eventName, resumeAfterFirstGesture, true));
     };
     void audio.play().then(() => { sync(); }).catch(() => { fail(); armFirstGestureFallback(); });
-    return () => { removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
+    return () => { cancelled = true; removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
   const toggle = useCallback(() => {
     const audio = audioRef.current; if (!audio) return;
@@ -141,6 +147,17 @@ export default function MainWorldV3() {
 function MainWorldV3Scene() {
   const { bgmEnabled, isPlaying, volume, toggle, setVolume } = useWorldAudio();
   const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
+  // Tracks the live viewport width so the mobile/desktop layout keeps up
+  // when the window is resized without a full reload (isMobile etc. below
+  // were previously computed once per render, so resizing an open tab left
+  // the CSS breakpoints and the JS-driven content — nav labels, subpage
+  // scenes — out of sync).
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   useEffect(() => () => window.cancelAnimationFrame(parallaxFrame.current ?? 0), []);
@@ -182,14 +199,16 @@ function MainWorldV3Scene() {
   }, [setParallax]);
   const handlePointerLeave = useCallback(() => setParallax(0, 0), [setParallax]);
   const toggleSfx = () => { const next = !sfxOn; if (sfxOn) playUiSound('click', true); setSfxOn(next); saveSfx(next); window.clearTimeout(timer.current); setToast(next ? '효과음을 켰어요.' : '효과음을 껐어요.'); timer.current = window.setTimeout(() => setToast(''), 1900); };
-  const hasDesktopAmbient = window.innerWidth >= 1024;
-  const isMobile = window.matchMedia?.('(max-width: 767px)').matches ?? window.innerWidth < 768;
-  // CSS media queries use the layout viewport. Keep compact desktop controls
-  // available when a classic scrollbar makes window.innerWidth slightly smaller.
-  const hasDesktopControls = window.matchMedia?.('(min-width: 1000px)').matches ?? hasDesktopAmbient;
-  const hasDesktopGuide = window.matchMedia?.('(min-width: 768px)').matches ?? window.innerWidth >= 768;
-  const desktopScene = !isMobile ? desktopScenes[activeNav as keyof typeof desktopScenes] ?? null : null;
-  const showsMainWorld = isMobile || activeNav === 'explore';
+  const hasDesktopAmbient = viewportWidth >= 1024;
+  // Matches the CSS desktop breakpoint (min-width: 1000px) below so there is
+  // no unstyled gap between the mobile and desktop layouts — a portrait
+  // tablet (768-999px) gets the mobile layout, a landscape one (1000px+)
+  // gets the desktop layout, so neither needs bespoke tablet styling.
+  const isMobile = viewportWidth < 1000;
+  const hasDesktopControls = viewportWidth >= 1000;
+  const hasDesktopGuide = viewportWidth >= 768;
+  const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
+  const showsMainWorld = activeNav === 'explore';
   const activateNavigation = (item: (typeof navigation)[number]) => {
     setActiveNav(item.id);
     if (!isMobile) {
@@ -197,15 +216,15 @@ function MainWorldV3Scene() {
       if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.');
       return;
     }
-    announce(item.id === 'explore' ? '홈에서 새로운 모험을 이어가요.' : undefined);
+    if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.');
   };
   return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
     <img className="mw3-background" src={asset('visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
-    {desktopScene && <><img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(desktopScene.asset)} alt={desktopScene.alt} /><div className="mw3-scene-veil" aria-hidden="true" /></>}
+    {desktopScene && <><img className="mw3-scene-backdrop" src={asset(desktopScene.asset)} alt="" aria-hidden="true" /><img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(isMobile ? desktopScene.mobileAsset : desktopScene.asset)} alt="" aria-hidden="true" /><div className="mw3-scene-veil" aria-hidden="true" /></>}
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
-      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={() => activateNavigation(item)}><WorldIcon name={isMobile ? item.mobileIcon : item.icon} /><span>{isMobile ? item.mobileLabel : item.label}</span></button>)}</nav></div>
+      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={(event) => { activateNavigation(item); event.currentTarget.blur(); }}><WorldIcon name={isMobile ? item.mobileIcon : item.icon} /><span>{isMobile ? item.mobileLabel : item.label}</span></button>)}</nav></div>
       <section className="mw3-profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${bgmEnabled ? 'is-enabled' : ''} ${isPlaying ? 'is-playing' : ''}`} aria-label={bgmEnabled ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
@@ -226,7 +245,7 @@ function MainWorldV3Scene() {
         <span className="mw3-card-content"><span className="mw3-avatar-frame"><img src={asset('visual-reset/main/assets/journey-avatar-medallion.png')} alt="여정 아바타" /></span><span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span></span>
       </button>}
       <article className="mw3-card mw3-card--continue"><h2 className="mw3-card-title"><WorldIcon name="play" />이어하기</h2><div className="mw3-card-content"><span className="mw3-island-frame"><img src={asset('visual-reset/main/assets/data-island-thumbnail-v6.png')} alt="데이터 섬" />{hasDesktopAmbient && <span className="mw3-world-tooltip mw3-continue-tooltip" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--island" src={asset('visual-reset/main/assets/data-island-thumbnail-v6.png')} alt="" /><span className="mw3-tooltip-copy"><b>데이터 섬의 비밀</b><small>다음 탐험 장면을 세심하게 다듬고 있어요.</small></span></span>}</span><span className="mw3-card-copy"><strong>{isMobile ? '데이터 섬' : '데이터 섬의 비밀'}</strong><small>3. 데이터를 시각화해요</small><span className="mw3-progress mw3-progress--blue"><i /></span><b className="mw3-percent">65%</b></span><button type="button" className="mw3-resume" onClick={() => announce('데이터 섬으로 떠날 준비 중이에요.')}>계속하기</button></div></article>
-      {hasDesktopAmbient ? <article className="mw3-card mw3-card--badges" aria-label="획득 배지"><span className="mw3-card-title"><WorldIcon name="badge" />획득 배지</span><span className="mw3-badge-layout"><span className="mw3-badge-row">{desktopBadges.map((badge, index) => <span className={`mw3-badge-item${index === desktopBadges.length - 1 ? ' mw3-badge-item--last' : ''}`} key={badge.asset}><button type="button" className="mw3-badge-trigger" aria-label={`${badge.name}: ${badge.lore}`}><img src={asset(`visual-reset/main/assets/${badge.asset}`)} alt="" /><small>{badge.name}</small></button><span className="mw3-badge-info" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--badge" src={asset(`visual-reset/main/assets/${badge.asset}`)} alt="" /><span className="mw3-tooltip-copy"><b>{badge.name}</b><small>{badge.lore}</small></span></span></span>)}<button type="button" className="mw3-badge-next" aria-label="더 많은 배지 보기" onClick={() => announce('새로운 여정을 이어가며 배지를 더 모아보세요!')}><span aria-hidden="true">›</span></button></span></span></article> : <button type="button" className="mw3-card mw3-card--badges mw3-card--compact-badges" onClick={() => announce('새로운 배지를 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="badge" />{isMobile ? '획득 배지' : '최근 획득 배지'}</span><span className="mw3-badge-row"><span><img src={asset('visual-reset/main/assets/badge-blue-v2.png')} alt="파란 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-gold-v2.png')} alt="금색 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-silver-v2.png')} alt="은색 배지" /></span><b aria-label="더 많은 배지">…</b></span></button>}
+      {hasDesktopAmbient ? <article className="mw3-card mw3-card--badges" aria-label="획득 배지"><span className="mw3-card-title"><WorldIcon name="badge" />획득 배지</span><span className="mw3-badge-layout"><span className="mw3-badge-row">{desktopBadges.map((badge, index) => <span className={`mw3-badge-item${index === desktopBadges.length - 1 ? ' mw3-badge-item--last' : ''}`} key={badge.asset}><button type="button" className="mw3-badge-trigger" aria-label={`${badge.name}: ${badge.lore}`}><img src={asset(`visual-reset/main/assets/${badge.asset}`)} alt="" /><small>{badge.name}</small></button><span className="mw3-badge-info" role="tooltip"><img className="mw3-tooltip-thumbnail mw3-tooltip-thumbnail--badge" src={asset(`visual-reset/main/assets/${badge.asset}`)} alt="" /><span className="mw3-tooltip-copy"><b>{badge.name}</b><small>{badge.lore}</small></span></span></span>)}<button type="button" className="mw3-badge-next" aria-label="더 많은 배지 보기" onClick={() => announce('새로운 여정을 이어가며 배지를 더 모아보세요!')}><span aria-hidden="true">›</span></button></span></span></article> : <button type="button" className="mw3-card mw3-card--badges mw3-card--compact-badges" onClick={() => announce('새로운 배지를 준비 중이에요.')}><span className="mw3-card-title"><WorldIcon name="badge" />{isMobile ? '획득 배지' : '최근 획득 배지'}</span><span className="mw3-badge-row"><span><img src={asset('visual-reset/main/assets/badge-blue-v5.png')} alt="파란 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-gold-v5.png')} alt="금색 배지" /></span><span><img src={asset('visual-reset/main/assets/badge-silver-v5.png')} alt="은색 배지" /></span><b aria-label="더 많은 배지">…</b></span></button>}
     </section>}
     {!isMobile && <section className="mw3-audio" aria-label="BGM 컨트롤"><div className="mw3-track"><WorldIcon name="music" /><strong>BGM</strong><span className="mw3-song">달빛 항해자의 마을</span></div><button type="button" className="mw3-audio-play" aria-label={isPlaying ? 'BGM 일시정지' : 'BGM 재생'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name={isPlaying ? 'pause' : 'play'} /></button><span className={`mw3-equalizer ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? '움직이는 이퀄라이저' : '정지된 이퀄라이저'}><i /><i /><i /><i /></span><div className="mw3-sfx"><WorldIcon name="speaker" /><span>효과음 켜짐</span><button type="button" role="switch" aria-checked={sfxOn} aria-label="효과음 켜기 또는 끄기" className={sfxOn ? 'is-on' : ''} onClick={toggleSfx}><i /></button></div></section>}
     <div className={`mw3-toast ${toast ? 'is-visible' : ''}`} role="status" aria-live="polite">{toast}</div>
