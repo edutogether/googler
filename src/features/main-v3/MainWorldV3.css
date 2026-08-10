@@ -935,6 +935,7 @@
   .mw3-profile-button { left: auto !important; right: 4px !important; }
   .mw3-mobile-bgm { color: #357bd4; }
   .mw3-mobile-bgm:not(.is-enabled) { color: #65716a; }
+  .mw3-mobile-bgm:not(.is-enabled)::after { position: absolute; width: 24px; height: 1.5px; border-radius: 99px; background: currentcolor; content: ""; opacity: .82; transform: rotate(-45deg); }
   .mw3-mobile-bgm .mw3-icon { width: 21px; height: 21px; }
   .mw3-profile .mw3-notification { border-radius: 14px; }
   .mw3-notification > span { top: -4px; right: -4px; }
