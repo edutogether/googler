@@ -209,12 +209,12 @@ describe('MainWorldV3 final preview', () => {
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
-    expect(document.querySelector('.mw3-quest-scene')).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png'));
+    await waitFor(() => expect(document.querySelector('.mw3-quest-scene')).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png')), { timeout: 2000 });
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-summary')).toBeNull();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
     fireEvent.click(screen.getByRole('button', { name: '홈' }));
-    expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
+    await waitFor(() => expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page'), { timeout: 2000 });
     fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
     expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정이 곧 열립니다.');
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
@@ -267,7 +267,7 @@ describe('MainWorldV3 final preview', () => {
     expect(within(reloadedCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
   });
 
-  it('shows the provided desktop scenes for quest, encyclopedia, and community, then restores home', () => {
+  it('shows the provided desktop scenes for quest, encyclopedia, and community, then restores home', async () => {
     render(<MainWorldV3 />);
 
     const scenes = {
@@ -278,6 +278,7 @@ describe('MainWorldV3 final preview', () => {
 
     for (const label of Object.keys(scenes) as Array<keyof typeof scenes>) {
       fireEvent.click(screen.getByRole('button', { name: label }));
+      await waitFor(() => expect(document.querySelector(`.${scenes[label].sceneClass}`)).toBeInTheDocument(), { timeout: 2000 });
       const scene = document.querySelector(`.${scenes[label].sceneClass}`) as HTMLImageElement;
       expect(scene).toHaveAttribute('src', expect.stringContaining(scenes[label].asset));
       expect(scene).toHaveAttribute('alt', '');
@@ -291,8 +292,8 @@ describe('MainWorldV3 final preview', () => {
     }
 
     fireEvent.click(screen.getByRole('button', { name: '홈' }));
+    await waitFor(() => expect(document.querySelector('.mw3-hero')).toBeInTheDocument(), { timeout: 2000 });
     expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
-    expect(document.querySelector('.mw3-hero')).toBeInTheDocument();
   });
 
   it('shows the approved planner visual scene while keeping global controls and BGM intent', async () => {
@@ -303,6 +304,7 @@ describe('MainWorldV3 final preview', () => {
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
     fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' }));
     fireEvent.click(screen.getByRole('button', { name: '플래너' }));
+    await waitFor(() => expect(document.querySelector('.mw3-planner-scene')).toBeInTheDocument(), { timeout: 2000 });
 
     const plannerScene = document.querySelector('.mw3-planner-scene') as HTMLImageElement;
     expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7.png'));
@@ -318,9 +320,9 @@ describe('MainWorldV3 final preview', () => {
     expect(MockAudio.instances).toHaveLength(1);
 
     fireEvent.click(screen.getByRole('button', { name: '홈' }));
+    await waitFor(() => expect(document.querySelector('.mw3-hero')).toBeInTheDocument(), { timeout: 2000 });
     expect(screen.getByRole('button', { name: '홈' })).toHaveAttribute('aria-current', 'page');
     expect(document.querySelector('.mw3-shell')).not.toHaveClass('mw3-shell--planner');
-    expect(document.querySelector('.mw3-hero')).toBeInTheDocument();
     expect(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
     expect(MockAudio.instances).toHaveLength(1);
   });
