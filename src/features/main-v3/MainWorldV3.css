@@ -223,7 +223,6 @@
 
 /* Final visual lock: polish surfaces without changing the approved layout. */
 @media (min-width: 768px) {
-  .mw3-header { right: 30px; }
   .mw3-light-field {
     background: radial-gradient(ellipse at 48% 44%, rgb(255 252 239 / .56), rgb(255 247 226 / .2) 46%, transparent 73%);
   }
@@ -940,8 +939,12 @@
   .mw3-card--compact-badges .mw3-badge-row > b { display: grid; width: 28px; height: 28px; margin-top: 8px; }
 }
 
-/* Mobile master: one flowing world page, with controls kept in the header. */
-@media (max-width: 767px) {
+/* Mobile master: one flowing world page, with controls kept in the header.
+   Capped at 999px (not 767px) to match the JS isMobile threshold
+   (viewportWidth < 1000) — a portrait tablet in the 768-999px gap used to
+   fall through to the desktop rules below with no mobile chrome applied,
+   producing a broken/overlapping header. */
+@media (max-width: 999px) {
   html:has(.mw3-shell) { scrollbar-width: none; }
   html:has(.mw3-shell)::-webkit-scrollbar { display: none; }
   .mw3-shell { width: 100vw; max-width: 100vw; min-height: 100svh; height: 100svh; box-sizing: border-box; padding: 0 12px; overflow: hidden; }
