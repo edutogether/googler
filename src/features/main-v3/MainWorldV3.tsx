@@ -204,11 +204,11 @@ function MainWorldV3Scene() {
   const handlePointerLeave = useCallback(() => setParallax(0, 0), [setParallax]);
   const toggleSfx = () => { const next = !sfxOn; if (sfxOn) playUiSound('click', true); setSfxOn(next); saveSfx(next); window.clearTimeout(timer.current); setToast(next ? '효과음을 켰어요.' : '효과음을 껐어요.'); timer.current = window.setTimeout(() => setToast(''), 1900); };
   const hasDesktopAmbient = viewportWidth >= 1024;
-  // Matches the CSS desktop breakpoint (min-width: 1000px) below so there is
-  // no unstyled gap between the mobile and desktop layouts — a portrait
-  // tablet (768-999px) gets the mobile layout, a landscape one (1000px+)
-  // gets the desktop layout, so neither needs bespoke tablet styling.
-  const isMobile = viewportWidth < 1000;
+  // Matches the CSS mobile breakpoint (max-width: 767px) below — the mobile
+  // header/hero/nav/marks styling only exists under 768px, so isMobile must
+  // flip there too or a portrait tablet (768-999px) gets mobile-only markup
+  // (e.g. .mw3-mobile-google-marks) with no matching CSS to position it.
+  const isMobile = viewportWidth < 768;
   const hasDesktopControls = viewportWidth >= 1000;
   const hasDesktopGuide = viewportWidth >= 768;
   const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
