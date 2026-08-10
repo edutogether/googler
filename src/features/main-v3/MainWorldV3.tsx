@@ -151,6 +151,12 @@ export default function MainWorldV3() {
 function MainWorldV3Scene() {
   const { bgmEnabled, isPlaying, volume, toggle, setVolume } = useWorldAudio();
   const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
+  // Page-change transition: cover the screen, swap the page underneath
+  // while hidden, hold on a loading beat, then clear — so a nav switch
+  // reads as a deliberate scene change instead of content popping in.
+  const [transitionPhase, setTransitionPhase] = useState<'idle' | 'cover' | 'loading' | 'reveal'>('idle');
+  const transitionTimers = useRef<number[]>([]);
+  useEffect(() => () => transitionTimers.current.forEach((id) => window.clearTimeout(id)), []);
   // Tracks the live viewport width so the mobile/desktop layout keeps up
   // when the window is resized without a full reload (isMobile etc. below
   // were previously computed once per render, so resizing an open tab left
@@ -172,6 +178,8 @@ function MainWorldV3Scene() {
       const preload = new Image();
       preload.src = asset(isMobileAtLoad ? scene.mobileAsset : scene.asset);
     });
+    const loadingBackdrop = new Image();
+    loadingBackdrop.src = asset(isMobileAtLoad ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp');
   }, []);
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -225,15 +233,26 @@ function MainWorldV3Scene() {
   const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
   const showsMainWorld = activeNav === 'explore';
   const activateNavigation = (item: (typeof navigation)[number]) => {
-    setActiveNav(item.id);
-    if (!isMobile) {
-      playUiSound('click', sfxOn);
-      if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.');
-      return;
-    }
-    if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.');
+    if (item.id === activeNav) return;
+    if (!isMobile) playUiSound('click', sfxOn);
+    const switchPage = () => { setActiveNav(item.id); if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.'); };
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { switchPage(); return; }
+    transitionTimers.current.forEach((id) => window.clearTimeout(id));
+    setTransitionPhase('cover');
+    // Timings mirror the CSS: .mw3-transition-veil fades over 460ms, so each
+    // wait is set slightly longer than the transition it's waiting out,
+    // otherwise the veil would be yanked away mid-fade.
+    transitionTimers.current = [window.setTimeout(() => {
+      switchPage();
+      setTransitionPhase('loading');
+      transitionTimers.current.push(window.setTimeout(() => {
+        setTransitionPhase('reveal');
+        transitionTimers.current.push(window.setTimeout(() => setTransitionPhase('idle'), 480));
+      }, 560));
+    }, 480)];
   };
   return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+    {transitionPhase !== 'idle' && <div className={`mw3-transition-veil mw3-transition-veil--${transitionPhase}`} aria-hidden="true"><img className="mw3-transition-backdrop" src={asset(isMobile ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp')} alt="" /><div className="mw3-transition-loader"><div className="mw3-transition-dots"><i /><i /><i /></div><div className="mw3-transition-track"><i /></div><span>다음 여정으로 이동 중…</span></div></div>}
     <img className="mw3-background" src={asset(isMobile ? 'visual-reset/main/be-a-googler-main-mobile-opt.webp' : 'visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {desktopScene && <><img className="mw3-scene-backdrop" src={asset(desktopScene.asset)} alt="" aria-hidden="true" /><img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(isMobile ? desktopScene.mobileAsset : desktopScene.asset)} alt="" aria-hidden="true" /><div className="mw3-scene-veil" aria-hidden="true" /></>}
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
