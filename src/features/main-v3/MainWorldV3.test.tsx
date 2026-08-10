@@ -284,6 +284,8 @@ describe('MainWorldV3 final preview', () => {
       expect(scene).toHaveAttribute('alt', '');
       expect(scene).toHaveAttribute('aria-hidden', 'true');
       expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
+      expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull();
+      fireEvent.click(document.querySelector('.mw3-shell') as HTMLElement);
       expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
       expect(document.querySelector('.mw3-scene-veil')).toBeInTheDocument();
       expect(document.querySelector('.mw3-hero')).toBeNull();
@@ -311,6 +313,8 @@ describe('MainWorldV3 final preview', () => {
     expect(plannerScene).toHaveAttribute('alt', '');
     expect(plannerScene).toHaveAttribute('aria-hidden', 'true');
     expect(document.querySelector('.mw3-shell')).toHaveClass('mw3-shell--planner');
+    expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull();
+    fireEvent.click(document.querySelector('.mw3-shell') as HTMLElement);
     expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-guide')).toBeNull();

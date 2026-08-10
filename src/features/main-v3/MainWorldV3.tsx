@@ -157,6 +157,10 @@ function MainWorldV3Scene() {
   const [transitionPhase, setTransitionPhase] = useState<'idle' | 'cover' | 'loading' | 'reveal'>('idle');
   const transitionTimers = useRef<number[]>([]);
   useEffect(() => () => transitionTimers.current.forEach((id) => window.clearTimeout(id)), []);
+  // The "coming soon" card no longer auto-covers the subpage art on arrival —
+  // it stays hidden so the scene is fully visible, and only pops in once the
+  // visitor clicks anywhere on the page.
+  const [constructionVisible, setConstructionVisible] = useState(false);
   // Tracks the live viewport width so the mobile/desktop layout keeps up
   // when the window is resized without a full reload (isMobile etc. below
   // were previously computed once per render, so resizing an open tab left
@@ -232,6 +236,8 @@ function MainWorldV3Scene() {
   const hasDesktopGuide = viewportWidth >= 768;
   const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
   const showsMainWorld = activeNav === 'explore';
+  useEffect(() => { setConstructionVisible(false); }, [activeNav]);
+  const revealConstruction = () => { if (desktopScene && !constructionVisible) setConstructionVisible(true); };
   const activateNavigation = (item: (typeof navigation)[number]) => {
     if (item.id === activeNav) return;
     if (!isMobile) playUiSound('click', sfxOn);
@@ -251,7 +257,7 @@ function MainWorldV3Scene() {
       }, 1340));
     }, 640)];
   };
-  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}`} data-transition={transitionPhase} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}${desktopScene && !constructionVisible ? ' mw3-shell--awaiting-tap' : ''}`} data-transition={transitionPhase} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={revealConstruction}>
     {transitionPhase !== 'idle' && <div className={`mw3-transition-veil mw3-transition-veil--${transitionPhase}`} aria-hidden="true"><img className="mw3-transition-backdrop" src={asset(isMobile ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp')} alt="" /><div className="mw3-transition-loader"><div className="mw3-transition-dots"><i /><i /><i /></div><div className="mw3-transition-track"><i /></div><span>다음 여정으로 이동 중…</span></div><div className="mw3-transition-flash" /></div>}
     <img className="mw3-background" src={asset(isMobile ? 'visual-reset/main/be-a-googler-main-mobile-opt.webp' : 'visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {desktopScene && <><img className="mw3-scene-backdrop" src={asset(desktopScene.asset)} alt="" aria-hidden="true" /><img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(isMobile ? desktopScene.mobileAsset : desktopScene.asset)} alt="" aria-hidden="true" /><div className="mw3-scene-veil" aria-hidden="true" /></>}
@@ -263,7 +269,7 @@ function MainWorldV3Scene() {
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>
     {showsMainWorld && <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title"><span className="mw3-title-line mw3-title-line--first"><span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>{isMobile ? '의 여정을' : ' 의 여정을'}</span></span><span className="mw3-title-line mw3-title-line--second">{isMobile ? <><em>시작</em>해볼까요?</> : '시작해볼까요 ?'}</span></h1><p className="mw3-description">{isMobile ? <><span className="mw3-description-line">호기심으로 배우고 성장하며,</span><span className="mw3-description-line">세상에 긍정적인 변화를 만들어요.</span></> : <span className="mw3-description-line">호기심으로 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.</span>}</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />{isMobile ? '새로운 여정' : '새로운 여정 시작하기'}</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div>{!isMobile && <button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란 ? <span>›</span></button>}</section>}
-    {desktopScene && <section key={desktopScene.name} className="mw3-construction" aria-labelledby="mw3-construction-title"><span className="mw3-construction-icon" aria-hidden="true"><WorldIcon name={desktopScene.icon} /></span><p>{desktopScene.eyebrow}</p><h2 id="mw3-construction-title">새로운 여정이<br />준비되고 있어요.</h2><small>{desktopScene.detail}</small><span>구글러를 위한 새로운 모험을 열심히 만들고 있어요.<br />조금만 기다려 주세요 !</span><button type="button" onClick={() => { setActiveNav('explore'); playUiSound('click', sfxOn); }}>메인 월드로 돌아가기 <i aria-hidden="true">›</i></button></section>}
+    {desktopScene && constructionVisible && <section key={desktopScene.name} className="mw3-construction" aria-labelledby="mw3-construction-title"><span className="mw3-construction-icon" aria-hidden="true"><WorldIcon name={desktopScene.icon} /></span><p>{desktopScene.eyebrow}</p><h2 id="mw3-construction-title">새로운 여정이<br />준비되고 있어요.</h2><small>{desktopScene.detail}</small><span>구글러를 위한 새로운 모험을 열심히 만들고 있어요.<br />조금만 기다려 주세요 !</span><button type="button" onClick={(event) => { event.stopPropagation(); setActiveNav('explore'); playUiSound('click', sfxOn); }}>메인 월드로 돌아가기 <i aria-hidden="true">›</i></button></section>}
     {showsMainWorld && !isMobile && <aside className={`mw3-guide${guideVisible ? '' : ' is-cycling-out'}`} aria-label="구글러 길잡이 안내" style={{ '--mw3-guide-lines': Math.max(1, guideText.split('\n').length) } as CSSProperties}>{hasDesktopGuide ? <p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p> : <p>안녕, 탐험가!<br />나는 구글러 길잡이<br />루나야. 함께 놀며<br />배워보자!</p>}</aside>}
     {hasDesktopControls && <DesktopProfileCluster bgmEnabled={bgmEnabled} isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     {showsMainWorld && <section className="mw3-summary" aria-label="여정 요약">
