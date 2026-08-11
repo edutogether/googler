@@ -62,7 +62,7 @@ describe('MainWorldV3 final preview', () => {
     expect(avatarTrigger).toHaveFocus();
     const islandTooltip = document.querySelector('.mw3-continue-tooltip') as HTMLElement;
     expect(islandTooltip).toHaveTextContent('데이터 섬의 비밀');
-    expect(islandTooltip.querySelector('.mw3-tooltip-thumbnail--island')).toHaveAttribute('src', expect.stringContaining('data-island-thumbnail-v6.png'));
+    expect(islandTooltip.querySelector('.mw3-tooltip-thumbnail--island')).toHaveAttribute('src', expect.stringContaining('data-island-thumbnail-v6-opt.webp'));
     expect(document.querySelectorAll('.mw3-audio')).toHaveLength(1);
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio')).toBeInTheDocument();
     const miniAudio = document.querySelector('.mw3-desktop-profile .mw3-mini-audio') as HTMLElement;
@@ -78,7 +78,7 @@ describe('MainWorldV3 final preview', () => {
     for (const asset of [
       'profile-avatar.png',
       'journey-avatar-medallion.png',
-      'data-island-thumbnail-v6.png',
+      'data-island-thumbnail-v6-opt.webp',
       'badge-blue-v5.png',
       'badge-gold-v5.png',
       'badge-silver-v5.png',
