@@ -43,6 +43,7 @@ function useWorldAudio() {
   const [bgmEnabled, setBgmEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
+  const volumeStateTimerRef = useRef<number | null>(null);
   const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
   useEffect(() => {
     const audio = new Audio(BGM_SOURCE);
@@ -91,8 +92,17 @@ function useWorldAudio() {
   const setVolume = useCallback((nextVolume: number) => {
     const audio = audioRef.current; if (!audio) return;
     const clamped = Math.min(1, Math.max(0, nextVolume));
-    audio.volume = clamped; setVolumeState(clamped); sync();
+    audio.volume = clamped; sync();
+    // The slider drags and the mute/unmute tween both call this many times a second;
+    // setVolumeState re-renders this whole scene (every background, badge, popover),
+    // and doing that on EVERY tick was heavy enough on real hardware to make the
+    // slider itself feel laggy even though the audible volume change is instant and
+    // free. The actual sound already changed above — only the React-side sync (needed
+    // for the initial value on mount and as the mute tween's target) is debounced.
+    if (volumeStateTimerRef.current !== null) window.clearTimeout(volumeStateTimerRef.current);
+    volumeStateTimerRef.current = window.setTimeout(() => { volumeStateTimerRef.current = null; setVolumeState(clamped); }, 80);
   }, [sync]);
+  useEffect(() => () => { if (volumeStateTimerRef.current !== null) window.clearTimeout(volumeStateTimerRef.current); }, []);
   return { bgmEnabled, isPlaying, volume, toggle, setVolume };
 }
 
