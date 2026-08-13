@@ -52,16 +52,22 @@ function useWorldAudio() {
     if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
     audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
     audioRef.current = audio;
-    // BGM starts on by default — attempt to play immediately on mount. If
-    // the browser silently blocks the autoplay, the button still shows
-    // "enabled" and isPlaying just stays false until the visitor's first
-    // tap on it starts it for real.
+    // BGM starts on by default — attempt to play immediately on mount.
+    // Real browsers almost always block an autoplay that has no prior user
+    // gesture, so on rejection the state is reset back to "off": the button
+    // then honestly reads "click to turn on", and that click is a genuine
+    // user gesture the browser will actually let play() through on.
+    // Leaving bgmEnabled stuck at "on" here (while nothing is truly
+    // playing) meant a visitor's first click just formalized the silent
+    // "off" state instead of starting sound — it took two clicks to hear
+    // anything.
     bgmEnabledRef.current = true; setBgmEnabled(true);
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
     const fail = () => { setIsPlaying(false); };
+    const failAutoplay = () => { bgmEnabledRef.current = false; setBgmEnabled(false); setIsPlaying(false); };
     const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
-    void audio.play().then(sync).catch(fail);
+    void audio.play().then(sync).catch(failAutoplay);
     return () => { audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
   const toggle = useCallback(() => {

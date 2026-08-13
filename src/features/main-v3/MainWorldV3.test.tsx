@@ -330,13 +330,20 @@ describe('MainWorldV3 final preview', () => {
     expect(MockAudio.instances).toHaveLength(1);
   });
 
-  it('stays enabled without crashing even if the browser rejects the autoplay attempt on mount', async () => {
+  it('falls back to a clean "off" state, not a stuck fake-on one, when the browser rejects the autoplay attempt on mount', async () => {
     MockAudio.rejectNextPlay = true;
     render(<MainWorldV3 />);
     const audio = MockAudio.instances[0];
     const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
-    expect(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).not.toHaveClass('is-playing');
+
+    // A single real click should now genuinely start playback, not just
+    // "confirm" an already-fake-on state.
+    fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' }));
+    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
   });
 });
