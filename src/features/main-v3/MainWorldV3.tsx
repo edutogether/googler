@@ -52,23 +52,36 @@ function useWorldAudio() {
     if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
     audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
     audioRef.current = audio;
-    // BGM starts on by default — attempt to play immediately on mount.
-    // Real browsers almost always block an autoplay that has no prior user
-    // gesture, so on rejection the state is reset back to "off": the button
-    // then honestly reads "click to turn on", and that click is a genuine
-    // user gesture the browser will actually let play() through on.
-    // Leaving bgmEnabled stuck at "on" here (while nothing is truly
-    // playing) meant a visitor's first click just formalized the silent
-    // "off" state instead of starting sound — it took two clicks to hear
-    // anything.
+    // BGM starts on by default: the button shows "on" from the first paint
+    // and an autoplay attempt fires immediately. Browsers block autoplay
+    // until the visitor's first interaction, so when that attempt is
+    // rejected, one-time capture listeners wait for the very first gesture
+    // anywhere on the page (any click/tap/key) and start playback right
+    // then — the visitor never has to find the BGM button itself.
     bgmEnabledRef.current = true; setBgmEnabled(true);
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
+    let cancelled = false;
+    const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;
+    let removeFirstGesture = () => {};
+    let retryInFlight = false;
     const fail = () => { setIsPlaying(false); };
-    const failAutoplay = () => { bgmEnabledRef.current = false; setBgmEnabled(false); setIsPlaying(false); };
     const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
-    void audio.play().then(sync).catch(failAutoplay);
-    return () => { audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
+    const resumeAfterFirstGesture = (event: Event) => {
+      // The BGM toggle buttons run their own toggle() handler — don't fight it.
+      if (event.target instanceof Element && event.target.closest('.mw3-mini-bgm, .mw3-mobile-bgm, .mw3-audio-play')) return;
+      if (!bgmEnabledRef.current || !audio.paused) { removeFirstGesture(); return; }
+      if (retryInFlight) return;
+      retryInFlight = true;
+      void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail).finally(() => { retryInFlight = false; });
+    };
+    const armFirstGestureFallback = () => {
+      if (cancelled) return;
+      gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, true));
+      removeFirstGesture = () => gestureEvents.forEach((eventName) => window.removeEventListener(eventName, resumeAfterFirstGesture, true));
+    };
+    void audio.play().then(sync).catch(() => { fail(); armFirstGestureFallback(); });
+    return () => { cancelled = true; removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
   const toggle = useCallback(() => {
     const audio = audioRef.current; if (!audio) return;

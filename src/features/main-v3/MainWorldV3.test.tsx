@@ -330,20 +330,34 @@ describe('MainWorldV3 final preview', () => {
     expect(MockAudio.instances).toHaveLength(1);
   });
 
-  it('falls back to a clean "off" state, not a stuck fake-on one, when the browser rejects the autoplay attempt on mount', async () => {
+  it('keeps showing "on" when autoplay is blocked, then starts playback on the first gesture anywhere', async () => {
     MockAudio.rejectNextPlay = true;
     render(<MainWorldV3 />);
     const audio = MockAudio.instances[0];
     const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
-    expect(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' })).toBeInTheDocument();
+    await Promise.resolve();
+    expect(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).not.toHaveClass('is-playing');
 
-    // A single real click should now genuinely start playback, not just
-    // "confirm" an already-fake-on state.
-    fireEvent.click(within(desktopCluster).getByRole('button', { name: 'BGM 켜기' }));
+    // Any first interaction on the page — not the BGM button — starts sound.
+    fireEvent.pointerDown(document.body);
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
     expect(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
+  });
+
+  it('uses the first CTA click itself to recover blocked autoplay without needing a second interaction', async () => {
+    MockAudio.rejectNextPlay = true;
+    render(<MainWorldV3 />);
+    const audio = MockAudio.instances[0];
+    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
+    await Promise.resolve();
+
+    fireEvent.click(screen.getByRole('button', { name: /새로운 여정 시작하기/ }));
+
+    await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(2));
+    expect(document.querySelector('.mw3-desktop-profile .mw3-mini-bgm')).toHaveAttribute('aria-label', 'BGM 끄기');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-equalizer')).toHaveClass('is-playing');
   });
 });
