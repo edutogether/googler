@@ -39,8 +39,8 @@ function saveSfx(enabled: boolean) { try { window.localStorage.setItem(MAIN_V3_S
 
 function useWorldAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const bgmEnabledRef = useRef(false);
-  const [bgmEnabled, setBgmEnabled] = useState(false);
+  const bgmEnabledRef = useRef(true);
+  const [bgmEnabled, setBgmEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
@@ -52,15 +52,16 @@ function useWorldAudio() {
     if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
     audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
     audioRef.current = audio;
-    // BGM starts off on every device — an autoplay attempt that gets
-    // silently blocked by the browser, then suddenly fires on the
-    // visitor's next unrelated click, reads as a startling glitch rather
-    // than music. Playback only ever starts from an explicit tap on the
-    // BGM button, via toggle() below.
+    // BGM starts on by default — attempt to play immediately on mount. If
+    // the browser silently blocks the autoplay, the button still shows
+    // "enabled" and isPlaying just stays false until the visitor's first
+    // tap on it starts it for real.
+    bgmEnabledRef.current = true; setBgmEnabled(true);
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
     const fail = () => { setIsPlaying(false); };
     const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
     audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
+    void audio.play().then(sync).catch(fail);
     return () => { audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
   }, [sync]);
   const toggle = useCallback(() => {
