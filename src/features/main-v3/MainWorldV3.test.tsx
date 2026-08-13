@@ -290,6 +290,10 @@ describe('MainWorldV3 final preview', () => {
       expect(scene).toHaveAttribute('aria-hidden', 'true');
       expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
       expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull();
+      // Header/audio-control clicks keep their own meaning and must NOT
+      // summon the coming-soon card — only a click on the scene itself does.
+      fireEvent.click(document.querySelector('.mw3-desktop-profile .mw3-notification') as HTMLElement);
+      expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull();
       fireEvent.click(document.querySelector('.mw3-shell') as HTMLElement);
       expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument();
       expect(document.querySelector('.mw3-scene-veil')).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { WorldIcon } from './WorldIcons';
 import './MainWorldV3.css';
 
@@ -240,7 +240,13 @@ function MainWorldV3Scene() {
   const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
   const showsMainWorld = activeNav === 'explore';
   useEffect(() => { setConstructionVisible(false); }, [activeNav]);
-  const revealConstruction = () => { if (desktopScene && !constructionVisible) setConstructionVisible(true); };
+  const revealConstruction = (event: ReactMouseEvent<HTMLElement>) => {
+    // Clicks on the header and audio controls keep their own meaning (open
+    // notifications, toggle BGM, switch pages) — only a click on the scene
+    // itself summons the coming-soon card.
+    if (event.target instanceof Element && event.target.closest('.mw3-header, .mw3-desktop-profile, .mw3-audio')) return;
+    if (desktopScene && !constructionVisible) setConstructionVisible(true);
+  };
   const activateNavigation = (item: (typeof navigation)[number]) => {
     if (item.id === activeNav) return;
     if (!isMobile) playUiSound('click', sfxOn);
