@@ -393,6 +393,7 @@
   .mw3-mini-bgm-control:hover .mw3-mini-volume-panel, .mw3-mini-bgm-control:focus-within .mw3-mini-volume-panel { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); transition-delay: 0ms; }
   .mw3-mini-bgm-control[data-volume-tray-dismissed="true"] .mw3-mini-volume-panel { opacity: 0; pointer-events: none; }
   .mw3-mini-volume-panel input { display: block; width: 100%; height: 20px; margin: 0; accent-color: #3d7fce; cursor: pointer; }
+  .mw3-mini-volume-panel input:disabled { cursor: default; opacity: .55; }
   .mw3-mini-song { position: relative; display: block; min-width: 0; overflow: hidden; color: #3f4b46; font-size: clamp(13px, .78vw, 15px); font-weight: 600; letter-spacing: -.035em; line-height: 1.4; mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); white-space: nowrap; }
   .mw3-mini-song-track { display: flex; width: max-content; animation: mw3-mini-tape-marquee 16s linear infinite; }
   .mw3-mini-song-track > span { flex: 0 0 auto; padding-right: 8.5em; }
