@@ -6,6 +6,18 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 - 브랜치: `main` (배포 브랜치이자 작업 브랜치, GitHub Pages 자동 배포)
 - 2026-08-10 외부 리뷰: `docs/EXTERNAL_HEALTH_REVIEW_20260810.md`
 
+## 전시 프리즈 — 복구 지점 (2026-08-13)
+
+**태그 `googler-exhibition-freeze-2026-08-13`** (커밋 990046e) = 전시 준비 10/10 검증 완료 시점. 테스트 25개·타입체크·lint·시각 회귀 20장·PC/모바일 라이브 실기 확인까지 전부 통과한 상태.
+
+이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
+
+```bash
+git checkout googler-exhibition-freeze-2026-08-13 -- .
+```
+
+그 다음 변경사항 확인 후 커밋·푸시하면 GitHub Pages가 검증된 상태로 재배포된다.
+
 ## 시각 회귀 검사 (2026-08-13 도입)
 
 CSS/화면 수정 후 배포 전에 반드시 실행:
