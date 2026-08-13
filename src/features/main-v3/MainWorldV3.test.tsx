@@ -137,41 +137,47 @@ describe('MainWorldV3 final preview', () => {
   });
 
   it('keeps compact desktop controls and badge discovery available at the 1024 CSS breakpoint', () => {
+    // try/finally so a failing assertion can't skip the restore and leak the
+    // stubbed viewport width into every later test in this file.
     const originalInnerWidth = window.innerWidth;
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1009 });
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
-    render(<MainWorldV3 />);
+    try {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1009 });
+      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+      render(<MainWorldV3 />);
 
-    const cluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
-    expect(within(cluster).getByRole('button', { name: /BGM 켜기|BGM 끄기/ })).toBeInTheDocument();
-    expect(within(cluster).getByRole('button', { name: '호기심 많은 구글러 프로필 보기' })).toBeInTheDocument();
-    expect(within(cluster).getByRole('button', { name: '알림 보기' })).toBeInTheDocument();
-    expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
-
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+      const cluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
+      expect(within(cluster).getByRole('button', { name: /BGM 켜기|BGM 끄기/ })).toBeInTheDocument();
+      expect(within(cluster).getByRole('button', { name: '호기심 많은 구글러 프로필 보기' })).toBeInTheDocument();
+      expect(within(cluster).getByRole('button', { name: '알림 보기' })).toBeInTheDocument();
+      expect(screen.getByLabelText('더 많은 배지')).toHaveTextContent('…');
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+    }
   });
 
   it('uses the compact mobile composition without a guide bubble or bottom audio dock', () => {
     const originalInnerWidth = window.innerWidth;
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
-    vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('max-width') })));
-    render(<MainWorldV3 />);
+    try {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+      vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('max-width') })));
+      render(<MainWorldV3 />);
 
-    expect(screen.getAllByRole('button', { name: /^(홈|퀘스트|플래너|도감|커뮤니티)$/ })).toHaveLength(5);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler의 여정을');
-    expect(screen.getByText('호기심으로 배우고 성장하며,')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '새로운 여정' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '이어하기' })).toBeInTheDocument();
-    expect(document.querySelector('.mw3-guide')).toBeNull();
-    expect(document.querySelector('.mw3-audio')).toBeNull();
-    expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
-    expect(document.querySelectorAll('.mw3-mobile-google-mark')).toHaveLength(2);
-    expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고 성장하며,세상에 긍정적인 변화를 만들어요.');
-    expect(document.querySelectorAll('.mw3-title-line')).toHaveLength(2);
-    expect(document.querySelectorAll('.mw3-description-line')).toHaveLength(2);
-    expect(document.querySelector('.mw3-badge-layout')).toBeNull();
-
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+      expect(screen.getAllByRole('button', { name: /^(홈|퀘스트|플래너|도감|커뮤니티)$/ })).toHaveLength(5);
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Googler의 여정을');
+      expect(screen.getByText('호기심으로 배우고 성장하며,')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: '새로운 여정' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: '이어하기' })).toBeInTheDocument();
+      expect(document.querySelector('.mw3-guide')).toBeNull();
+      expect(document.querySelector('.mw3-audio')).toBeNull();
+      expect(document.querySelectorAll('.mw3-summary > *')).toHaveLength(3);
+      expect(document.querySelectorAll('.mw3-mobile-google-mark')).toHaveLength(2);
+      expect(document.querySelector('.mw3-description')).toHaveTextContent('호기심으로 배우고 성장하며,세상에 긍정적인 변화를 만들어요.');
+      expect(document.querySelectorAll('.mw3-title-line')).toHaveLength(2);
+      expect(document.querySelectorAll('.mw3-description-line')).toHaveLength(2);
+      expect(document.querySelector('.mw3-badge-layout')).toBeNull();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+    }
   });
 
   it('types the desktop guide message and keeps the full message when reduced motion is requested', () => {
