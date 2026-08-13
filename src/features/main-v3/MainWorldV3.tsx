@@ -4,7 +4,7 @@ import './MainWorldV3.css';
 
 const base = import.meta.env.BASE_URL;
 const asset = (path: string) => `${base}${path}`;
-const BGM_SOURCE = asset('audio/bgm/moonlit-voyager-village-loop.mp3');
+const BGM_SOURCE = asset('audio/bgm/moonlit-voyager-village-loop-opt.mp3');
 export const MAIN_V3_BGM_STORAGE_KEY = 'be-a-googler:main-v3-bgm';
 export const MAIN_V3_SFX_STORAGE_KEY = 'be-a-googler:main-v3-sfx';
 const DEFAULT_VOLUME = 1;
@@ -19,10 +19,10 @@ const navigation = [
 ] as const;
 
 const desktopScenes = {
-  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png', mobileAsset: 'visual-reset/quest/be-a-googler-quest-1080x2340-mobile-v1-opt.webp' },
-  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가의 여정을 계획할 플래너를 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7.png', mobileAsset: 'visual-reset/planner/be-a-googler-dakku-planner-1080x2340-mobile-v1-opt.webp' },
-  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10.png', mobileAsset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1080x2340-mobile-v1-opt.webp' },
-  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11.png', mobileAsset: 'visual-reset/community/be-a-googler-community-1080x2340-mobile-v1-opt.webp' },
+  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10-opt.webp', mobileAsset: 'visual-reset/quest/be-a-googler-quest-1080x2340-mobile-v1-opt.webp' },
+  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가의 여정을 계획할 플래너를 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7-opt.webp', mobileAsset: 'visual-reset/planner/be-a-googler-dakku-planner-1080x2340-mobile-v1-opt.webp' },
+  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10-opt.webp', mobileAsset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1080x2340-mobile-v1-opt.webp' },
+  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11-opt.webp', mobileAsset: 'visual-reset/community/be-a-googler-community-1080x2340-mobile-v1-opt.webp' },
 } as const;
 
 const desktopBadges = [
@@ -268,7 +268,7 @@ function MainWorldV3Scene() {
   };
   return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}${desktopScene && !constructionVisible ? ' mw3-shell--awaiting-tap' : ''}`} data-transition={transitionPhase} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={revealConstruction}>
     {transitionPhase !== 'idle' && <div className={`mw3-transition-veil mw3-transition-veil--${transitionPhase}`} aria-hidden="true"><img className="mw3-transition-backdrop" src={asset(isMobile ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp')} alt="" /><div className="mw3-transition-loader"><div className="mw3-transition-dots"><i /><i /><i /></div><div className="mw3-transition-track"><i /></div><span>다음 여정으로 이동 중…</span></div><div className="mw3-transition-flash" /></div>}
-    <img className="mw3-background" src={asset(isMobile ? 'visual-reset/main/be-a-googler-main-mobile-opt.webp' : 'visual-reset/main/be-a-googler-main-desktop-16x9.png')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
+    <img className="mw3-background" src={asset(isMobile ? 'visual-reset/main/be-a-googler-main-mobile-opt.webp' : 'visual-reset/main/be-a-googler-main-desktop-16x9-opt.webp')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {/* The backdrop layer is only ever visible on the desktop breakpoint
         (min-width: 1000px); rendering it on mobile still downloads the
         multi-MB desktop scene even though CSS hides it, so it is left out

@@ -25,3 +25,7 @@ Thumbs.db
 # Editor files
 .vscode/
 .idea/
+
+# Visual regression artifacts (machine-specific renderings)
+.visual-baselines/
+.visual-diffs/

@@ -2,9 +2,17 @@
 
 Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite). 상위 원칙은 [D:\Project\CLAUDE.md](../../CLAUDE.md) 상속 — 여기는 이 앱 전용 상태/이슈만 기록한다.
 
-## 현재 상태 (2026-08-10 기준)
-- 브랜치: `feature/main-mobile-final-20260805`
+## 현재 상태 (2026-08-13 기준)
+- 브랜치: `main` (배포 브랜치이자 작업 브랜치, GitHub Pages 자동 배포)
 - 2026-08-10 외부 리뷰: `docs/EXTERNAL_HEALTH_REVIEW_20260810.md`
+
+## 시각 회귀 검사 (2026-08-13 도입)
+
+CSS/화면 수정 후 배포 전에 반드시 실행:
+
+- `npm run visual` — 홈+서브페이지 4개 × 해상도 4종(1920/1280/850/390)을 기준 스크린샷과 픽셀 비교. 다르면 실패하고 `.visual-diffs/`에 비교 이미지 저장.
+- `npm run visual:update` — 화면을 의도적으로 바꿨을 때 기준(정답지)을 갱신.
+- 기준 이미지는 `.visual-baselines/`(gitignore됨)에 로컬 저장 — 같은 PC에서만 유효.
 
 ## 알려진 이슈 — 다음 작업 후보
 

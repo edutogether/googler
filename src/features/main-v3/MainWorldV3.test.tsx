@@ -209,7 +209,7 @@ describe('MainWorldV3 final preview', () => {
     render(<MainWorldV3 />);
     const audio = MockAudio.instances[0];
     expect(MockAudio.instances).toHaveLength(1);
-    expect(audio.src).toContain('/audio/bgm/moonlit-voyager-village-loop.mp3');
+    expect(audio.src).toContain('/audio/bgm/moonlit-voyager-village-loop-opt.mp3');
     expect(audio.loop).toBe(true);
     expect(audio.preload).toBe('auto');
     expect(audio.volume).toBe(1);
@@ -218,7 +218,7 @@ describe('MainWorldV3 final preview', () => {
     await waitFor(() => expect(audio.play).toHaveBeenCalledTimes(1));
     expect(within(desktopCluster).getByRole('button', { name: 'BGM 끄기' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
-    await waitFor(() => expect(document.querySelector('.mw3-quest-scene')).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png')), { timeout: 2000 });
+    await waitFor(() => expect(document.querySelector('.mw3-quest-scene')).toHaveAttribute('src', expect.stringContaining('visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10-opt.webp')), { timeout: 2000 });
     expect(document.querySelector('.mw3-hero')).toBeNull();
     expect(document.querySelector('.mw3-summary')).toBeNull();
     expect(screen.getByRole('button', { name: '퀘스트' })).toHaveAttribute('aria-current', 'page');
@@ -276,9 +276,9 @@ describe('MainWorldV3 final preview', () => {
     render(<MainWorldV3 />);
 
     const scenes = {
-      퀘스트: { shellClass: 'mw3-shell--quest', sceneClass: 'mw3-quest-scene', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10.png' },
-      도감: { shellClass: 'mw3-shell--encyclopedia', sceneClass: 'mw3-encyclopedia-scene', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10.png' },
-      커뮤니티: { shellClass: 'mw3-shell--community', sceneClass: 'mw3-community-scene', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11.png' },
+      퀘스트: { shellClass: 'mw3-shell--quest', sceneClass: 'mw3-quest-scene', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10-opt.webp' },
+      도감: { shellClass: 'mw3-shell--encyclopedia', sceneClass: 'mw3-encyclopedia-scene', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10-opt.webp' },
+      커뮤니티: { shellClass: 'mw3-shell--community', sceneClass: 'mw3-community-scene', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11-opt.webp' },
     } as const;
 
     for (const label of Object.keys(scenes) as Array<keyof typeof scenes>) {
@@ -318,7 +318,7 @@ describe('MainWorldV3 final preview', () => {
     await waitFor(() => expect(document.querySelector('.mw3-planner-scene')).toBeInTheDocument(), { timeout: 2000 });
 
     const plannerScene = document.querySelector('.mw3-planner-scene') as HTMLImageElement;
-    expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7.png'));
+    expect(plannerScene).toHaveAttribute('src', expect.stringContaining('visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7-opt.webp'));
     expect(plannerScene).toHaveAttribute('alt', '');
     expect(plannerScene).toHaveAttribute('aria-hidden', 'true');
     expect(document.querySelector('.mw3-shell')).toHaveClass('mw3-shell--planner');
