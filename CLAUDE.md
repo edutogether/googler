@@ -6,16 +6,16 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 - 브랜치: `main` (배포 브랜치이자 작업 브랜치, GitHub Pages 자동 배포)
 - 2026-08-10 외부 리뷰: `docs/EXTERNAL_HEALTH_REVIEW_20260810.md`
 
-## 전시 프리즈 — 복구 지점 (최신: 2026-08-14)
+## 전시 프리즈 — 복구 지점 (최신: 2026-08-17)
 
-**태그 `googler-exhibition-freeze-2026-08-14`** (커밋 5413b7c) = 최신 검증 완료 시점. 부트 스플래시, BGM 볼륨 리렌더 병목 수정 포함. 테스트 25개·타입체크·lint·시각 회귀 20장·CI 성공·라이브 확인까지 전부 통과.
+**태그 `googler-exhibition-freeze-2026-08-17`** (커밋 e936bfe) = 최신 검증 완료 시점. CI push 트리거 정상화(main), 배포 워크플로에 typecheck/lint/test 게이트 추가, `__initial_auth_token` 무검증 인증 코드 제거, journey/visual-reset 프로토타입 브랜치 5개 archive 정리 포함. 테스트 25개·타입체크·lint·build·CI 성공·라이브 확인까지 전부 통과.
 
-이전 지점 `googler-exhibition-freeze-2026-08-13`(커밋 990046e)도 그대로 보존돼 있다 — 더 이전 상태로 돌아가야 할 특수한 경우에만 사용.
+이전 지점 `googler-exhibition-freeze-2026-08-14`(커밋 5413b7c), `googler-exhibition-freeze-2026-08-13`(커밋 990046e)도 그대로 보존돼 있다 — 더 이전 상태로 돌아가야 할 특수한 경우에만 사용.
 
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-exhibition-freeze-2026-08-14 -- .
+git checkout googler-exhibition-freeze-2026-08-17 -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 GitHub Pages가 검증된 상태로 재배포된다.
