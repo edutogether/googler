@@ -6,6 +6,17 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 - 브랜치: `main` (배포 브랜치이자 작업 브랜치, GitHub Pages 자동 배포)
 - 2026-08-10 외부 리뷰: `docs/EXTERNAL_HEALTH_REVIEW_20260810.md`
 
+## Firebase 프로젝트 (2026-08-17 신규 생성, 준비 완료)
+
+- **Google Cloud/Firebase 프로젝트 ID: `be-a-g00gler`** (조직 없음). 프로젝트 ID엔 "google" 문자열이 상표 정책상 금지돼 있어서 `googler`를 그대로 못 씀 — 그래서 두 번째 `o`를 숫자 `0`(zero)으로 바꾼 형태. 프로젝트 표시 이름은 "Be a Googler" 그대로.
+- **완료된 것:**
+  - 웹 앱 등록 완료, 6개 SDK 키를 GitHub repo secrets에 등록 완료(`VITE_FIREBASE_API_KEY` 등 — `deploy-pages.yml`이 이미 이 이름들로 읽음)
+  - Firestore Database 활성화(Standard edition, 서울 리전), 이 저장소의 `firestore.rules` 콘솔에 게시 완료
+  - Authentication에서 익명 로그인 활성화(Auto clean-up 30일 켜짐 — 이 앱은 20일 완주 프로그램이라 주기상 문제없음)
+  - Google Cloud 예산 알림 설정 완료(Alerts only, googler 프로젝트 단독 스코프)
+  - App Check 등록 완료(reCAPTCHA v3, 도메인 `edutogether.github.io`) — **Enforce는 의도적으로 꺼둔 상태(모니터링만)**. 며칠 정상 동작 확인 후 강제 적용으로 전환할 것.
+- **아직 코드에서 안 쓰는 상태**: 위 준비는 다 끝났지만 `MainWorldV3`가 여전히 Firebase를 호출하지 않는 정적 셸이라, 이 설정들은 실제로 켜지지(트래픽이 흐르지) 않고 있다. 재배선 작업을 시작하는 순간 비로소 이 인프라가 실제로 쓰이기 시작한다.
+
 ## 전시 프리즈 — 복구 지점 (최신: 2026-08-17)
 
 **태그 `googler-exhibition-freeze-2026-08-17`** (커밋 e936bfe) = 최신 검증 완료 시점. CI push 트리거 정상화(main), 배포 워크플로에 typecheck/lint/test 게이트 추가, `__initial_auth_token` 무검증 인증 코드 제거, journey/visual-reset 프로토타입 브랜치 5개 archive 정리 포함. 테스트 25개·타입체크·lint·build·CI 성공·라이브 확인까지 전부 통과.
@@ -51,7 +62,7 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
 
 2026-08-17 최상위 전체 감사에서 googler는 "전시용 기준"으로 재평가되어 54.5점🔴 → 74.9점🟢으로 올라갔다. **이 74.9점은 "Firebase를 켜기 전까지"라는 조건이 붙은 점수다** — MainWorldV3/LegacyGooglerApp 단절과 Firestore 보안규칙 부재가 평가에서 제외된 결과이기 때문. **Firebase를 실제로 켜는 순간 이 평가는 원래 점수(54.5점, 레드 4개)로 되돌아간다는 걸 반드시 기억할 것.**
 
-그 시점(재배선 착수)에 참고할 것:
+2026-08-17 당일 후속 조치로 Firebase 프로젝트 생성과 firestore.rules/예산알림/App Check까지 전부 준비를 끝내뒀다(위 "Firebase 프로젝트" 섹션 참고) — 그래서 "규칙 없이 무방비로 켜질" 위험은 이제 없다. 다만 이건 인프라 준비일 뿐, 아래는 여전히 유효하다:
+
 - 재연결에 필요한 구체 항목 체크리스트: `D:\Project\_audits\20260817\googler.md`
-- Firestore 보안규칙 파일이 저장소에 아예 없음 — 랭킹 문서를 클라이언트가 준 uid로 그대로 쓰는 구조라, 규칙 없이 Firebase를 켜면 누구나 남의 기록을 조작할 수 있다. **Firebase를 켜기로 결정하는 그 순간(그 전이 아니라)** firestore.rules 작성 + 예산 알림 설정이 필수.
 - XP/레벨/배지 개념 자체가 `domain/progress.ts`에 없어서, 단순 "재배선"이 아니라 도메인 로직을 새로 설계해야 하는 규모다 (기존에 알려졌던 것보다 심각하다는 게 2026-08-17 재검증 결과).
