@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { collection, doc, getDoc, getFirestore, onSnapshot, setDoc } from 'firebase/firestore';
 import type { AppServices, LeaderboardEntry, Profile } from '../appServices';
 import type { FirebaseConfig } from './config';
@@ -13,10 +13,7 @@ export function createFirebaseServices(config: FirebaseConfig): AppServices {
   return {
     mode: 'firebase',
     subscribeToSession: (onUser) => {
-      void (async () => {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-        else await signInAnonymously(auth);
-      })();
+      void signInAnonymously(auth);
       return onAuthStateChanged(auth, (user) => onUser(user?.uid ?? null));
     },
     profiles: {
