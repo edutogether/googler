@@ -27,7 +27,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
   - Firebase SDK `11.0.2` → `^12.18.0` 업그레이드(2026-08-23, `@firebase/rules-unit-testing`이 v12를 요구해서 겸사겸사) — typecheck/lint/test 25개/build 전부 재확인, 번들 크기 불변.
   - Authentication에서 익명 로그인 활성화(Auto clean-up 30일 켜짐 — 이 앱은 20일 완주 프로그램이라 주기상 문제없음)
   - Google Cloud 예산 알림 설정 완료(Alerts only, googler 프로젝트 단독 스코프). **한계 인지할 것: 이건 임계값 넘으면 메일만 오는 것이고, 실제로 API 호출을 막거나 결제를 중단시키진 않는다.** 진짜 강제 차단이 필요하면 예산 초과 시 API를 비활성화하는 Cloud Function을 별도로 만들어야 함(아직 없음).
-  - App Check 등록 완료(reCAPTCHA v3, 도메인 `edutogether.github.io`) — **Enforce는 의도적으로 꺼둔 상태(모니터링만)**. 익명 로그인 무제한 + 지금 추가한 필드검증 조합에서 이게 유일한 봇/스크립트 방어선이니, 재배선 착수 전에는 반드시 켤 것.
+  - App Check 등록 완료(reCAPTCHA v3, 도메인 `edutogether.github.io`), **Cloud Firestore API에 Enforce 켜짐(2026-08-23)**. 최신 Firebase 콘솔은 앱 단위가 아니라 API 단위로 Enforce를 건다 — App Check → APIs 탭에서 Cloud Firestore 항목을 켠 것. Authentication API는 별개 항목으로 아직 Unenforced 상태로 남아있음(요청받은 범위가 Firestore였어서 그대로 둠, 필요해지면 같은 화면에서 켜면 됨). 이유: 클라이언트 코드가 Firebase를 안 부르더라도 Firestore 프로젝트 자체는 인터넷에 살아있어서, 프로젝트 ID만 알면 REST API로 직접 두드릴 수 있음 — App Check가 그 뒷문을 막는 유일한 방어선.
 
 ## 전시 프리즈 — 복구 지점 (최신: 2026-08-17)
 
