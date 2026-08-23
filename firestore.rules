@@ -22,12 +22,26 @@ service cloud.firestore {
     // Public leaderboard: anyone may read it (it's a leaderboard), but a
     // write must come from the signed-in user it claims to be — both the
     // document ID and the uid field inside the entry must match the caller,
-    // so no one can write to, or masquerade as, another entrant.
+    // so no one can write to, or masquerade as, another entrant. The write
+    // also has to match this exact shape: no extra fields, and each field
+    // bounded in type/length/range — Firestore rules have no single
+    // "document byte size" check, so bounding every allowed field is what
+    // stands in for a size limit here. The score ceiling (100000) is a
+    // generous sanity cap, not a real business rule — domain/progress.ts
+    // doesn't define an actual max score yet, so this just blocks obviously
+    // abusive values (e.g. 999999999) rather than enforcing a precise range.
     match /artifacts/{appId}/public/data/rankings/{uid} {
       allow read: if true;
       allow write: if request.auth != null
         && request.auth.uid == uid
-        && request.resource.data.uid == uid;
+        && request.resource.data.uid == uid
+        && request.resource.data.keys().hasOnly(['uid', 'nickname', 'emoji', 'scoreL1', 'scoreL2', 'passedL1', 'passedL2'])
+        && request.resource.data.nickname is string && request.resource.data.nickname.size() <= 30
+        && request.resource.data.emoji is string && request.resource.data.emoji.size() <= 8
+        && (!('scoreL1' in request.resource.data) || (request.resource.data.scoreL1 is number && request.resource.data.scoreL1 >= 0 && request.resource.data.scoreL1 <= 100000))
+        && (!('scoreL2' in request.resource.data) || (request.resource.data.scoreL2 is number && request.resource.data.scoreL2 >= 0 && request.resource.data.scoreL2 <= 100000))
+        && (!('passedL1' in request.resource.data) || request.resource.data.passedL1 is bool)
+        && (!('passedL2' in request.resource.data) || request.resource.data.passedL2 is bool);
     }
 
     // Everything else: denied by default.
