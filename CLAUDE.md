@@ -97,5 +97,14 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
    - 참고: `eslint`(9→10), `typescript`(5→7), `jsdom`(25→30) 등은 이번엔 건드리지 않음 — 승인 범위(React/Vite) 밖이라 별도 논의 없이 끼워넣지 않았음.
 
 3. **Tailwind CSS 3→4** (2026-08-25, 별도 승인 후 진행) — 완료·배포됨(커밋 `b3ef2e9`). 기존 설정이 테마 커스터마이징·플러그인 없이 최소 구성이라 마이그레이션이 단순했음: `src/index.css`의 `@tailwind base/components/utilities` 3줄이 `@import "tailwindcss";` 한 줄로 축약, PostCSS 플러그인이 `tailwindcss` → `@tailwindcss/postcss`로 교체(v4가 벤더 프리픽스를 자체 처리해서 `autoprefixer`는 제거), `tailwind.config.js`는 기존 content 글롭이 v4의 기본 자동 감지 범위와 동일해서 삭제. 시각 회귀 20/20 통과(Vite 8 업그레이드 때부터 있던 홈 화면 0.040% 오차 외 신규 차이 없음)로 실제 렌더링 변화 없음 확인.
+
+## 나머지 outdated 패키지 정리 (2026-08-25)
+
+`npm outdated`에 남아있던 6개를 검토 — 3개는 그대로 올리고, 3개는 각자 다른 진짜 이유로 보류. **이건 "밀린 일"이 아니라 각 패키지가 안정되거나 이 컴포넌트를 손볼 때 다시 검토할 참고 메모다:**
+
+- **올린 것**: `@testing-library/jest-dom` 6→7, `lucide-react` 0.468→1.34 — 둘 다 코드 변경 없이 그대로 통과, 시각 회귀 20/20 확인(커밋 `0536b59`).
+- **보류: `eslint` 9→10 + `eslint-plugin-react-hooks` 5→7`** — 이 둘은 따로 뗄 수 없다(hooks 플러그인이 eslint 10을 지원하는 버전 자체가 새 엄격 규칙까지 같이 딸려 나옴). 새 규칙(`set-state-in-effect`, `refs`)이 `MainWorldV3.tsx` 5곳에 걸리는데, 전부 이미 잘 동작하는 기존 패턴이라 "버전 올리기"가 아니라 "이 취약한 컴포넌트를 리팩터링하기"가 되어버림 — 재배선 라운드에서 그 컴포넌트를 어차피 다시 만질 때 같이 검토.
+- **보류: `jsdom` 25→30** — 로컬에서 재현: `MainWorldV3.test.tsx`의 씬 전환 테스트 2개가 `data-transition="loading"`에서 멈춘 채 결정적으로 실패함(jsdom을 25로만 되돌리면 통과 — 원인 확정). React 19가 이미 한 번 노출시킨 것과 같은 계열의 타이밍 취약성(위 "React 19" 항목 참고)을 jsdom 30이 한 번 더 노출시킨 것으로 보임. 컴포넌트를 실제로 손봐야 안전하게 고칠 수 있어서 별도 조사 대상으로 남겨둠.
+- **보류: `typescript` 5→7** — 사용자 결정(2026-08-25): 일반적인 메이저 버전이 아니라 tsc를 통째로 Go로 새로 짠 네이티브 컴파일러 전환(6.x 정식 출시 없이 바로 7.0)이라 아직 생태계가 덜 다져졌다고 판단, 안정화되면 그때 다시 검토하기로 함.
 3. **Sentry 에러 모니터링** — 완료·배포됨. Sentry 프로젝트 "Be a Googler"(조직: 817beatles 개인 계정, codyssey와 별개 프로젝트). `src/main.tsx`에서 `import.meta.env.PROD`일 때만 `Sentry.init()` 실행(로컬 개발/테스트 중엔 잡음 안 남), `<Sentry.ErrorBoundary>`로 `<App />` 감싸서 렌더 크래시 시 한국어 폴백 문구 표시. DSN(`https://bb25f9469e6a53b7fb3b8c4dbaac0965@o4511966927912960.ingest.us.sentry.io/4511966996267008`)은 GitHub secret이 아니라 소스에 그대로 하드코딩 — Firebase API 키와 달리 Sentry는 DSN을 "전송 전용 공개 주소"로 문서화해 클라이언트 코드 노출이 안전하다고 명시함. 로컬 프로덕션 빌드에서 강제로 에러를 던져 실제로 Sentry ingest 엔드포인트로 전송되는 것까지 확인 후 배포(커밋 `5266e73`).
 4. **개인정보처리방침 페이지** — 완료. `public/privacy.html`, 라이브: `https://edutogether.github.io/googler/privacy.html`.
