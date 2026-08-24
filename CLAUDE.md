@@ -86,6 +86,10 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
 사용자가 4건 모두 동시 진행을 명시적으로 승인("4건 다 지금 진행", 의존성 업그레이드는 원래 이번 라운드엔 급하지 않다고 권고했으나 사용자가 진행 결정).
 
 1. **App Check Enforce (Authentication)** — 완료. Cloud Firestore에 이어 Authentication API도 Enforce 켜짐(위 Firebase 섹션 참고).
-2. **의존성 메이저 업그레이드 (React 18→19, Vite 6→8)** — 아직 미착수. 승인은 났지만 손 안 댐.
+2. **의존성 메이저 업그레이드 (React 18→19, Vite 6→8)** — 완료·배포됨.
+   - React 19: `useRef<number>()`처럼 초기값 없는 호출을 타입이 더 이상 허용하지 않아 `MainWorldV3.tsx`의 두 곳을 `useRef<number | undefined>(undefined)`로 수정(커밋 `9c65f4f`).
+   - 이 과정에서 로컬(Windows)에선 통과하지만 GitHub Actions(Ubuntu) CI에서는 결정적으로 실패하는 테스트 하나 발견 — "다음 씬으로 전환 후 이전 '준비중' 카드가 사라졌는지" 확인하는 부분이 `activeNav` 변경에 반응하는 `useEffect`로 비동기 처리되는데, 테스트는 이걸 동기로 가정하고 있었음. React 19의 effect 스케줄링이 CI 환경에서 이 경쟁 조건을 노출시킴. `expect(...)`를 `await waitFor(...)`로 감싸 테스트가 실제 비동기 흐름을 올바르게 기다리도록 수정(컴포넌트 코드는 안 건드림, 커밋 `b193d57`).
+   - Vite 6→8: vitest 2.x와 `@vitejs/plugin-react` 4.x가 각각 Vite 5-7까지만 지원해서 Vite 8과 함께 필수로 묶어 올림 — `vite@8.2.2`, `@vitejs/plugin-react@6.1.0`, `vitest@4.1.11`. 설정 변경 없이 그대로 동작. Vite 8의 기본 CSS 압축기가 달라져 산출물 바이트가 달라졌지만(홈 화면 0.040% 차이, 허용범위 내) 시각 회귀 20/20 통과로 실제 렌더링엔 변화 없음 확인(커밋 `d9df2b1`).
+   - 참고: `eslint`(9→10), `tailwindcss`(3→4), `typescript`(5→7), `jsdom`(25→30) 등은 이번엔 건드리지 않음 — 사용자가 승인한 범위는 "React 18→19, Vite 6→8"이었고 나머지는 훨씬 더 큰 변경(특히 Tailwind 4는 설정 파일 포맷 자체가 바뀜)이라 별도 논의 없이 끼워넣지 않았음.
 3. **Sentry 에러 모니터링** — 완료·배포됨. Sentry 프로젝트 "Be a Googler"(조직: 817beatles 개인 계정, codyssey와 별개 프로젝트). `src/main.tsx`에서 `import.meta.env.PROD`일 때만 `Sentry.init()` 실행(로컬 개발/테스트 중엔 잡음 안 남), `<Sentry.ErrorBoundary>`로 `<App />` 감싸서 렌더 크래시 시 한국어 폴백 문구 표시. DSN(`https://bb25f9469e6a53b7fb3b8c4dbaac0965@o4511966927912960.ingest.us.sentry.io/4511966996267008`)은 GitHub secret이 아니라 소스에 그대로 하드코딩 — Firebase API 키와 달리 Sentry는 DSN을 "전송 전용 공개 주소"로 문서화해 클라이언트 코드 노출이 안전하다고 명시함. 로컬 프로덕션 빌드에서 강제로 에러를 던져 실제로 Sentry ingest 엔드포인트로 전송되는 것까지 확인 후 배포(커밋 `5266e73`).
 4. **개인정보처리방침 페이지** — 완료. `public/privacy.html`, 라이브: `https://edutogether.github.io/googler/privacy.html`.
