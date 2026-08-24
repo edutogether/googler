@@ -1,10 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import * as Sentry from '@sentry/react';
 import App from './App';
 import './index.css';
 
+// Only report from the real deployed build — not local dev or the test
+// runner, which would otherwise spam a real Sentry project with noise.
+// The DSN is a public, send-only address (Sentry's own docs say it's safe
+// to ship in client code), so it doesn't need to be an env-var secret.
+if (import.meta.env.PROD) {
+  Sentry.init({
+    dsn: 'https://bb25f9469e6a53b7fb3b8c4dbaac0965@o4511966927912960.ingest.us.sentry.io/4511966996267008',
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <Sentry.ErrorBoundary fallback={<p style={{ padding: '40px', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>문제가 발생했어요. 페이지를 새로고침해 주세요.</p>}>
+      <App />
+    </Sentry.ErrorBoundary>
   </React.StrictMode>,
 );
