@@ -208,7 +208,7 @@ export default function MainWorldV3() {
 
 function MainWorldV3Scene() {
   const { bgmEnabled, isPlaying, volume, toggle, setVolume } = useWorldAudio();
-  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number>(); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number>();
+  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number | undefined>(undefined); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number | undefined>(undefined);
   // Page-change transition: cover the screen, swap the page underneath
   // while hidden, hold on a loading beat, then clear — so a nav switch
   // reads as a deliberate scene change instead of content popping in.
