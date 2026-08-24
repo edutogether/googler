@@ -289,7 +289,10 @@ describe('MainWorldV3 final preview', () => {
       expect(scene).toHaveAttribute('alt', '');
       expect(scene).toHaveAttribute('aria-hidden', 'true');
       expect(document.querySelector('.mw3-shell')).toHaveClass(scenes[label].shellClass);
-      expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull();
+      // The coming-soon card from a previous scene is cleared by a
+      // useEffect keyed on activeNav, not synchronously with the click —
+      // wait for it rather than assume it already flushed.
+      await waitFor(() => expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull());
       // Header/audio-control clicks keep their own meaning and must NOT
       // summon the coming-soon card — only a click on the scene itself does.
       fireEvent.click(document.querySelector('.mw3-desktop-profile .mw3-notification') as HTMLElement);
