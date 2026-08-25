@@ -26,9 +26,9 @@ const desktopScenes = {
 } as const;
 
 const desktopBadges = [
-  { asset: 'badge-blue-v5.png', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
-  { asset: 'badge-gold-v5.png', name: '용기 있는 시작', lore: '새로운 여정을 힘차게 열었어요.' },
-  { asset: 'badge-silver-v5.png', name: '협업의 톱니', lore: '함께 배우는 힘을 발견했어요.' },
+  { asset: 'badge-blue-mobile-opt.webp', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
+  { asset: 'badge-gold-mobile-opt.webp', name: '용기 있는 시작', lore: '새로운 여정을 힘차게 열었어요.' },
+  { asset: 'badge-silver-mobile-opt.webp', name: '협업의 톱니', lore: '함께 배우는 힘을 발견했어요.' },
   { asset: 'badge-emerald.png', name: '초록 나침반', lore: '호기심의 방향을 스스로 찾았어요.' },
   { asset: 'badge-violet.png', name: '별빛 지도', lore: '배움의 별자리를 연결했어요.' },
   { asset: 'badge-coral.png', name: '반짝이는 생각', lore: '새로운 아이디어를 세상에 밝혔어요.' },
@@ -51,7 +51,7 @@ function useWorldAudio() {
     // without triggering autoplay audio; real users never set this.
     const qaMuted = new URLSearchParams(window.location.search).get('qa-mute') === '1';
     if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
-    audio.loop = true; audio.preload = 'auto'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
+    audio.loop = true; audio.preload = 'metadata'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
     audioRef.current = audio;
     // BGM starts on by default: the button shows "on" from the first paint
     // and an autoplay attempt fires immediately. Browsers block autoplay
@@ -106,12 +106,25 @@ function useWorldAudio() {
   return { bgmEnabled, isPlaying, volume, toggle, setVolume };
 }
 
+// A fresh AudioContext per click used to pile up faster than the browser
+// could close the previous ones (most browsers only allow a handful of
+// concurrent contexts), throwing on a rapid double-click or key-repeat.
+// One shared, lazily-created context reused for every click fixes that.
+let sharedUiAudioContext: AudioContext | null = null;
+function getUiAudioContext(): AudioContext | null {
+  if (typeof window.AudioContext === 'undefined') return null;
+  if (!sharedUiAudioContext || sharedUiAudioContext.state === 'closed') sharedUiAudioContext = new window.AudioContext();
+  return sharedUiAudioContext;
+}
 function playUiSound(kind: 'click' | 'chime', on: boolean) {
-  if (!on || typeof window.AudioContext === 'undefined') return;
-  const context = new window.AudioContext(); const oscillator = context.createOscillator(); const gain = context.createGain(); const start = context.currentTime; const duration = kind === 'chime' ? .16 : .07;
+  if (!on) return;
+  const context = getUiAudioContext();
+  if (!context) return;
+  if (context.state === 'suspended') void context.resume();
+  const oscillator = context.createOscillator(); const gain = context.createGain(); const start = context.currentTime; const duration = kind === 'chime' ? .16 : .07;
   oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(kind === 'chime' ? 660 : 420, start); if (kind === 'chime') oscillator.frequency.exponentialRampToValueAtTime(880, start + .11);
   gain.gain.setValueAtTime(.0001, start); gain.gain.exponentialRampToValueAtTime(.035, start + .012); gain.gain.exponentialRampToValueAtTime(.0001, start + duration);
-  oscillator.connect(gain).connect(context.destination); oscillator.start(start); oscillator.stop(start + duration + .01); oscillator.addEventListener('ended', () => void context.close());
+  oscillator.connect(gain).connect(context.destination); oscillator.start(start); oscillator.stop(start + duration + .01);
 }
 
 const VOLUME_TWEEN_MS = 260;
@@ -226,9 +239,16 @@ function MainWorldV3Scene() {
   // scenes — out of sync).
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   useEffect(() => {
-    const onResize = () => setViewportWidth(window.innerWidth);
+    // A drag-resize can fire the resize event dozens of times a second;
+    // coalescing to one state update per animation frame keeps that from
+    // triggering a matching flood of re-renders.
+    let frame = 0;
+    const onResize = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => setViewportWidth(window.innerWidth));
+    };
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    return () => { window.removeEventListener('resize', onResize); window.cancelAnimationFrame(frame); };
   }, []);
   useEffect(() => {
     // Warm the browser cache for every subpage scene right away, so the
@@ -328,6 +348,7 @@ function MainWorldV3Scene() {
         multi-MB desktop scene even though CSS hides it, so it is left out
         of the tree entirely there. */}
     {desktopScene && <>{!isMobile && <img className="mw3-scene-backdrop" src={asset(desktopScene.asset)} alt="" aria-hidden="true" />}<img className={`mw3-scene mw3-${desktopScene.name}-scene`} src={asset(isMobile ? desktopScene.mobileAsset : desktopScene.asset)} alt="" aria-hidden="true" /><div className="mw3-scene-veil" aria-hidden="true" /></>}
+    {desktopScene && !constructionVisible && <button type="button" className="mw3-construction-reveal" onClick={() => setConstructionVisible(true)}>다음 여정 안내 보기</button>}
     {isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
@@ -337,7 +358,7 @@ function MainWorldV3Scene() {
     </header>
     {showsMainWorld && <section className="mw3-hero" aria-labelledby="mw3-title"><p className="mw3-eyebrow">배움이 모험이 되는 곳 <span>✨</span></p><h1 id="mw3-title"><span className="mw3-title-line mw3-title-line--first"><span className="mw3-word-googler"><b>G</b><b>o</b><b>o</b><b>g</b><b>l</b><b>e</b><b>r</b>{isMobile ? '의 여정을' : ' 의 여정을'}</span></span><span className="mw3-title-line mw3-title-line--second">{isMobile ? <><em>시작</em>해볼까요?</> : '시작해볼까요 ?'}</span></h1><p className="mw3-description">{isMobile ? <><span className="mw3-description-line">호기심으로 배우고 성장하며,</span><span className="mw3-description-line">세상에 긍정적인 변화를 만들어요.</span></> : <span className="mw3-description-line">호기심으로 배우고 성장하며, 세상에 긍정적인 변화를 만들어요.</span>}</p><div className="mw3-cta-row"><button type="button" className="mw3-primary-cta" onClick={() => announce('새로운 여정이 곧 열립니다.', true)}><WorldIcon name="compass" />{isMobile ? '새로운 여정' : '새로운 여정 시작하기'}</button><button type="button" className="mw3-secondary-cta" onClick={() => announce()}><WorldIcon name="play" />이어하기</button></div>{!isMobile && <button type="button" className="mw3-text-action" onClick={() => announce('여정 안내를 준비 중이에요.')}>여정이란 ? <span>›</span></button>}</section>}
     {desktopScene && constructionVisible && <section key={desktopScene.name} className="mw3-construction" aria-labelledby="mw3-construction-title"><span className="mw3-construction-icon" aria-hidden="true"><WorldIcon name={desktopScene.icon} /></span><p>{desktopScene.eyebrow}</p><h2 id="mw3-construction-title">새로운 여정이<br />준비되고 있어요.</h2><small>{desktopScene.detail}</small><span>구글러를 위한 새로운 모험을 열심히 만들고 있어요.<br />조금만 기다려 주세요 !</span><button type="button" onClick={(event) => { event.stopPropagation(); setActiveNav('explore'); playUiSound('click', sfxOn); }}>메인 월드로 돌아가기 <i aria-hidden="true">›</i></button></section>}
-    {showsMainWorld && !isMobile && <aside className={`mw3-guide${guideVisible ? '' : ' is-cycling-out'}`} aria-label="구글러 길잡이 안내" style={{ '--mw3-guide-lines': Math.max(1, guideText.split('\n').length) } as CSSProperties}><p aria-live="polite" aria-atomic="true" aria-label={DESKTOP_GUIDE_MESSAGE}><span>{guideText}</span></p></aside>}
+    {showsMainWorld && !isMobile && <aside className={`mw3-guide${guideVisible ? '' : ' is-cycling-out'}`} aria-label="구글러 길잡이 안내" style={{ '--mw3-guide-lines': Math.max(1, guideText.split('\n').length) } as CSSProperties}><p aria-label={DESKTOP_GUIDE_MESSAGE}><span aria-hidden="true">{guideText}</span></p></aside>}
     {hasDesktopControls && <DesktopProfileCluster bgmEnabled={bgmEnabled} isPlaying={isPlaying} volume={volume} onToggleBgm={() => { toggle(); playUiSound('click', sfxOn); }} onVolumeChange={setVolume} onProfile={() => announce('프로필 탐험을 준비 중이에요.')} />}
     {showsMainWorld && <section className="mw3-summary" aria-label="여정 요약">
       {hasDesktopAmbient ? <article className="mw3-card mw3-card--journey">
@@ -356,5 +377,6 @@ function MainWorldV3Scene() {
     </section>}
     {!isMobile && <section className="mw3-audio" aria-label="BGM 컨트롤"><div className="mw3-track"><WorldIcon name="music" /><strong>BGM</strong><span className="mw3-song">달빛 항해자의 마을</span></div><button type="button" className="mw3-audio-play" aria-label={isPlaying ? 'BGM 일시정지' : 'BGM 재생'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name={isPlaying ? 'pause' : 'play'} /></button><span className={`mw3-equalizer ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? '움직이는 이퀄라이저' : '정지된 이퀄라이저'}><i /><i /><i /><i /></span><div className="mw3-sfx"><WorldIcon name="speaker" /><span>효과음 켜짐</span><button type="button" role="switch" aria-checked={sfxOn} aria-label="효과음 켜기 또는 끄기" className={sfxOn ? 'is-on' : ''} onClick={toggleSfx}><i /></button></div></section>}
     <div className={`mw3-toast ${toast ? 'is-visible' : ''}`} role="status" aria-live="polite">{toast}</div>
+    <a className="mw3-privacy-link" href={asset('privacy.html')} target="_blank" rel="noopener">개인정보처리방침</a>
   </main>;
 }

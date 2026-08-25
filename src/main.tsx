@@ -9,8 +9,18 @@ import './index.css';
 // The DSN is a public, send-only address (Sentry's own docs say it's safe
 // to ship in client code), so it doesn't need to be an env-var secret.
 if (import.meta.env.PROD) {
+  // Circuit breaker: without a cap, a bug that throws on every render (or
+  // every frame of an animation loop) could burn the whole monthly Sentry
+  // quota from a single visitor's session before anyone notices.
+  const MAX_EVENTS_PER_SESSION = 20;
+  let eventCount = 0;
   Sentry.init({
     dsn: 'https://bb25f9469e6a53b7fb3b8c4dbaac0965@o4511966927912960.ingest.us.sentry.io/4511966996267008',
+    environment: 'production',
+    beforeSend(event) {
+      eventCount += 1;
+      return eventCount <= MAX_EVENTS_PER_SESSION ? event : null;
+    },
   });
 }
 

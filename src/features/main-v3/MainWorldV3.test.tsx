@@ -79,9 +79,9 @@ describe('MainWorldV3 final preview', () => {
       'profile-avatar.png',
       'journey-avatar-medallion.png',
       'data-island-thumbnail-v6-opt.webp',
-      'badge-blue-v5.png',
-      'badge-gold-v5.png',
-      'badge-silver-v5.png',
+      'badge-blue-mobile-opt.webp',
+      'badge-gold-mobile-opt.webp',
+      'badge-silver-mobile-opt.webp',
       'badge-emerald.png',
       'badge-violet.png',
       'badge-coral.png',
@@ -211,7 +211,7 @@ describe('MainWorldV3 final preview', () => {
     expect(MockAudio.instances).toHaveLength(1);
     expect(audio.src).toContain('/audio/bgm/moonlit-voyager-village-loop-opt.mp3');
     expect(audio.loop).toBe(true);
-    expect(audio.preload).toBe('auto');
+    expect(audio.preload).toBe('metadata');
     expect(audio.volume).toBe(1);
     expect(window.localStorage.getItem(MAIN_V3_BGM_STORAGE_KEY)).toBeNull();
     const desktopCluster = document.querySelector('.mw3-desktop-profile') as HTMLElement;
