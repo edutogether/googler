@@ -129,3 +129,10 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
 실측 검증: typecheck/lint/test(25/25, Firestore 규칙 포함)/build 전부 통과, 시각 회귀 20/20 완전 일치(0.000%). 실제 브라우저로 소스맵·release SHA 번들 포함 확인, 배지 6개 전부 webp로 로드, CSP 켠 채로 콘솔 에러 0, nav 버튼에 마우스만 올려도 해당 씬 하나만 정확히 요청되는 것, 클릭 내비게이션 정상 동작까지 확인.
 
 **7순위 목록의 6번(가동 감시, UptimeRobot 등록)은 외부 계정 가입이 필요해 대표 본인만 할 수 있는 항목이라 코드/설정 작업은 하지 않음** — 안내만 별도로 전달.
+
+## Opus 크로스체크 후속 2건 (2026-08-25)
+
+- **Sentry 기본 세션 트래킹 끔**: `@sentry/react` 10.x는 `BrowserSession` 통합이 기본 포함돼있어, 에러 없이 정상 이용해도 idle/tab-hide 시점에 "세션" 비콘을 자동 전송한다(`privacy.html`의 "정상 이용 중엔 아무 정보도 전송 안 됨" 문구를 거짓으로 만듦). 지적받은 수정법(`autoSessionTracking: false`)은 `node_modules` 소스를 직접 확인해보니 이 SDK 버전엔 존재하지 않는 옵션이라 **그대로 안 믿고** `integrations: (defaults) => defaults.filter(i => i.name !== 'BrowserSession')` 방식으로 수정. 검증 도구 관련 발견: MCP Browser pane의 `read_network_requests`가 일부 cross-origin fetch를 못 잡는 사각지대가 있음을 확인(수동 fetch는 실제 200/400 응답을 받아오는데도 로그엔 안 잡힘) — 이후 Sentry 관련 네트워크 검증은 반드시 Playwright 스크립트(`playwright-core` 직접 실행)로 할 것, 이 MCP 도구의 네트워크 로그만으로 "요청이 없다"고 결론 내리지 말 것.
+- **Sentry 이벤트 상한이 새로고침마다 리셋되던 문제 수정**: 기존엔 모듈 레벨 변수라 새로고침하면 카운트가 0으로 돌아갔음 — 전시 키오스크에서 같은 렌더버그로 새로고침을 반복하면(수백 번) 월 할당량을 태울 수 있었음. `localStorage`에 날짜별로 저장하는 방식으로 교체해 하루 단위로 실제로 상한이 유지되도록 함(커밋 `60cc6a7`).
+
+실측 검증(Playwright, 실제 헤드리스 Chrome): `visibilitychange`를 hidden으로 강제 발생시켜도 Sentry 요청 0건(세션 트래킹 완전히 꺼짐 확인), 실제로 에러를 던지면 정확히 1건 전송(캡처 기능은 정상), CSP 위반 0건.
