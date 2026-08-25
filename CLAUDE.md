@@ -114,3 +114,18 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
 배지 이미지 5.2MB→31KB 교체, 미참조 죽은 에셋 26MB 삭제, 오디오 프리로드 완화, Pretendard 폰트 self-host(그동안 선언만 있고 실제 로드 안 되고 있었음), 개인정보처리방침 실제 상태로 재작성+앱 내 링크 추가, 가이드 말풍선 무한 낭독 접근성 버그 수정, Sentry 이벤트 상한, AudioContext 재사용, 리사이즈 디바운스, 카카오 썸네일 압축(3.87MB→421KB), 키보드로 "준비중" 카드 접근 가능하게 — 전부 완료·배포(커밋 `b11ceff`). 이어서 홈 화면 전용 로고 마크가 다른 화면에도 겹쳐 보이던 버그(`showsMainWorld` 조건 누락)도 사용자가 스크린샷으로 직접 짚어줘서 발견·수정(커밋 `c2cf00f`).
 
 **BGM 매 방문 초기화 — 현행 유지로 확정(2026-08-25)**: `useWorldAudio`가 마운트마다 `localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY)`로 저장된 설정을 지우고 무조건 켜짐으로 시작하는 것(MainWorldV3.tsx `useWorldAudio` 내부)은 **버그가 아니라 확정된 설계 결정**이다. 크로스세션 감사가 "교실 30대 동시접속 맥락에서 거슬릴 수 있다"고 지적했지만, 사용자가 직접 판단한 실제 이유: **이 화면은 하루 동안 여러 방문객이 거쳐가는 공용 전시 키오스크다.** 만약 마지막 상태를 기억하도록 바꾸면(옵션 B), 그날 첫 방문객이 BGM을 끄는 순간 그 뒤로 오는 모든 방문객이 음악 없이 보게 되어 몰입감이 떨어진다 — "같은 사람이 반복 방문"하는 맥락이 아니라 "하루 동안 다른 사람들이 이어서 방문"하는 맥락이라 현행 방식(매번 켜짐으로 리셋)이 맞다. **재배선 라운드에서 실제 사용 맥락이 바뀌지 않는 한 이 동작은 그대로 유지할 것.**
+
+## 크로스세션 라이브 재감사 후속 6건 (2026-08-25)
+
+앞 라운드 12건 중 실측 확인된 10건 재확인 + 이번에 새로 나온 항목 정리 후 전부 완료·배포(커밋 `742eb91`):
+
+- **소스맵 + Sentry release**: `vite.config.ts`에 `build.sourcemap: true` 추가. GitHub Pages가 `dist/`를 통째로 공개 서빙하기 때문에, 업로드용 인증 토큰이나 CI 파이프라인 없이도 Sentry가 `sourceMappingURL` 주석을 보고 직접 맵을 가져가 심볼화한다. `Sentry.init`엔 `release: import.meta.env.VITE_COMMIT_SHA`를 추가하고, `deploy-pages.yml`의 build 스텝에 `VITE_COMMIT_SHA: ${{ github.sha }}`를 주입해 실제 배포 커밋과 값이 일치하도록 함.
+- **배지 나머지 3장(emerald/violet/coral) webp 변환**: 107~115KB PNG 3장(합 333KB) → 11~15KB webp(합 37KB). 형제 배지들과 동일한 ffmpeg 파이프라인.
+- **`sendDefaultPii: false`** 명시(SDK 기본값에 의존하지 않도록).
+- **서브페이지 씬 프리로드를 hover/실제 이동 시점으로 지연**: 기존엔 홈 진입 즉시 퀘스트/플래너/도감/커뮤니티 4개 씬(약 1.5~2MB)을 무조건 미리 받았음. 이제 각 내비 버튼에 `onMouseEnter`/`onFocus`로 해당 씬만 프리로드하고, 터치처럼 hover가 없는 입력을 위해 `activateNavigation` 시작 시점에도 한 번 더 걸어둠(전환 애니메이션의 640ms cover 구간 안에 끝남). 전환 배경(loading-desktop/mobile.webp)은 어떤 목적지든 항상 필요해서 그대로 즉시 로드 유지.
+- **CSP 메타 태그 추가**: 이 작업을 하려면 `index.html`의 인라인 파비콘 토글 스크립트를 `public/favicon-toggle.js`로 먼저 분리해야 했음 — 안 그러면 엄격한 `script-src 'self'`가 그 스크립트를 막거나, `'unsafe-inline'`을 넣어야 해서 CSP의 의미가 크게 줄어들었을 것. `style-src`는 여전히 `'unsafe-inline'`이 필요함(React 인라인 `style` prop + 패럴랙스 효과의 `style.setProperty` 직접 호출) — 이건 이 컴포넌트가 만들어진 방식에서 오는 실제 트레이드오프지, 놓친 게 아님. `connect-src`엔 Sentry ingest 호스트만 명시. **`frame-ancestors`/`report-uri`/`sandbox`는 의도적으로 뺐음** — GitHub Pages는 커스텀 HTTP 헤더를 못 걸고, 이 세 지시어는 `<meta>` 태그로 걸면 브라우저가 조용히 무시한다(실제 HTTP 헤더로만 동작) — 넣어봐야 가짜 안심만 줄 뿐이라 뺀 것.
+- **`privacy.html`의 `robots noindex` 제거**: 이제 앱 안에서 링크가 걸려있어서(전 라운드에 추가) 검색엔진 노출을 막아둘 이유가 없어짐.
+
+실측 검증: typecheck/lint/test(25/25, Firestore 규칙 포함)/build 전부 통과, 시각 회귀 20/20 완전 일치(0.000%). 실제 브라우저로 소스맵·release SHA 번들 포함 확인, 배지 6개 전부 webp로 로드, CSP 켠 채로 콘솔 에러 0, nav 버튼에 마우스만 올려도 해당 씬 하나만 정확히 요청되는 것, 클릭 내비게이션 정상 동작까지 확인.
+
+**7순위 목록의 6번(가동 감시, UptimeRobot 등록)은 외부 계정 가입이 필요해 대표 본인만 할 수 있는 항목이라 코드/설정 작업은 하지 않음** — 안내만 별도로 전달.
