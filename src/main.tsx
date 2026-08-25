@@ -17,6 +17,10 @@ if (import.meta.env.PROD) {
   Sentry.init({
     dsn: 'https://bb25f9469e6a53b7fb3b8c4dbaac0965@o4511966927912960.ingest.us.sentry.io/4511966996267008',
     environment: 'production',
+    release: import.meta.env.VITE_COMMIT_SHA ?? 'unknown',
+    // Default-deny sending things like IP address or request cookies — this
+    // is an anonymous exhibition shell, error reports don't need them.
+    sendDefaultPii: false,
     beforeSend(event) {
       eventCount += 1;
       return eventCount <= MAX_EVENTS_PER_SESSION ? event : null;

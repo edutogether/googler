@@ -3,6 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- GitHub Pages serves this as a static file with no custom HTTP
+         headers available, so the CSP has to go here as a meta tag. That
+         means frame-ancestors/report-uri/sandbox are left out — browsers
+         silently ignore those three when set via meta rather than a real
+         header, so including them would just be false reassurance. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://o4511966927912960.ingest.us.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self';"
+    />
     <link
       id="googler-favicon"
       rel="icon"
@@ -45,35 +54,7 @@
       content="https://edutogether.github.io/googler/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
     />
     <title>Be a Googler | 배움의 모험을 하는 곳</title>
-    <script>
-      (() => {
-        const activeIcon =
-          "/googler/favicon/gemini-star-active.png?v=20260803-1";
-        const inactiveIcon =
-          "/googler/favicon/gemini-star-inactive.png?v=20260803-1";
-
-        const updateFavicon = () => {
-          const favicon = document.getElementById("googler-favicon");
-          if (!favicon) return;
-
-          const isActive =
-            document.visibilityState === "visible" && document.hasFocus();
-          favicon.href = isActive ? activeIcon : inactiveIcon;
-        };
-
-        document.addEventListener("visibilitychange", updateFavicon);
-        window.addEventListener("focus", updateFavicon);
-        window.addEventListener("blur", updateFavicon);
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", updateFavicon, {
-            once: true,
-          });
-        } else {
-          updateFavicon();
-        }
-      })();
-    </script>
+    <script src="/googler/favicon-toggle.js" defer></script>
   </head>
   <body>
     <!-- Boot splash: painted before any JS runs, so a fresh tab shows the

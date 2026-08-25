@@ -82,9 +82,9 @@ describe('MainWorldV3 final preview', () => {
       'badge-blue-mobile-opt.webp',
       'badge-gold-mobile-opt.webp',
       'badge-silver-mobile-opt.webp',
-      'badge-emerald.png',
-      'badge-violet.png',
-      'badge-coral.png',
+      'badge-emerald.webp',
+      'badge-violet.webp',
+      'badge-coral.webp',
     ]) {
       expect(imageSources.some((source) => source?.endsWith(asset))).toBe(true);
     }

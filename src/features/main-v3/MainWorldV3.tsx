@@ -29,9 +29,9 @@ const desktopBadges = [
   { asset: 'badge-blue-mobile-opt.webp', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
   { asset: 'badge-gold-mobile-opt.webp', name: '용기 있는 시작', lore: '새로운 여정을 힘차게 열었어요.' },
   { asset: 'badge-silver-mobile-opt.webp', name: '협업의 톱니', lore: '함께 배우는 힘을 발견했어요.' },
-  { asset: 'badge-emerald.png', name: '초록 나침반', lore: '호기심의 방향을 스스로 찾았어요.' },
-  { asset: 'badge-violet.png', name: '별빛 지도', lore: '배움의 별자리를 연결했어요.' },
-  { asset: 'badge-coral.png', name: '반짝이는 생각', lore: '새로운 아이디어를 세상에 밝혔어요.' },
+  { asset: 'badge-emerald.webp', name: '초록 나침반', lore: '호기심의 방향을 스스로 찾았어요.' },
+  { asset: 'badge-violet.webp', name: '별빛 지도', lore: '배움의 별자리를 연결했어요.' },
+  { asset: 'badge-coral.webp', name: '반짝이는 생각', lore: '새로운 아이디어를 세상에 밝혔어요.' },
 ] as const;
 
 function getSfx() { try { return window.localStorage.getItem(MAIN_V3_SFX_STORAGE_KEY) !== 'false'; } catch { return true; } }
@@ -250,18 +250,19 @@ function MainWorldV3Scene() {
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); window.cancelAnimationFrame(frame); };
   }, []);
+  const preloadedScenesRef = useRef<Set<string>>(new Set());
+  const preloadScene = useCallback((id: keyof typeof desktopScenes) => {
+    if (preloadedScenesRef.current.has(id)) return;
+    preloadedScenesRef.current.add(id);
+    const preload = new Image();
+    preload.src = asset(window.innerWidth < 1000 ? desktopScenes[id].mobileAsset : desktopScenes[id].asset);
+  }, []);
   useEffect(() => {
-    // Warm the browser cache for every subpage scene right away, so the
-    // shell's flat fallback color never shows through on a visitor's first
-    // visit to a page — without this, the scene <img> only starts fetching
-    // once its section actually renders, well after the shell paints.
-    const isMobileAtLoad = window.innerWidth < 1000;
-    Object.values(desktopScenes).forEach((scene) => {
-      const preload = new Image();
-      preload.src = asset(isMobileAtLoad ? scene.mobileAsset : scene.asset);
-    });
+    // The loading-transition backdrop is needed for every navigation
+    // regardless of destination, so it's still warmed right away — it's a
+    // single small image, not the 4 multi-hundred-KB subpage scenes below.
     const loadingBackdrop = new Image();
-    loadingBackdrop.src = asset(isMobileAtLoad ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp');
+    loadingBackdrop.src = asset(window.innerWidth < 1000 ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp');
   }, []);
   const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [sfxOn]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -323,6 +324,7 @@ function MainWorldV3Scene() {
   };
   const activateNavigation = (item: (typeof navigation)[number]) => {
     if (item.id === activeNav) return;
+    if (item.id in desktopScenes) preloadScene(item.id as keyof typeof desktopScenes);
     if (!isMobile) playUiSound('click', sfxOn);
     const switchPage = () => { setActiveNav(item.id); if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.'); };
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { switchPage(); return; }
@@ -352,7 +354,7 @@ function MainWorldV3Scene() {
     {showsMainWorld && isMobile && <div className="mw3-mobile-google-marks" aria-hidden="true"><span className="mw3-mobile-google-mark mw3-mobile-google-mark--character"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span><span className="mw3-mobile-google-mark mw3-mobile-google-mark--robot"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="" /></span></div>}
     {hasDesktopAmbient && <div className={`mw3-ambient ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true"><span className="mw3-ambient-dust dust-1" /><span className="mw3-ambient-dust dust-2" /><span className="mw3-ambient-dust dust-3" /><span className="mw3-ambient-dust dust-4" /><span className="mw3-ambient-dust dust-5" /><span className="mw3-ambient-dust dust-6" /><span className="mw3-ambient-dust dust-7" /><span className="mw3-ambient-leaf leaf-1" /><span className="mw3-ambient-leaf leaf-2" /><span className="mw3-ambient-leaf leaf-3" /></div>}
     <header className="mw3-header" aria-label="메인 내비게이션">
-      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={(event) => { activateNavigation(item); event.currentTarget.blur(); }}><WorldIcon name={isMobile ? item.mobileIcon : item.icon} /><span>{isMobile ? item.mobileLabel : item.label}</span></button>)}</nav></div>
+      <div className="mw3-navigation"><a className="mw3-brand" href={base} aria-label="Be a Googler 홈으로 이동"><img src={asset('visual-reset/main/be-a-googler-brand.png')} alt="Be a Googler" /></a><span className="mw3-divider" aria-hidden="true" /><nav aria-label="주요 메뉴">{navigation.map((item) => <button type="button" key={item.id} className={activeNav === item.id ? 'is-active' : ''} aria-current={activeNav === item.id ? 'page' : undefined} onClick={(event) => { activateNavigation(item); event.currentTarget.blur(); }} onMouseEnter={() => { if (item.id in desktopScenes) preloadScene(item.id as keyof typeof desktopScenes); }} onFocus={() => { if (item.id in desktopScenes) preloadScene(item.id as keyof typeof desktopScenes); }}><WorldIcon name={isMobile ? item.mobileIcon : item.icon} /><span>{isMobile ? item.mobileLabel : item.label}</span></button>)}</nav></div>
       <section className="mw3-profile" aria-label="프로필"><button type="button" className={`mw3-mobile-bgm ${bgmEnabled ? 'is-enabled' : ''} ${isPlaying ? 'is-playing' : ''}`} aria-label={bgmEnabled ? 'BGM 끄기' : 'BGM 켜기'} onClick={() => { toggle(); playUiSound('click', sfxOn); }}><WorldIcon name="music" /></button><button className="mw3-notification" type="button" aria-label="알림 보기" onClick={() => announce('새로운 알림을 준비 중이에요.')}><WorldIcon name="bell" /><span>3</span></button><span className="mw3-divider" aria-hidden="true" /><button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={() => announce('프로필 탐험을 준비 중이에요.')}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><strong>호기심 많은 구글러</strong><small>Lv. 7 탐험가</small></span><WorldIcon name="chevron" /></button></section>
       <button type="button" className="mw3-mobile-menu" aria-label="메뉴 준비 중" onClick={() => announce()}><WorldIcon name="menu" /></button>
     </header>

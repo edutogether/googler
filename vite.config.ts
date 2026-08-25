@@ -4,6 +4,12 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/googler/',
   plugins: [react()],
+  build: {
+    // dist/ is served publicly from GitHub Pages, so Sentry can fetch these
+    // maps directly at symbolication time (via the sourceMappingURL comment
+    // Vite adds to each bundle) without needing an upload step.
+    sourcemap: true,
+  },
   server: {
     watch: {
       // Windows fires an EBUSY watch error (crashing the dev server) when a
