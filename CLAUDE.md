@@ -38,16 +38,16 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 
 ## 전시 프리즈 — 복구 지점 (최신: 2026-08-26)
 
-**태그 `googler-freeze-20260826-2`** (커밋 `36bae4f`) = 최신 검증 완료 시점. SFX 라벨 상태 연동, CI에 `rules:test` 게이트 추가, XP 마크업 중복 제거, `WorldIcons.tsx` 테스트 추가, 재배선 관련 대표 결정 3건 기록, privacy.html Sentry 보관기간 명시(대표님 직접 커밋)까지 포함. `npm run check`(typecheck/lint/test 27개/build) 전부 통과 확인.
+**태그 `googler-freeze-20260826-3`** (커밋 `edbd389`) = 최신 검증 완료 시점. SFX 라벨 상태 연동, CI에 `rules:test` 게이트 추가, XP 마크업 중복 제거, `WorldIcons.tsx` 테스트 추가, 재배선 관련 대표 결정 3건 기록, privacy.html Sentry 보관기간+최종수정일(대표님 직접 커밋), README 보안 문구 현행화, firestore.rules 길이검증 테스트 추가까지 포함. `npm run check`(typecheck/lint/test 27개/build) 전부 통과 확인.
 
-**이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견됨 — 그 상태로 복원했다면 개인정보처리방침·CSP·Sentry 연동 전체·React19/Vite8/Tailwind4 업그레이드가 전부 되돌아갔을 것).**
+**이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견됨 — 그 상태로 복원했다면 개인정보처리방침·CSP·Sentry 연동 전체·React19/Vite8/Tailwind4 업그레이드가 전부 되돌아갔을 것). 참고로 `googler-freeze-20260826-2`는 이 문서를 처음 갱신한 지 한 시간도 안 돼 대표님의 동시 커밋으로 곧바로 낡아버린 실제 사례다 — 태그를 찍고 문서를 고친 직후에도 `git log --oneline -5`로 다시 한번 최신 여부를 확인하는 습관이 필요하다는 근거.**
 
-이전 지점들 — `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용.
+이전 지점들 — `googler-freeze-20260826-2`(`36bae4f`), `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용.
 
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-freeze-20260826-2 -- .
+git checkout googler-freeze-20260826-3 -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 GitHub Pages가 검증된 상태로 재배포된다.
