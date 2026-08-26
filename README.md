@@ -38,6 +38,6 @@ src/
   legacy/        # 최상위 상태, 서비스 연결, 이벤트, 페이지 조립 (현재 미렌더링)
 ```
 
-Firebase 변수는 `.env.example`을 참고합니다. 실제 Firebase 인증과 보안 정책은 후속 단계에서 다룹니다. 비밀값과 실제 `.env` 파일은 commit하지 않습니다.
+Firebase 변수는 `.env.example`을 참고합니다. `firestore.rules`는 이미 작성돼 있고 `npm run rules:test`로 Firestore 에뮬레이터에 대해 CI에서 매 배포·PR마다 검증됩니다 — 다만 이 경로는 현재 라이브 화면(MainWorldV3)에서 호출되지 않는 legacy 전용 코드입니다(위 "현재 라이브 경로" 참고). 비밀값과 실제 `.env` 파일은 commit하지 않습니다.
 
-현재 자동 테스트는 콘텐츠/도메인/서비스/화면 상호작용을 검증합니다. Stage 1에서는 실제 Firebase 보안 정책, 운영 인증 흐름, 사용자 데이터 운영 검증을 수행합니다.
+현재 자동 테스트는 콘텐츠/도메인/서비스/화면 상호작용과 Firestore 보안 규칙을 검증합니다.

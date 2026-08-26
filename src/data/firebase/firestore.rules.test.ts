@@ -57,6 +57,14 @@ describeRules('firestore.rules', () => {
     await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile')));
   });
 
+  it('rejects leaderboard writes with an oversized nickname or emoji', async () => {
+    const db = anonymous('mobile');
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { nickname: 'x'.repeat(31) })));
+    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile', { nickname: 'x'.repeat(30) })));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { emoji: 'x'.repeat(9) })));
+    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile', { emoji: 'x'.repeat(8) })));
+  });
+
   it('denies everything outside the modeled paths by default', async () => {
     const db = anonymous('mobile');
     await assertFails(setDoc(doc(db, 'artifacts', appId, 'admin', 'settings'), { open: true }));

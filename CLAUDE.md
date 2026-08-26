@@ -36,16 +36,18 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
   - Google Cloud 예산 알림 설정 완료(Alerts only, googler 프로젝트 단독 스코프). **한계 인지할 것: 이건 임계값 넘으면 메일만 오는 것이고, 실제로 API 호출을 막거나 결제를 중단시키진 않는다.** 진짜 강제 차단이 필요하면 예산 초과 시 API를 비활성화하는 Cloud Function을 별도로 만들어야 함(아직 없음).
   - App Check 등록 완료(reCAPTCHA v3, 도메인 `edutogether.github.io`), **Cloud Firestore + Authentication 두 API 모두 Enforce 켜짐(2026-08-23)**. 최신 Firebase 콘솔은 앱 단위가 아니라 API 단위로 Enforce를 건다 — App Check → APIs 탭에서 각 항목을 켠 것. 이유: 클라이언트 코드가 Firebase를 안 부르더라도 Firestore/Auth 프로젝트 자체는 인터넷에 살아있어서, 프로젝트 ID만 알면 REST API로 직접 두드릴 수 있음 — App Check가 그 뒷문을 막는 유일한 방어선.
 
-## 전시 프리즈 — 복구 지점 (최신: 2026-08-17)
+## 전시 프리즈 — 복구 지점 (최신: 2026-08-26)
 
-**태그 `googler-exhibition-freeze-2026-08-17`** (커밋 e936bfe) = 최신 검증 완료 시점. CI push 트리거 정상화(main), 배포 워크플로에 typecheck/lint/test 게이트 추가, `__initial_auth_token` 무검증 인증 코드 제거, journey/visual-reset 프로토타입 브랜치 5개 archive 정리 포함. 테스트 25개·타입체크·lint·build·CI 성공·라이브 확인까지 전부 통과.
+**태그 `googler-freeze-20260826-2`** (커밋 `36bae4f`) = 최신 검증 완료 시점. SFX 라벨 상태 연동, CI에 `rules:test` 게이트 추가, XP 마크업 중복 제거, `WorldIcons.tsx` 테스트 추가, 재배선 관련 대표 결정 3건 기록, privacy.html Sentry 보관기간 명시(대표님 직접 커밋)까지 포함. `npm run check`(typecheck/lint/test 27개/build) 전부 통과 확인.
 
-이전 지점 `googler-exhibition-freeze-2026-08-14`(커밋 5413b7c), `googler-exhibition-freeze-2026-08-13`(커밋 990046e)도 그대로 보존돼 있다 — 더 이전 상태로 돌아가야 할 특수한 경우에만 사용.
+**이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견됨 — 그 상태로 복원했다면 개인정보처리방침·CSP·Sentry 연동 전체·React19/Vite8/Tailwind4 업그레이드가 전부 되돌아갔을 것).**
+
+이전 지점들 — `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용.
 
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-exhibition-freeze-2026-08-17 -- .
+git checkout googler-freeze-20260826-2 -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 GitHub Pages가 검증된 상태로 재배포된다.
