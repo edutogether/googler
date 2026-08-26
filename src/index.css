@@ -1,4 +1,13 @@
-@import "tailwindcss";
+/* Only App.tsx/main.tsx/features/main-v3 are ever rendered (see LOCKED in
+   CLAUDE.md) — everything else under src/ (legacy/, pages/, content/, etc.)
+   is dead code whose Tailwind utility classes would otherwise still get
+   scanned and shipped in the CSS bundle. Scoping the source scan to the
+   live path only keeps unreachable-code changes from bloating output. */
+@import "tailwindcss" source(none);
+@source "../index.html";
+@source "./App.tsx";
+@source "./main.tsx";
+@source "./features/main-v3/**/*.{ts,tsx}";
 
 :root {
   font-family: Arial, "Noto Sans KR", sans-serif;
