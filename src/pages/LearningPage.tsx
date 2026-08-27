@@ -3,7 +3,7 @@ import type { CourseLevel, LearningDay } from '../domain/course';
 import { isDayComplete as isLearningDayComplete } from '../domain/progress';
 import { LearningDayCard } from '../features/learning/LearningDayCard';
 
-const themeColors = {
+const themeColors: Record<string, { bg: string; highlight: string; text: string }> = {
   blue: { bg: 'bg-[#E8F0FE]', highlight: 'bg-[#D2E3FC]', text: 'text-[#1967D2]' },
   red: { bg: 'bg-[#FCE8E6]', highlight: 'bg-[#FAD2CF]', text: 'text-[#C5221F]' },
   yellow: { bg: 'bg-[#FEF7E0]', highlight: 'bg-[#FEEFC3]', text: 'text-[#E37400]' },

@@ -14,9 +14,10 @@ import { ProfileEditor } from '../features/profile/ProfileEditor';
 import { CompletionCelebration } from '../features/learning/CompletionCelebration';
 import { LeaderboardPage } from '../pages/LeaderboardPage';
 import type { LeaderboardEntry } from '../data/appServices';
+import type { LearningDay } from '../domain/course';
 
 export default function LegacyGooglerApp() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<{ uid: string } | null>(null);
   const [userProfile, setUserProfile] = useState({ nickname: "", emoji: "" });
   const [showProfileSetup, setShowProfileSetup] = useState(false);
 
@@ -51,7 +52,7 @@ export default function LegacyGooglerApp() {
     const unsubRankings = services.leaderboard.subscribe(setRankings);
     return () => { unsubProgress(); unsubRankings(); };
   }, [services, user]);
-  const handleSaveProfile = async (selectedEmoji, nicknameInput) => {
+  const handleSaveProfile = async (selectedEmoji: string, nicknameInput: string) => {
     if (!nicknameInput.trim()) {
       showToastMsg("닉네임을 입력해주세요!");
       return;
@@ -74,12 +75,12 @@ export default function LegacyGooglerApp() {
   const currentLevelMissions = currentLevel === 'L1' ? l1Completed : l2Completed;
   const currentProgressPercent = calculateProgressPercent(completedIds, coursesByLevel[currentLevel]);
 
-  const showToastMsg = (msg) => {
+  const showToastMsg = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 3000);
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     if(textAreaRef.current) {
       textAreaRef.current.value = text;
       textAreaRef.current.select();
@@ -92,7 +93,7 @@ export default function LegacyGooglerApp() {
     }
   };
 
-  const invokeNativeShare = async (title, text) => {
+  const invokeNativeShare = async (title: string, text: string) => {
     const currentUrl = window.location.href.split('?')[0];
     const shareText = text + "\n\n🔗 접속 링크:\n" + currentUrl;
     const isIframe = window.self !== window.top;
@@ -101,14 +102,15 @@ export default function LegacyGooglerApp() {
       try {
         await navigator.share({ title, text: shareText });
       } catch (error) {
-        if (error.name !== 'AbortError') copyToClipboard(shareText);
+        const errorName = error instanceof DOMException || error instanceof Error ? error.name : undefined;
+        if (errorName !== 'AbortError') copyToClipboard(shareText);
       }
     } else {
       copyToClipboard(shareText);
     }
   };
 
-  const handleKakaoShare = (dayItem, index) => {
+  const handleKakaoShare = (dayItem: LearningDay, index: number) => {
     const message = missionShareMessage(dayItem.title, index + 1, currentProgressPercent);
     invokeNativeShare(message.title, message.text);
   };
@@ -129,7 +131,7 @@ export default function LegacyGooglerApp() {
     invokeNativeShare(message.title, message.text);
   };
 
-  const toggleCheck = async (dayId, checkIndex) => {
+  const toggleCheck = async (dayId: string, checkIndex: number) => {
     if (!user) return;
 
     const key = `${currentLevel}_${dayId}_${checkIndex}`;
