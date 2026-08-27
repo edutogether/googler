@@ -1,219 +1,18 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import type { CSSProperties } from 'react';
 import { WorldIcon } from './WorldIcons';
 import './MainWorldV3.css';
+import { asset, base, desktopBadges, desktopScenes, DESKTOP_GUIDE_MESSAGE, MAIN_V3_BGM_STORAGE_KEY, MAIN_V3_SFX_STORAGE_KEY, navigation } from './mainWorldContent';
+import { playUiSound } from './uiSound';
+import { useWorldAudio } from './useWorldAudio';
+import { useViewportBreakpoints } from './useViewportBreakpoints';
+import { useScenePreloader } from './useScenePreloader';
+import { useAnnouncements } from './useAnnouncements';
+import { useDesktopGuideBubble } from './useDesktopGuideBubble';
+import { useParallaxTilt } from './useParallaxTilt';
+import { useSceneNavigation } from './useSceneNavigation';
+import { DesktopProfileCluster } from './DesktopProfileCluster';
 
-const base = import.meta.env.BASE_URL;
-const asset = (path: string) => `${base}${path}`;
-const BGM_SOURCE = asset('audio/bgm/moonlit-voyager-village-loop-opt.mp3');
-export const MAIN_V3_BGM_STORAGE_KEY = 'be-a-googler:main-v3-bgm';
-export const MAIN_V3_SFX_STORAGE_KEY = 'be-a-googler:main-v3-sfx';
-const DEFAULT_VOLUME = 1;
-const DESKTOP_GUIDE_MESSAGE = '안녕 ?\n호기심이 아주 많은\n구글러구나 !\n나와 같이 구글을\n즐겁게 배워볼래 ?';
-
-const navigation = [
-  { id: 'explore', label: '홈', mobileLabel: '홈', icon: 'home', mobileIcon: 'home' },
-  { id: 'town', label: '퀘스트', mobileLabel: '퀘스트', icon: 'scroll', mobileIcon: 'scroll' },
-  { id: 'missions', label: '플래너', mobileLabel: '플래너', icon: 'calendar', mobileIcon: 'calendar' },
-  { id: 'guides', label: '도감', mobileLabel: '도감', icon: 'book', mobileIcon: 'book' },
-  { id: 'archive', label: '커뮤니티', mobileLabel: '커뮤니티', icon: 'users', mobileIcon: 'users' },
-] as const;
-
-const desktopScenes = {
-  town: { name: 'quest', icon: 'scroll', eyebrow: '새로운 배움의 의뢰', detail: '탐험가를 위한 첫 퀘스트를 정성껏 준비하고 있어요.', asset: 'visual-reset/quest/be-a-googler-quest-2560x1440-scene-v10-opt.webp', mobileAsset: 'visual-reset/quest/be-a-googler-quest-1080x2340-mobile-v1-opt.webp' },
-  missions: { name: 'planner', icon: 'calendar', eyebrow: '여정을 계획하는 지도', detail: '탐험가의 여정을 계획할 플래너를 준비하고 있어요.', asset: 'visual-reset/planner/be-a-googler-dakku-planner-2560x1440-scene-v7-opt.webp', mobileAsset: 'visual-reset/planner/be-a-googler-dakku-planner-1080x2340-mobile-v1-opt.webp' },
-  guides: { name: 'encyclopedia', icon: 'book', eyebrow: '발견을 모아 보는 서가', detail: '호기심 가득한 이야기를 차곡차곡 모으고 있어요.', asset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-2560x1440-scene-v10-opt.webp', mobileAsset: 'visual-reset/encyclopedia/be-a-googler-encyclopedia-1080x2340-mobile-v1-opt.webp' },
-  archive: { name: 'community', icon: 'users', eyebrow: '함께 만드는 광장', detail: '다른 탐험가와 영감을 나눌 공간이 생길거에요.', asset: 'visual-reset/community/be-a-googler-community-2560x1440-scene-v11-opt.webp', mobileAsset: 'visual-reset/community/be-a-googler-community-1080x2340-mobile-v1-opt.webp' },
-} as const;
-
-const desktopBadges = [
-  { asset: 'badge-blue-mobile-opt.webp', name: '데이터 항해', lore: '데이터 섬의 첫 지도를 완성했어요.' },
-  { asset: 'badge-gold-mobile-opt.webp', name: '용기 있는 시작', lore: '새로운 여정을 힘차게 열었어요.' },
-  { asset: 'badge-silver-mobile-opt.webp', name: '협업의 톱니', lore: '함께 배우는 힘을 발견했어요.' },
-  { asset: 'badge-emerald.webp', name: '초록 나침반', lore: '호기심의 방향을 스스로 찾았어요.' },
-  { asset: 'badge-violet.webp', name: '별빛 지도', lore: '배움의 별자리를 연결했어요.' },
-  { asset: 'badge-coral.webp', name: '반짝이는 생각', lore: '새로운 아이디어를 세상에 밝혔어요.' },
-] as const;
-
-function getSfx() { try { return window.localStorage.getItem(MAIN_V3_SFX_STORAGE_KEY) !== 'false'; } catch { return true; } }
-function saveSfx(enabled: boolean) { try { window.localStorage.setItem(MAIN_V3_SFX_STORAGE_KEY, String(enabled)); } catch { /* optional */ } }
-
-function useWorldAudio() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const bgmEnabledRef = useRef(true);
-  const [bgmEnabled, setBgmEnabled] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
-  const volumeStateTimerRef = useRef<number | null>(null);
-  const sync = useCallback(() => { const audio = audioRef.current; setIsPlaying(Boolean(audio && !audio.paused && !audio.muted && audio.volume > 0)); }, []);
-  useEffect(() => {
-    const audio = new Audio(BGM_SOURCE);
-    // Automated visual QA opts in with ?qa-mute=1 to capture screenshots
-    // without triggering autoplay audio; real users never set this.
-    const qaMuted = new URLSearchParams(window.location.search).get('qa-mute') === '1';
-    if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
-    audio.loop = true; audio.preload = 'metadata'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
-    audioRef.current = audio;
-    // BGM starts on by default: the button shows "on" from the first paint
-    // and an autoplay attempt fires immediately. Browsers block autoplay
-    // until the visitor's first interaction, so when that attempt is
-    // rejected, one-time capture listeners wait for the very first gesture
-    // anywhere on the page (any click/tap/key) and start playback right
-    // then — the visitor never has to find the BGM button itself.
-    bgmEnabledRef.current = true; setBgmEnabled(true);
-    try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
-    let cancelled = false;
-    const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;
-    let removeFirstGesture = () => {};
-    let retryInFlight = false;
-    const fail = () => { setIsPlaying(false); };
-    const ended = () => { if (bgmEnabledRef.current) { audio.currentTime = 0; void audio.play().catch(fail); } };
-    audio.addEventListener('play', sync); audio.addEventListener('playing', sync); audio.addEventListener('pause', sync); audio.addEventListener('error', fail); audio.addEventListener('ended', ended);
-    const resumeAfterFirstGesture = (event: Event) => {
-      // The BGM toggle buttons run their own toggle() handler — don't fight it.
-      if (event.target instanceof Element && event.target.closest('.mw3-mini-bgm, .mw3-mobile-bgm, .mw3-audio-play')) return;
-      if (!bgmEnabledRef.current || !audio.paused) { removeFirstGesture(); return; }
-      if (retryInFlight) return;
-      retryInFlight = true;
-      void audio.play().then(() => { removeFirstGesture(); sync(); }).catch(fail).finally(() => { retryInFlight = false; });
-    };
-    const armFirstGestureFallback = () => {
-      if (cancelled) return;
-      gestureEvents.forEach((eventName) => window.addEventListener(eventName, resumeAfterFirstGesture, true));
-      removeFirstGesture = () => gestureEvents.forEach((eventName) => window.removeEventListener(eventName, resumeAfterFirstGesture, true));
-    };
-    void audio.play().then(sync).catch(() => { fail(); armFirstGestureFallback(); });
-    return () => { cancelled = true; removeFirstGesture(); audio.pause(); audio.removeEventListener('play', sync); audio.removeEventListener('playing', sync); audio.removeEventListener('pause', sync); audio.removeEventListener('error', fail); audio.removeEventListener('ended', ended); audioRef.current = null; };
-  }, [sync]);
-  const toggle = useCallback(() => {
-    const audio = audioRef.current; if (!audio) return;
-    if (bgmEnabledRef.current) { bgmEnabledRef.current = false; setBgmEnabled(false); audio.pause(); audio.currentTime = 0; return; }
-    audio.currentTime = 0; bgmEnabledRef.current = true; setBgmEnabled(true); void audio.play().then(sync).catch(() => setIsPlaying(false));
-  }, [sync]);
-  const setVolume = useCallback((nextVolume: number) => {
-    const audio = audioRef.current; if (!audio) return;
-    const clamped = Math.min(1, Math.max(0, nextVolume));
-    audio.volume = clamped; sync();
-    // The slider drags and the mute/unmute tween both call this many times a second;
-    // setVolumeState re-renders this whole scene (every background, badge, popover),
-    // and doing that on EVERY tick was heavy enough on real hardware to make the
-    // slider itself feel laggy even though the audible volume change is instant and
-    // free. The actual sound already changed above — only the React-side sync (needed
-    // for the initial value on mount and as the mute tween's target) is debounced.
-    if (volumeStateTimerRef.current !== null) window.clearTimeout(volumeStateTimerRef.current);
-    volumeStateTimerRef.current = window.setTimeout(() => { volumeStateTimerRef.current = null; setVolumeState(clamped); }, 80);
-  }, [sync]);
-  useEffect(() => () => { if (volumeStateTimerRef.current !== null) window.clearTimeout(volumeStateTimerRef.current); }, []);
-  return { bgmEnabled, isPlaying, volume, toggle, setVolume };
-}
-
-// A fresh AudioContext per click used to pile up faster than the browser
-// could close the previous ones (most browsers only allow a handful of
-// concurrent contexts), throwing on a rapid double-click or key-repeat.
-// One shared, lazily-created context reused for every click fixes that.
-let sharedUiAudioContext: AudioContext | null = null;
-function getUiAudioContext(): AudioContext | null {
-  if (typeof window.AudioContext === 'undefined') return null;
-  if (!sharedUiAudioContext || sharedUiAudioContext.state === 'closed') sharedUiAudioContext = new window.AudioContext();
-  return sharedUiAudioContext;
-}
-function playUiSound(kind: 'click' | 'chime', on: boolean) {
-  if (!on) return;
-  const context = getUiAudioContext();
-  if (!context) return;
-  if (context.state === 'suspended') void context.resume();
-  const oscillator = context.createOscillator(); const gain = context.createGain(); const start = context.currentTime; const duration = kind === 'chime' ? .16 : .07;
-  oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(kind === 'chime' ? 660 : 420, start); if (kind === 'chime') oscillator.frequency.exponentialRampToValueAtTime(880, start + .11);
-  gain.gain.setValueAtTime(.0001, start); gain.gain.exponentialRampToValueAtTime(.035, start + .012); gain.gain.exponentialRampToValueAtTime(.0001, start + duration);
-  oscillator.connect(gain).connect(context.destination); oscillator.start(start); oscillator.stop(start + duration + .01);
-}
-
-const VOLUME_TWEEN_MS = 260;
-const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-
-/** The slider handle animates on mute/unmute only: off pulls it smoothly to the left
- *  end, on stretches it back out to whatever level it was at (not always 100%) — the
- *  stored `volume` never changes from this, only the on-screen position does. Dragging
- *  must track the pointer 1:1 with zero lag, so it updates the displayed value directly
- *  and never goes through the tween (keying the tween effect on `enabled` alone, not
- *  `volume`, keeps every drag tick from restarting a 260ms ease against a moving
- *  target — ported from the same fix in CLASSCADE's BgmControl). */
-function MiniVolumePanel({ enabled, volume, onVolumeChange }: { enabled: boolean; volume: number; onVolumeChange: (volume: number) => void }) {
-  const [displayVolume, setDisplayVolume] = useState(enabled ? volume : 0);
-  const rafRef = useRef<number | null>(null);
-  const volumeRef = useRef(volume);
-  volumeRef.current = volume;
-  const displayVolumeRef = useRef(displayVolume);
-  displayVolumeRef.current = displayVolume;
-  useEffect(() => {
-    const target = enabled ? volumeRef.current : 0;
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    const start = displayVolumeRef.current;
-    const delta = target - start;
-    if (Math.abs(delta) < 0.001) { setDisplayVolume(target); return; }
-    const startedAt = performance.now();
-    const step = (now: number) => {
-      const t = Math.min(1, (now - startedAt) / VOLUME_TWEEN_MS);
-      const next = start + delta * easeOutCubic(t);
-      displayVolumeRef.current = next;
-      setDisplayVolume(next);
-      if (t < 1) rafRef.current = requestAnimationFrame(step);
-      else rafRef.current = null;
-    };
-    rafRef.current = requestAnimationFrame(step);
-    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
-  }, [enabled]);
-  function handleDrag(next: number) {
-    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-    displayVolumeRef.current = next;
-    setDisplayVolume(next);
-    onVolumeChange(next);
-  }
-  return <div className="mw3-mini-volume-panel" aria-label="BGM 볼륨"><input type="range" min="0" max="1" step="0.01" value={displayVolume} disabled={!enabled} aria-label="BGM 볼륨 조절" onChange={(event) => handleDrag(Number(event.target.value))} /></div>;
-}
-
-function DesktopProfileCluster({
-  bgmEnabled,
-  isPlaying,
-  volume,
-  onToggleBgm,
-  onVolumeChange,
-  onProfile,
-}: {
-  bgmEnabled: boolean;
-  isPlaying: boolean;
-  volume: number;
-  onToggleBgm: () => void;
-  onVolumeChange: (volume: number) => void;
-  onProfile: () => void;
-}) {
-  const [volumeTrayDismissed, setVolumeTrayDismissed] = useState(false);
-  const dismissVolumeTray = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== 'Escape') return;
-    event.preventDefault(); setVolumeTrayDismissed(true);
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-  };
-  return <section className="mw3-desktop-profile" aria-label="프로필과 오디오 컨트롤">
-    <div className="mw3-mini-audio" aria-label="BGM 미니 컨트롤">
-      <div className="mw3-mini-bgm-control" data-volume-tray-dismissed={volumeTrayDismissed} onMouseEnter={() => setVolumeTrayDismissed(false)} onMouseLeave={() => setVolumeTrayDismissed(true)} onFocusCapture={() => setVolumeTrayDismissed(false)} onKeyDown={dismissVolumeTray}>
-        <button type="button" className={`mw3-mini-bgm ${bgmEnabled ? 'is-enabled' : ''} ${isPlaying ? 'is-playing' : ''}`} aria-label={bgmEnabled ? 'BGM 끄기' : 'BGM 켜기'} onClick={onToggleBgm}><WorldIcon name="music" /></button>
-        <MiniVolumePanel enabled={bgmEnabled} volume={volume} onVolumeChange={onVolumeChange} />
-      </div>
-      <span className="mw3-mini-song" aria-label="Be a Googler - 달빛 항해자의 마을"><span className="mw3-mini-song-track" aria-hidden="true"><span>Be a Googler - 달빛 항해자의 마을</span><span>Be a Googler - 달빛 항해자의 마을</span></span></span>
-      <span className={`mw3-mini-equalizer ${isPlaying ? 'is-playing' : ''}`} aria-label={isPlaying ? '움직이는 이퀄라이저' : '정지된 이퀄라이저'}>{Array.from({ length: 6 }, (_, index) => <i key={index} />)}</span>
-    </div>
-    <span className="mw3-divider" aria-hidden="true" />
-    <button className="mw3-profile-button" type="button" aria-label="호기심 많은 구글러 프로필 보기" onClick={onProfile}><img src={asset('visual-reset/main/assets/profile-avatar.png')} alt="" /><span className="mw3-identity"><small>Lv. 7 탐험가</small><strong>호기심 많은 구글러</strong></span><WorldIcon name="chevron" /></button>
-    <span className="mw3-divider" aria-hidden="true" />
-    <div className="mw3-desktop-notification">
-      <button className="mw3-notification" type="button" aria-label="알림 보기" aria-haspopup="dialog"><WorldIcon name="bell" /><span>3</span></button>
-      <div className="mw3-notification-popover" role="dialog" aria-label="새 알림">
-        <div className="mw3-notification-popover-heading"><strong>새 소식</strong><button type="button" aria-label="알림 더보기">•••</button></div>
-        <ul><li><i>✦</i><span><b>오늘의 여정이 열렸어요</b><small>별빛 항로가 탐험가를 기다려요.</small></span></li><li><i>◈</i><span><b>데이터 섬 탐험이 이어집니다</b><small>다음 지도가 은은히 빛나고 있어요.</small></span></li><li><i>✧</i><span><b>새로운 배지를 확인해보세요</b><small>보관함에 작은 선물이 도착했어요.</small></span></li></ul>
-        <button className="mw3-notification-more" type="button">전체 보기 <span>›</span></button>
-      </div>
-    </div>
-  </section>;
-}
+export { MAIN_V3_BGM_STORAGE_KEY, MAIN_V3_SFX_STORAGE_KEY };
 
 export default function MainWorldV3() {
   return <MainWorldV3Scene />;
@@ -221,129 +20,25 @@ export default function MainWorldV3() {
 
 function MainWorldV3Scene() {
   const { bgmEnabled, isPlaying, volume, toggle, setVolume } = useWorldAudio();
-  const [activeNav, setActiveNav] = useState('explore'); const [sfxOn, setSfxOn] = useState(getSfx); const [toast, setToast] = useState(''); const [guideText, setGuideText] = useState(''); const [guideVisible, setGuideVisible] = useState(false); const timer = useRef<number | undefined>(undefined); const shell = useRef<HTMLElement | null>(null); const parallaxFrame = useRef<number | undefined>(undefined);
-  // Page-change transition: cover the screen, swap the page underneath
-  // while hidden, hold on a loading beat, then clear — so a nav switch
-  // reads as a deliberate scene change instead of content popping in.
-  const [transitionPhase, setTransitionPhase] = useState<'idle' | 'cover' | 'loading' | 'reveal'>('idle');
-  const transitionTimers = useRef<number[]>([]);
-  useEffect(() => () => transitionTimers.current.forEach((id) => window.clearTimeout(id)), []);
-  // The "coming soon" card no longer auto-covers the subpage art on arrival —
-  // it stays hidden so the scene is fully visible, and only pops in once the
-  // visitor clicks anywhere on the page.
-  const [constructionVisible, setConstructionVisible] = useState(false);
-  // Tracks the live viewport width so the mobile/desktop layout keeps up
-  // when the window is resized without a full reload (isMobile etc. below
-  // were previously computed once per render, so resizing an open tab left
-  // the CSS breakpoints and the JS-driven content — nav labels, subpage
-  // scenes — out of sync).
-  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
-  useEffect(() => {
-    // A drag-resize can fire the resize event dozens of times a second;
-    // coalescing to one state update per animation frame keeps that from
-    // triggering a matching flood of re-renders.
-    let frame = 0;
-    const onResize = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(() => setViewportWidth(window.innerWidth));
-    };
-    window.addEventListener('resize', onResize);
-    return () => { window.removeEventListener('resize', onResize); window.cancelAnimationFrame(frame); };
-  }, []);
-  const preloadedScenesRef = useRef<Set<string>>(new Set());
-  const preloadScene = useCallback((id: keyof typeof desktopScenes) => {
-    if (preloadedScenesRef.current.has(id)) return;
-    preloadedScenesRef.current.add(id);
-    const preload = new Image();
-    preload.src = asset(window.innerWidth < 1000 ? desktopScenes[id].mobileAsset : desktopScenes[id].asset);
-  }, []);
-  useEffect(() => {
-    // The loading-transition backdrop is needed for every navigation
-    // regardless of destination, so it's still warmed right away — it's a
-    // single small image, not the 4 multi-hundred-KB subpage scenes below.
-    const loadingBackdrop = new Image();
-    loadingBackdrop.src = asset(window.innerWidth < 1000 ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp');
-  }, []);
-  const announce = useCallback((message = '이 길은 아직 준비 중이에요 🌱', chime = false) => { window.clearTimeout(timer.current); setToast(message); playUiSound(chime ? 'chime' : 'click', sfxOn); timer.current = window.setTimeout(() => setToast(''), 1900); }, [sfxOn]);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-  useEffect(() => () => window.cancelAnimationFrame(parallaxFrame.current ?? 0), []);
-  useEffect(() => {
-    if (window.innerWidth < 768) return undefined;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      setGuideVisible(true);
-      setGuideText(DESKTOP_GUIDE_MESSAGE);
-      return undefined;
-    }
+  const { isMobile, hasDesktopAmbient, hasDesktopControls } = useViewportBreakpoints();
+  const { preloadScene } = useScenePreloader();
+  const { sfxOn, toast, announce, toggleSfx } = useAnnouncements();
+  const { guideText, guideVisible } = useDesktopGuideBubble();
+  const { shellRef, handlePointerMove, handlePointerLeave } = useParallaxTilt();
+  const {
+    activeNav,
+    setActiveNav,
+    transitionPhase,
+    constructionVisible,
+    setConstructionVisible,
+    desktopScene,
+    showsMainWorld,
+    revealConstruction,
+    activateNavigation,
+  } = useSceneNavigation({ isMobile, sfxOn, announce, preloadScene });
 
-    let timeout: number | undefined;
-    let index = 0;
-    const beginTyping = () => {
-      index = 1;
-      setGuideVisible(true);
-      setGuideText(DESKTOP_GUIDE_MESSAGE.slice(0, index));
-      timeout = window.setTimeout(typeNext, 46);
-    };
-    const hideBubble = () => {
-      setGuideVisible(false);
-      timeout = window.setTimeout(beginTyping, 620);
-    };
-    const typeNext = () => {
-      index += 1;
-      setGuideText(DESKTOP_GUIDE_MESSAGE.slice(0, index));
-      timeout = window.setTimeout(index >= DESKTOP_GUIDE_MESSAGE.length ? hideBubble : typeNext, index >= DESKTOP_GUIDE_MESSAGE.length ? 9900 : 46);
-    };
-    timeout = window.setTimeout(beginTyping, 320);
-    return () => window.clearTimeout(timeout);
-  }, []);
-  const setParallax = useCallback((x: number, y: number) => {
-    window.cancelAnimationFrame(parallaxFrame.current ?? 0);
-    parallaxFrame.current = window.requestAnimationFrame(() => { shell.current?.style.setProperty('--mw3-parallax-x', x.toFixed(3)); shell.current?.style.setProperty('--mw3-parallax-y', y.toFixed(3)); });
-  }, []);
-  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLElement>) => {
-    if (window.innerWidth < 1024 || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    const bounds = event.currentTarget.getBoundingClientRect(); setParallax(((event.clientX - bounds.left) / bounds.width - .5) * 2, ((event.clientY - bounds.top) / bounds.height - .5) * 2);
-  }, [setParallax]);
-  const handlePointerLeave = useCallback(() => setParallax(0, 0), [setParallax]);
-  const toggleSfx = () => { const next = !sfxOn; if (sfxOn) playUiSound('click', true); setSfxOn(next); saveSfx(next); window.clearTimeout(timer.current); setToast(next ? '효과음을 켰어요.' : '효과음을 껐어요.'); timer.current = window.setTimeout(() => setToast(''), 1900); };
-  const hasDesktopAmbient = viewportWidth >= 1024;
-  // Matches the CSS desktop breakpoint (min-width: 1000px) below so there is
-  // no unstyled gap between the mobile and desktop layouts — a portrait
-  // tablet (768-999px) gets the mobile layout, a landscape one (1000px+)
-  // gets the desktop layout, so neither needs bespoke tablet styling.
-  const isMobile = viewportWidth < 1000;
-  const hasDesktopControls = viewportWidth >= 1000;
-  const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
-  const showsMainWorld = activeNav === 'explore';
-  useEffect(() => { setConstructionVisible(false); }, [activeNav]);
-  const revealConstruction = (event: ReactMouseEvent<HTMLElement>) => {
-    // Clicks on the header and audio controls keep their own meaning (open
-    // notifications, toggle BGM, switch pages) — only a click on the scene
-    // itself summons the coming-soon card.
-    if (event.target instanceof Element && event.target.closest('.mw3-header, .mw3-desktop-profile, .mw3-audio')) return;
-    if (desktopScene && !constructionVisible) setConstructionVisible(true);
-  };
-  const activateNavigation = (item: (typeof navigation)[number]) => {
-    if (item.id === activeNav) return;
-    if (item.id in desktopScenes) preloadScene(item.id as keyof typeof desktopScenes);
-    if (!isMobile) playUiSound('click', sfxOn);
-    const switchPage = () => { setActiveNav(item.id); if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.'); };
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { switchPage(); return; }
-    transitionTimers.current.forEach((id) => window.clearTimeout(id));
-    setTransitionPhase('cover');
-    // Timings mirror the CSS: .mw3-transition-veil fades over 620ms and the
-    // progress bar fills over 1300ms, so each wait is set slightly longer
-    // than what it's waiting out, otherwise it gets cut off mid-motion.
-    transitionTimers.current = [window.setTimeout(() => {
-      switchPage();
-      setTransitionPhase('loading');
-      transitionTimers.current.push(window.setTimeout(() => {
-        setTransitionPhase('reveal');
-        transitionTimers.current.push(window.setTimeout(() => setTransitionPhase('idle'), 640));
-      }, 1340));
-    }, 640)];
-  };
   const journeyCopy = <span className="mw3-card-copy"><strong>Lv. 7 탐험가</strong><small>320 / 560 XP</small><span className="mw3-progress mw3-progress--gold"><i /></span><small>다음 레벨까지 240 XP 남음</small></span>;
-  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}${desktopScene && !constructionVisible ? ' mw3-shell--awaiting-tap' : ''}`} data-transition={transitionPhase} ref={shell} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={revealConstruction}>
+  return <main className={`mw3-shell${desktopScene ? ` mw3-shell--${desktopScene.name}` : ''}${desktopScene && !constructionVisible ? ' mw3-shell--awaiting-tap' : ''}`} data-transition={transitionPhase} ref={shellRef} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={revealConstruction}>
     {transitionPhase !== 'idle' && <div className={`mw3-transition-veil mw3-transition-veil--${transitionPhase}`} aria-hidden="true"><img className="mw3-transition-backdrop" src={asset(isMobile ? 'visual-reset/main/be-a-googler-loading-mobile.webp' : 'visual-reset/main/be-a-googler-loading-desktop.webp')} alt="" /><div className="mw3-transition-loader"><div className="mw3-transition-dots"><i /><i /><i /></div><div className="mw3-transition-track"><i /></div><span>다음 여정으로 이동 중…</span></div><div className="mw3-transition-flash" /></div>}
     <img className="mw3-background" src={asset(isMobile ? 'visual-reset/main/be-a-googler-main-mobile-opt.webp' : 'visual-reset/main/be-a-googler-main-desktop-16x9-opt.webp')} alt="" aria-hidden="true" /><div className="mw3-light-field" aria-hidden="true" />
     {/* The backdrop layer is only ever visible on the desktop breakpoint
