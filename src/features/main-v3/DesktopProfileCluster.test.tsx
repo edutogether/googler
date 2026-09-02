@@ -28,4 +28,27 @@ describe('DesktopProfileCluster', () => {
     fireEvent.keyDown(control, { key: 'Escape' });
     expect(control.getAttribute('data-volume-tray-dismissed')).toBe('true');
   });
+
+  it('does not pop the volume tray open just because the BGM toggle button itself received focus', () => {
+    render(<DesktopProfileCluster bgmEnabled isPlaying volume={0.5} onToggleBgm={vi.fn()} onVolumeChange={vi.fn()} onProfile={vi.fn()} />);
+    const toggleButton = screen.getByRole('button', { name: 'BGM 끄기' });
+    const control = toggleButton.closest('[data-volume-tray-dismissed]') as HTMLElement;
+    fireEvent.mouseLeave(control); // real-world sequence: tray closed after an earlier hover, then...
+    expect(control.getAttribute('data-volume-tray-dismissed')).toBe('true');
+
+    fireEvent.focus(toggleButton); // ...the toggle button is clicked, which Chrome also focuses.
+
+    expect(control.getAttribute('data-volume-tray-dismissed')).toBe('true');
+  });
+
+  it('does pop the volume tray open when the slider itself receives focus (keyboard tabbing)', () => {
+    render(<DesktopProfileCluster bgmEnabled isPlaying volume={0.5} onToggleBgm={vi.fn()} onVolumeChange={vi.fn()} onProfile={vi.fn()} />);
+    const control = screen.getByRole('button', { name: 'BGM 끄기' }).closest('[data-volume-tray-dismissed]') as HTMLElement;
+    fireEvent.mouseLeave(control);
+    expect(control.getAttribute('data-volume-tray-dismissed')).toBe('true');
+
+    fireEvent.focus(screen.getByRole('slider'));
+
+    expect(control.getAttribute('data-volume-tray-dismissed')).toBe('false');
+  });
 });

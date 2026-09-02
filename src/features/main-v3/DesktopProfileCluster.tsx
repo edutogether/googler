@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { FocusEvent as ReactFocusEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { WorldIcon } from './WorldIcons';
 import { asset } from './mainWorldContent';
 import { MiniVolumePanel } from './MiniVolumePanel';
@@ -25,9 +25,17 @@ export function DesktopProfileCluster({
     event.preventDefault(); setVolumeTrayDismissed(true);
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   };
+  // Only the volume slider (the tray's own input) should pop the tray open
+  // on focus — the BGM on/off button also lives inside this wrapper and
+  // Chrome focuses a <button> on click, so a plain onFocusCapture here
+  // reopened the tray every time someone just toggled BGM on/off with the
+  // mouse, with nothing hovered.
+  const revealVolumeTrayOnInputFocus = (event: ReactFocusEvent<HTMLDivElement>) => {
+    if (event.target.tagName === 'INPUT') setVolumeTrayDismissed(false);
+  };
   return <section className="mw3-desktop-profile" aria-label="프로필과 오디오 컨트롤">
     <div className="mw3-mini-audio" aria-label="BGM 미니 컨트롤">
-      <div className="mw3-mini-bgm-control" data-volume-tray-dismissed={volumeTrayDismissed} onMouseEnter={() => setVolumeTrayDismissed(false)} onMouseLeave={() => setVolumeTrayDismissed(true)} onFocusCapture={() => setVolumeTrayDismissed(false)} onKeyDown={dismissVolumeTray}>
+      <div className="mw3-mini-bgm-control" data-volume-tray-dismissed={volumeTrayDismissed} onMouseEnter={() => setVolumeTrayDismissed(false)} onMouseLeave={() => setVolumeTrayDismissed(true)} onFocusCapture={revealVolumeTrayOnInputFocus} onKeyDown={dismissVolumeTray}>
         <button type="button" className={`mw3-mini-bgm ${bgmEnabled ? 'is-enabled' : ''} ${isPlaying ? 'is-playing' : ''}`} aria-label={bgmEnabled ? 'BGM 끄기' : 'BGM 켜기'} onClick={onToggleBgm}><WorldIcon name="music" /></button>
         <MiniVolumePanel enabled={bgmEnabled} volume={volume} onVolumeChange={onVolumeChange} />
       </div>
