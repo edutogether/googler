@@ -24,7 +24,19 @@ jobs:
       - run: npm run build
         env:
           VITE_COMMIT_SHA: ${{ github.sha }}
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
+          channelId: live
+          projectId: be-a-g00gler
+      # The service account firebase init hosting:github created only has
+      # Hosting-deploy scope, not firebaserules.googleapis.com access, so
+      # this 403s until that's granted manually in IAM. continue-on-error
+      # keeps that failure from blocking the Hosting deploy above, which is
+      # the part every push actually needs to succeed.
       - name: Deploy Firestore rules and indexes
+        continue-on-error: true
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
@@ -32,9 +44,3 @@ jobs:
           rm -f /tmp/firebase-service-account.json
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
-          channelId: live
-          projectId: be-a-g00gler
