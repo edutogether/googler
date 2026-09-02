@@ -205,15 +205,23 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 - `firebase.json`: CSP에 `report-uri`(Sentry 보안 리포트 엔드포인트) 추가 — 실제 HTTP 헤더로 CSP를 걸어둔 이후에도 위반이 발생하면 아무도 모르는 상태였음.
 - 위 "미해결로 남은 것" → "해결됨"으로 갱신(`.claude/settings.json` bypassPermissions 이전, 이 라운드 착수 전에 이미 완료).
 
+**2라운드 추가 수정(같은 날, 대표님이 "코드로 가능한 건 전부 100점으로" 지시한 후속):**
+- `firebase.json`: `public/` 정적 자산 중 실제로 버전 관리되는 것만 골라 immutable 캐시 적용 — `visual-reset/*/*-v*-opt.webp` + `visual-reset/main/assets/*-v*-opt.webp`(파일명 자체에 버전 토큰이 박혀있는 씬/모바일 이미지 9개, 재인코딩할 때마다 새 파일명으로 나가는 게 기존 관행), `favicon/**` + `social/**`(index.html·favicon-toggle.js의 모든 참조가 이미 `?v=` 캐시버스팅 쿼리스트링을 달고 있음). 배지·로딩화면·메인 비주얼 등 버전 토큰이 없는 나머지 파일은 그대로 짧은 캐시 유지 — `minimatch`로 글롭 패턴이 실제 `dist/` 산출물과 정확히 일치하는지 검증 후 적용(오탐 0건 확인).
+- **Opus의 확장성 X-2 finding 정정**: "데스크톱이 2560×1440 이미지를 그대로 받는다"는 지적이 있었는데, `ffmpeg`로 실제 배포 파일을 열어보니 파일명(`-2560x1440-`)과 달리 실제 인코딩 해상도는 이미 1672×941로 최적화돼 있었다(다른 씬 파일들도 동일). 즉 이 finding은 파일명을 실제 해상도로 오인한 오탐이었고, srcset/sizes 추가 작업은 필요 없다고 판단해 진행하지 않음.
+- `.github/workflows/firebase-hosting-merge.yml`: Firestore 규칙/인덱스 배포가 `continue-on-error: true`라 실패해도 아무 신호가 없던 것 — 배포 스텝에 `id`를 붙이고, 실패 시(`outcome == 'failure'`) `::error::` 어노테이션 + `$GITHUB_STEP_SUMMARY`에 경고를 남기는 후속 스텝 추가(job 자체는 여전히 실패시키지 않음 — continue-on-error의 원래 목적 유지).
+- **테스트 커버리지 나머지 전부**: `ExamPage`/`RetryPage`/`LeaderboardPage`(정렬·동점자 처리·빈 상태·본인 강조 로직 포함)/`MissionChecklist`/`LearningDayCard`/`DesktopProfileCluster`/`MiniVolumePanel`(rAF 트윈 애니메이션)/`mainWorldContent`/`uiSound`(공유 AudioContext 재사용·suspended 상태 재개) — 9개 파일 신규 테스트 24개 작성. 이제 저장소 전체에서 테스트 없는 파일은 순수 타입/데이터 정의뿐(의도적 생략).
+- **Sentry 이벤트 상한 서버측 전체화는 재분류**: 처음엔 "코드로 가능"으로 분류했으나, 기기 간 카운터를 공유하려면 Firestore 등 공유 저장소가 필요하고 이는 `MainWorldV3`를 Firebase에 연결하는 셈이 되어 이번 라운드 LOCKED("재배선 범위 밖")와 정면충돌한다는 걸 뒤늦게 발견 — Cloud Functions 신규 구축도 마찬가지로 범위 밖. **올바른 해법은 Sentry 자체 콘솔의 Rate Limits/Spike Protection 설정**(Project Settings → Client Keys → Configure)이라고 정정해서 안내함 — 코드가 아니라 Sentry 계정 접근 권한이 있는 사람만 할 수 있는 콘솔 작업.
+
 **의도적으로 고치지 않고 남긴 것(이유 포함, "나중에 해도 됨"이 아니라 지금 안전하게 못 고칠 구체적 이유가 있는 것들):**
 - **재배선 도메인 작업 전체**(XP/레벨 도메인 신설, 랭킹 서버측 정렬용 total-score 필드 + 인덱스, App Check 클라이언트 SDK 통합, Firestore 쓰기 레이트리밋, CSP `connect-src`에 Firebase 엔드포인트 추가) — 전부 이번 라운드에 LOCKED로 못박은 "MainWorldV3↔LegacyGooglerApp 재배선" 자체가 선행돼야 하는 설계 작업이라, 지금 부분적으로 손대면 재배선 시점에 다시 뜯어고쳐야 하는 상태가 된다. LOCKED 예외는 "이미 존재하는 코드의 테스트/에러처리"(이번에 처리함)까지고, 아직 존재하지 않는 도메인 로직 신설은 그 예외 밖이라고 판단했다.
-- **계정/데이터 삭제 경로 부재**(익명 계정 30일 자동정리는 인증 정보만 지우고 Firestore 문서·공개 랭킹 닉네임은 영구히 남음) — UX·정책 결정(삭제 시 랭킹 표시를 어떻게 할지 등)이 필요해 대표 선택 사안으로 분류.
-- **닉네임 실명 입력 제한 여부** — 정책 결정 사안으로 분류.
-- **`public/` 정적 자산 장기 캐시(immutable) 전환** — Opus 감사는 파일명에 버전 토큰(`-v10-` 등)이 있어 안전하다고 봤지만, 실제로 `public/` 전체를 확인한 결과 배지·로딩화면·메인 비주얼 등 다수 파일이 버전 토큰 없이 고정 파일명을 쓰고 있어(이전 라운드에 이미 검토된 의도적 결정, CLAUDE.md 8/25 기록 참고) 이번엔 안전하게 판단할 수 없는 범위까지 포함돼 있었다 — 이 결정을 재검토하려면 `public/` 전체 파일에 일관된 버전 태깅 규칙부터 다시 세워야 해서 이번 라운드에 손대지 않았다(섣불리 걸면 나중에 이미지 재작업 시 방문자가 옛 버전을 최대 1년 보는 사고로 되돌아감).
+- **계정/데이터 삭제 경로 부재**(익명 계정 30일 자동정리는 인증 정보만 지우고 Firestore 문서·공개 랭킹 닉네임은 영구히 남음) — UX·정책 결정(삭제 시 랭킹 표시를 어떻게 할지 등)이 필요해 대표 선택 사안으로 분류. **2026-09-02 대표님 확인**: 현재 라이브 제품엔 계정 개념 자체가 없다(아래 참고) — 재배선 이후에나 유효해지는 항목.
+- **닉네임 실명 입력 제한 여부** — 정책 결정 사안으로 분류. 마찬가지로 재배선 이후에나 유효.
 - **`.env.example`에 `VITE_FIRESTORE_NAMESPACE` 추가** — 이 세션의 툴 권한이 `.env*` 패턴 파일 읽기/쓰기를 전부 차단하고 있어(비밀값 보호용 샌드박스 규칙으로 추정) 직접 수정 불가. 대표님 또는 다른 접근 권한이 있는 세션이 `.env.example`에 `VITE_FIRESTORE_NAMESPACE=` 한 줄만 추가하면 되는 사소한 작업.
 - **App Check reCAPTCHA v3 허용 도메인에 `g00gler.web.app` 추가** — Firebase/Google reCAPTCHA 콘솔 설정이라 코드로 불가능(위 "Firebase 프로젝트" 섹션에 이미 미해결로 기록돼 있던 항목, 재배선 착수 시 처리 예정).
-- **Sentry 이벤트 상한이 기기별(서버 아님)** — 진짜 전체 상한을 걸려면 서버측(Cloud Function 등) 처리가 필요해 이번 라운드 범위를 넘어섬.
-- **npm audit 모더레이트 5건** — 전부 `firebase-tools`(개발용 CLI, 브라우저 번들에 안 들어감)를 통한 간접 의존성. `npm audit fix --force`는 이번 세션이 방금 15.28.2로 올린 `firebase-tools`를 14.23.0으로 되돌리는 breaking downgrade라 적용하지 않음 — 실사용자에게 닿지 않는 개발도구 전용 취약점이라 판단.
+- **Sentry 이벤트 상한 전체화** — 위에서 정정한 대로 Sentry 콘솔 작업.
+- **npm audit 모더레이트 5건** — 전부 `firebase-tools`(개발용 CLI, 브라우저 번들에 안 들어감)를 통한 간접 의존성. `npm audit fix --force`는 이번 세션이 방금 15.28.2로 올린 `firebase-tools`를 14.23.0으로 되돌리는 breaking downgrade라 적용하지 않음 — 실사용자에게 닿지 않는 개발도구 전용 취약점이고 상류 패키지가 해소해야 하는 문제라 §4-1 구조적 상한으로 처리.
+
+**"계정이 없는 목업인데 계정 얘기를 왜 하냐"는 대표님 반응에 코드로 재확인한 사실(2026-09-02)**: `src/App.tsx`는 `MainWorldV3` 하나만 렌더링하고, 실제 배포 번들(`dist/assets/*.js`)을 grep하면 `firebase`/`signInAnonymously`/`getFirestore`/`LegacyGooglerApp` 문자열이 전부 0건이다 — 즉 **지금 `g00gler.web.app` 방문자에게는 계정도 닉네임 저장도 전혀 발생하지 않는다.** 위에 나온 P-1(랭킹 공개 고지)/P-2(계정 삭제)/P-4(닉네임 정책) findings는 Opus 감사의 "(B) 원래 계획한 전체 제품 기준" 트랙 — 재배선 이후를 가정한 참고 메모였다는 점을 분명히 한다. 다만 Firestore/Auth **백엔드 자체**는 이미 살아있는 인프라라(프로젝트 ID만 알면 REST로 직접 접근 가능) `firestore.rules`의 랭킹 읽기 제한(S-1)은 이 구분과 무관하게 지금도 유효한 보안 조치였다.
 
 **검증**: `npm run check`(typecheck/lint/test/build) + `npm run rules:test`(Firestore 에뮬레이터, 8/8) 전부 통과.
 
