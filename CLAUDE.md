@@ -36,7 +36,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
   - Firebase SDK `11.0.2` → `^12.18.0` 업그레이드(2026-08-23, `@firebase/rules-unit-testing`이 v12를 요구해서 겸사겸사) — typecheck/lint/test 25개/build 전부 재확인, 번들 크기 불변.
   - Authentication에서 익명 로그인 활성화(Auto clean-up 30일 켜짐 — 이 앱은 20일 완주 프로그램이라 주기상 문제없음)
   - Google Cloud 예산 알림 설정 완료(Alerts only, googler 프로젝트 단독 스코프). **한계 인지할 것: 이건 임계값 넘으면 메일만 오는 것이고, 실제로 API 호출을 막거나 결제를 중단시키진 않는다.** 진짜 강제 차단이 필요하면 예산 초과 시 API를 비활성화하는 Cloud Function을 별도로 만들어야 함(아직 없음).
-  - App Check 등록 완료(reCAPTCHA v3, 도메인 `edutogether.github.io`), **Cloud Firestore + Authentication 두 API 모두 Enforce 켜짐(2026-08-23)**. 최신 Firebase 콘솔은 앱 단위가 아니라 API 단위로 Enforce를 건다 — App Check → APIs 탭에서 각 항목을 켠 것. 이유: 클라이언트 코드가 Firebase를 안 부르더라도 Firestore/Auth 프로젝트 자체는 인터넷에 살아있어서, 프로젝트 ID만 알면 REST API로 직접 두드릴 수 있음 — App Check가 그 뒷문을 막는 유일한 방어선. **미해결 메모(2026-09-02)**: App Check reCAPTCHA v3 키에 등록된 도메인이 여전히 `edutogether.github.io` 하나뿐이다 — 라이브 오리진이 `g00gler.web.app`으로 바뀌었지만, 클라이언트 App Check 통합 코드가 아직 0줄(재배선 전)이라 지금은 영향 없다. **재배선 착수 시 반드시 `g00gler.web.app`을 App Check 도메인에 추가할 것.**
+  - App Check 등록 완료(reCAPTCHA v3), **Cloud Firestore + Authentication 두 API 모두 Enforce 켜짐(2026-08-23)**. 최신 Firebase 콘솔은 앱 단위가 아니라 API 단위로 Enforce를 건다 — App Check → APIs 탭에서 각 항목을 켠 것. 이유: 클라이언트 코드가 Firebase를 안 부르더라도 Firestore/Auth 프로젝트 자체는 인터넷에 살아있어서, 프로젝트 ID만 알면 REST API로 직접 두드릴 수 있음 — App Check가 그 뒷문을 막는 유일한 방어선. **해결됨(2026-09-02, 대표님이 Google reCAPTCHA 관리 콘솔에서 직접 처리)**: reCAPTCHA v3 허용 도메인을 `g00gler.web.app` 추가 + `edutogether.github.io` 삭제(GitHub Pages 이미 폐기됨)로 정리 완료 — 현재 라이브 오리진과 정확히 일치한다.
 
 ## 전시 프리즈 — 복구 지점 (최신: 2026-09-02)
 
@@ -217,8 +217,8 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 - **계정/데이터 삭제 경로 부재**(익명 계정 30일 자동정리는 인증 정보만 지우고 Firestore 문서·공개 랭킹 닉네임은 영구히 남음) — UX·정책 결정(삭제 시 랭킹 표시를 어떻게 할지 등)이 필요해 대표 선택 사안으로 분류. **2026-09-02 대표님 확인**: 현재 라이브 제품엔 계정 개념 자체가 없다(아래 참고) — 재배선 이후에나 유효해지는 항목.
 - **닉네임 실명 입력 제한 여부** — 정책 결정 사안으로 분류. 마찬가지로 재배선 이후에나 유효.
 - **`.env.example`에 `VITE_FIRESTORE_NAMESPACE` 추가** — 이 세션의 툴 권한이 `.env*` 패턴 파일 읽기/쓰기를 전부 차단하고 있어(비밀값 보호용 샌드박스 규칙으로 추정) 직접 수정 불가. 대표님 또는 다른 접근 권한이 있는 세션이 `.env.example`에 `VITE_FIRESTORE_NAMESPACE=` 한 줄만 추가하면 되는 사소한 작업.
-- **App Check reCAPTCHA v3 허용 도메인에 `g00gler.web.app` 추가** — Firebase/Google reCAPTCHA 콘솔 설정이라 코드로 불가능(위 "Firebase 프로젝트" 섹션에 이미 미해결로 기록돼 있던 항목, 재배선 착수 시 처리 예정).
-- **Sentry 이벤트 상한 전체화** — 위에서 정정한 대로 Sentry 콘솔 작업.
+- **App Check reCAPTCHA v3 허용 도메인 — 해결됨**, 위 "Firebase 프로젝트" 섹션 참고.
+- **Sentry 이벤트 상한 전체화 — 해결됨**, 위에서 정정한 대로 Sentry 콘솔 작업으로 대표님이 직접 완료.
 - **npm audit 모더레이트 5건** — 전부 `firebase-tools`(개발용 CLI, 브라우저 번들에 안 들어감)를 통한 간접 의존성. `npm audit fix --force`는 이번 세션이 방금 15.28.2로 올린 `firebase-tools`를 14.23.0으로 되돌리는 breaking downgrade라 적용하지 않음 — 실사용자에게 닿지 않는 개발도구 전용 취약점이고 상류 패키지가 해소해야 하는 문제라 §4-1 구조적 상한으로 처리.
 
 **"계정이 없는 목업인데 계정 얘기를 왜 하냐"는 대표님 반응에 코드로 재확인한 사실(2026-09-02)**: `src/App.tsx`는 `MainWorldV3` 하나만 렌더링하고, 실제 배포 번들(`dist/assets/*.js`)을 grep하면 `firebase`/`signInAnonymously`/`getFirestore`/`LegacyGooglerApp` 문자열이 전부 0건이다 — 즉 **지금 `g00gler.web.app` 방문자에게는 계정도 닉네임 저장도 전혀 발생하지 않는다.** 위에 나온 P-1(랭킹 공개 고지)/P-2(계정 삭제)/P-4(닉네임 정책) findings는 Opus 감사의 "(B) 원래 계획한 전체 제품 기준" 트랙 — 재배선 이후를 가정한 참고 메모였다는 점을 분명히 한다. 다만 Firestore/Auth **백엔드 자체**는 이미 살아있는 인프라라(프로젝트 ID만 알면 REST로 직접 접근 가능) `firestore.rules`의 랭킹 읽기 제한(S-1)은 이 구분과 무관하게 지금도 유효한 보안 조치였다.
