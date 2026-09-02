@@ -27,7 +27,14 @@ const CHROME_CANDIDATES = [
   'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
 ];
 const PORT = 43117;
-const BASE_URL = `http://localhost:${PORT}/googler/?preview=main-v3&qa-mute=1`;
+// Read Vite's base path from vite.config.ts instead of hardcoding it here —
+// this script broke silently (server never came up) the last time the two
+// drifted apart (GitHub Pages' `/googler/` vs. Firebase Hosting's `/`).
+const viteConfigSource = readFileSync(path.join(root, 'vite.config.ts'), 'utf8');
+const baseMatch = viteConfigSource.match(/base:\s*['"]([^'"]*)['"]/);
+if (!baseMatch) { console.error('vite.config.ts에서 base 경로를 찾지 못했습니다.'); process.exit(1); }
+const BASE_PATH = baseMatch[1];
+const BASE_URL = `http://localhost:${PORT}${BASE_PATH}?preview=main-v3&qa-mute=1`;
 // 대비 임계값: 전체 픽셀의 0.2% 초과가 다르면 실패로 간주.
 const FAIL_RATIO = 0.002;
 
@@ -107,7 +114,7 @@ async function main() {
   execSync('npm run build', { cwd: root, stdio: 'inherit' });
   const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: root, shell: true, stdio: 'ignore' });
   try {
-    await waitForServer(`http://localhost:${PORT}/googler/`);
+    await waitForServer(`http://localhost:${PORT}${BASE_PATH}`);
     const shots = await captureAll(chromePath);
 
     if (updating) {

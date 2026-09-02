@@ -23,7 +23,7 @@ npm run check
 npm run preview
 ```
 
-Vite base는 GitHub Pages의 `/googler/`이며 공식 Pages URL은 `https://edutogether.github.io/googler/`입니다.
+Vite base는 `/`이며(Firebase Hosting은 루트 도메인으로 서빙), 공식 URL은 `https://g00gler.web.app/`입니다 — 사이트 ID `googler`는 프로젝트 ID와 같은 이유(상표 정책)로 거부되어 `g00gler`로 대체했습니다.
 
 ## 구조
 

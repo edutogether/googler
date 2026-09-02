@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/googler/',
+  base: '/',
   plugins: [react()],
   build: {
     // dist/ is served publicly from GitHub Pages, so Sentry can fetch these

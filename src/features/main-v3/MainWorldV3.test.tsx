@@ -25,7 +25,7 @@ afterEach(() => {
 
 describe('MainWorldV3 final preview', () => {
   it('renders the V3 preview through the query-gated application route', () => {
-    window.history.replaceState({}, '', '/googler/?preview=main-v3');
+    window.history.replaceState({}, '', '/?preview=main-v3');
     render(<App />);
 
     expect(document.querySelector('.mw3-shell')).toBeInTheDocument();

@@ -17,12 +17,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  window.history.replaceState({}, '', '/googler/');
+  window.history.replaceState({}, '', '/');
   vi.unstubAllGlobals();
 });
 
 describe('public MainWorldV3 route', () => {
-  it('renders MainWorldV3 as the default /googler/ screen', () => {
+  it('renders MainWorldV3 as the default / screen', () => {
     render(<App />);
 
     expect(document.querySelector('.mw3-shell')).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe('public MainWorldV3 route', () => {
   });
 
   it('keeps the preview query compatible with the same MainWorldV3 screen', () => {
-    window.history.replaceState({}, '', '/googler/?preview=main-v3');
+    window.history.replaceState({}, '', '/?preview=main-v3');
     render(<App />);
 
     expect(document.querySelector('.mw3-shell')).toBeInTheDocument();

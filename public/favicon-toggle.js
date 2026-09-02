@@ -1,6 +1,6 @@
 (() => {
-  const activeIcon = "/googler/favicon/gemini-star-active.png?v=20260803-1";
-  const inactiveIcon = "/googler/favicon/gemini-star-inactive.png?v=20260803-1";
+  const activeIcon = "/favicon/gemini-star-active.png?v=20260803-1";
+  const inactiveIcon = "/favicon/gemini-star-inactive.png?v=20260803-1";
 
   const updateFavicon = () => {
     const favicon = document.getElementById("googler-favicon");

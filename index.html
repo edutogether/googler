@@ -3,29 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- GitHub Pages serves this as a static file with no custom HTTP
-         headers available, so the CSP has to go here as a meta tag. That
-         means frame-ancestors/report-uri/sandbox are left out — browsers
-         silently ignore those three when set via meta rather than a real
-         header, so including them would just be false reassurance. -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://o4511966927912960.ingest.us.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self';"
-    />
+    <!-- CSP is set as a real HTTP header in firebase.json (Firebase Hosting
+         supports custom headers, unlike GitHub Pages), so no meta tag here. -->
     <link
       id="googler-favicon"
       rel="icon"
       type="image/png"
-      href="/googler/favicon/gemini-star-active.png?v=20260803-1"
+      href="/favicon/gemini-star-active.png?v=20260803-1"
     />
-    <link rel="stylesheet" href="/googler/fonts/pretendard/pretendard.css" />
+    <link rel="stylesheet" href="/fonts/pretendard/pretendard.css" />
     <meta
       name="description"
       content="호기심을 가이드 삼아 배우고 만들고 성장하는 Be a Googler의 학습 모험"
     />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="og:url" content="https://edutogether.github.io/googler/" />
+    <meta property="og:url" content="https://g00gler.web.app/" />
     <meta property="og:site_name" content="Be a Googler" />
     <meta property="og:title" content="Be a Googler | 배움의 모험을 하는 곳" />
     <meta
@@ -34,11 +27,11 @@
     />
     <meta
       property="og:image"
-      content="https://edutogether.github.io/googler/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
+      content="https://g00gler.web.app/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
     />
     <meta
       property="og:image:secure_url"
-      content="https://edutogether.github.io/googler/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
+      content="https://g00gler.web.app/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
     />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1730" />
@@ -51,10 +44,10 @@
     />
     <meta
       name="twitter:image"
-      content="https://edutogether.github.io/googler/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
+      content="https://g00gler.web.app/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1"
     />
     <title>Be a Googler | 배움의 모험을 하는 곳</title>
-    <script src="/googler/favicon-toggle.js" defer></script>
+    <script src="/favicon-toggle.js" defer></script>
   </head>
   <body>
     <!-- Boot splash: painted before any JS runs, so a fresh tab shows the

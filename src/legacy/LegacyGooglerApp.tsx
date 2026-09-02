@@ -32,8 +32,11 @@ export default function LegacyGooglerApp() {
   const [toastMsg, setToastMsg] = useState("");
 
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const saveTimerRef = useRef<number | undefined>(undefined);
 
   const services = useMemo(() => createAppServices(), []);
+
+  useEffect(() => () => window.clearTimeout(saveTimerRef.current), []);
 
   useEffect(() => services.subscribeToSession(async (uid) => {
     setUser(uid ? { uid } : null);
@@ -131,7 +134,29 @@ export default function LegacyGooglerApp() {
     invokeNativeShare(message.title, message.text);
   };
 
-  const toggleCheck = async (dayId: string, checkIndex: number) => {
+  const persistProgress = async (uid: string, nextProgress: Record<string, boolean>) => {
+    try {
+      await services.progress.save(uid, nextProgress);
+
+      const updatedIds = completedMissionIds(nextProgress, courses);
+      const l1Score = countCompletedMissions(updatedIds, coursesByLevel.L1);
+      const l2Score = countCompletedMissions(updatedIds, coursesByLevel.L2);
+
+      await services.leaderboard.save({
+        uid,
+        nickname: userProfile.nickname,
+        emoji: userProfile.emoji,
+        scoreL1: l1Score,
+        scoreL2: l2Score,
+        passedL1: nextProgress.passedL1 || false,
+        passedL2: nextProgress.passedL2 || false
+      });
+    } catch (error) {
+      console.error("데이터 저장 실패:", error);
+    }
+  };
+
+  const toggleCheck = (dayId: string, checkIndex: number) => {
     if (!user) return;
 
     const key = `${currentLevel}_${dayId}_${checkIndex}`;
@@ -146,28 +171,13 @@ export default function LegacyGooglerApp() {
       setTimeout(() => setShowConfetti(false), 3000);
     }
 
-    if (user) {
-      try {
-        await services.progress.save(user.uid, newProgress);
-
-        const updatedIds = completedMissionIds(newProgress, courses);
-        const l1Score = countCompletedMissions(updatedIds, coursesByLevel.L1);
-        const l2Score = countCompletedMissions(updatedIds, coursesByLevel.L2);
-
-        await services.leaderboard.save({
-          uid: user.uid,
-          nickname: userProfile.nickname,
-          emoji: userProfile.emoji,
-          scoreL1: l1Score,
-          scoreL2: l2Score,
-          passedL1: newProgress.passedL1 || false,
-          passedL2: newProgress.passedL2 || false
-        });
-
-      } catch (error) {
-        console.error("데이터 저장 실패:", error);
-      }
-    }
+    // Debounced: a learner ticking several boxes in quick succession
+    // previously fired two Firestore writes (progress + leaderboard) per
+    // click, each fanning out to every open leaderboard subscription. Only
+    // the last state in a burst actually needs to be persisted.
+    const uid = user.uid;
+    window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => { void persistProgress(uid, newProgress); }, 600);
   };
 
   const tabs = [
