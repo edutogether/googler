@@ -52,9 +52,18 @@ export default function LegacyGooglerApp() {
   useEffect(() => {
     if (!user) return;
     const unsubProgress = services.progress.subscribe(user.uid, (next) => { setProgress(next); setIsLoading(false); });
-    const unsubRankings = services.leaderboard.subscribe(setRankings);
-    return () => { unsubProgress(); unsubRankings(); };
+    return () => unsubProgress();
   }, [services, user]);
+
+  // Only listens while the ranking tab is actually open — a session-long
+  // leaderboard subscription meant every other participant's progress save
+  // fanned out a read to every open tab regardless of whether anyone was
+  // looking at the board (see COMMON_STANDARDS.md-driven audit, 확장성/비용
+  // finding).
+  useEffect(() => {
+    if (!user || !showRanking) return;
+    return services.leaderboard.subscribe(setRankings);
+  }, [services, user, showRanking]);
   const handleSaveProfile = async (selectedEmoji: string, nicknameInput: string) => {
     if (!nicknameInput.trim()) {
       showToastMsg("닉네임을 입력해주세요!");
