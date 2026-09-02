@@ -32,12 +32,13 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
           channelId: live
           projectId: be-a-g00gler
-      # The service account firebase init hosting:github created only has
-      # Hosting-deploy scope, not firebaserules.googleapis.com access, so
-      # this 403s until that's granted manually in IAM. continue-on-error
-      # keeps that failure from blocking the Hosting deploy above, which is
-      # the part every push actually needs to succeed.
+      # continue-on-error keeps a rules/index deploy failure from blocking
+      # the Hosting deploy above, which is the part every push actually
+      # needs to succeed — never reorder this step before Hosting deploy
+      # (see CLAUDE.md, an earlier ordering here silently skipped Hosting
+      # deploy entirely on the first real deploy attempt).
       - name: Deploy Firestore rules and indexes
+        id: rules_deploy
         continue-on-error: true
         run: |
           trap 'rm -f /tmp/firebase-service-account.json' EXIT
@@ -46,3 +47,13 @@ jobs:
           npx firebase-tools deploy --only firestore:rules,firestore:indexes --project be-a-g00gler --non-interactive
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
+      # continue-on-error hides a rules/index deploy failure from the job's
+      # overall pass/fail status, so without this the repo's firestore.rules
+      # could silently drift from what's actually live with no signal
+      # anywhere. This can't fail the job (that would defeat the point of
+      # continue-on-error above) — it just makes the failure impossible to
+      # miss in the Actions UI.
+      - name: Warn if the Firestore rules/index deploy failed
+        if: steps.rules_deploy.outcome == 'failure'
+        run: |
+          echo "::error::Firestore rules/index deploy failed — firestore.rules in this repo may now be out of sync with what's actually live. Check the 'Deploy Firestore rules and indexes' step above and redeploy manually if needed." | tee -a "$GITHUB_STEP_SUMMARY"
