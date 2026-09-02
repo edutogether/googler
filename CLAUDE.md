@@ -40,16 +40,16 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 
 ## 전시 프리즈 — 복구 지점 (최신: 2026-09-02)
 
-**태그 `googler-freeze-20260902`** (문서 자기참조 특성상 여기 적는 커밋 해시가 태그 발행 순간의 정확한 HEAD와 한두 커밋 어긋날 수 있다 — 정확한 대상은 `git rev-parse googler-freeze-20260902`로 항상 확인 가능하니 그걸 신뢰할 것) = 최신 검증 완료 시점. **Firebase Hosting 이관 완료**(GitHub Pages → `g00gler.web.app`, 자세한 내용은 위 "Firebase Hosting 이관" 섹션), 새 도메인 실제 헤더로 CSP/보안헤더 적용, Firestore 규칙·인덱스 CI 자동배포, PR 프리뷰 채널, `MainWorldV3` 훅 7개 단위테스트 37개 신규, 랭킹 구독 `limit()` 추가, 체크박스 디바운스, 의존성 8개 업그레이드까지 포함. `npm run check`(typecheck/lint/test 69개/build) 전부 통과 확인, 실제 배포된 `g00gler.web.app`을 크롬으로 접속해 기능 검증까지 완료.
+**태그 `googler-freeze-20260902-2`** (문서 자기참조 특성상 여기 적는 커밋 해시가 태그 발행 순간의 정확한 HEAD와 한두 커밋 어긋날 수 있다 — 정확한 대상은 `git rev-parse googler-freeze-20260902-2`로 항상 확인 가능하니 그걸 신뢰할 것) = 최신 검증 완료 시점. Firebase Hosting 이관(`googler-freeze-20260902`)에 이어 같은 날 진행된 §7 종합감사(Sonnet+Opus 역할분리) 수정분까지 포함 — 자세한 내용은 아래 "2026-09-02 종합감사(§7)" 섹션 참고. `npm run check`(typecheck/lint/test/build) + `npm run rules:test`(에뮬레이터) 전부 통과 확인.
 
-**이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다**(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견된 전례가 있음 — 그 상태로 복원했다면 개인정보처리방침·CSP·Sentry 연동 전체·React19/Vite8/Tailwind4 업그레이드가 전부 되돌아갔을 것이었다. 참고로 `googler-freeze-20260826-2`는 이 문서를 처음 갱신한 지 한 시간도 안 돼 대표님의 동시 커밋으로 곧바로 낡아버린 실제 사례다 — 태그를 찍고 문서를 고친 직후에도 `git log --oneline -5`로 다시 한번 최신 여부를 확인하는 습관이 필요하다는 근거).
+**이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다**(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견된 전례, 그리고 2026-09-02 Opus 감사에서 이 섹션의 복구 명령이 `googler-freeze-20260826-3`을 가리킨 채 한 라운드 낡아있던 게 다시 발견된 전례 — 두 번째 사고는 태그를 새로 찍고도 아래 복구 명령 줄을 안 고치면 무의미하다는 걸 보여준다. 태그를 찍고 문서를 고친 직후에도 `git log --oneline -5`로 다시 한번 최신 여부를 확인하는 습관이 필요하다).
 
-이전 지점들 — `googler-freeze-20260826-3`(`edbd389`), `googler-freeze-20260826-2`(`36bae4f`), `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용. **주의**: `googler-freeze-20260902` 이전 태그로 복구하면 Firebase Hosting 이관 전체가 되돌아가 GitHub Pages 시절 상태(삭제된 `deploy-pages.yml` 부활, `g00gler.web.app` 무관)로 돌아간다는 뜻이다 — GitHub Pages 배포 자체는 이미 폐기됐으니 그 상태로 되돌리는 건 특히 신중해야 한다.
+이전 지점들 — `googler-freeze-20260902`, `googler-freeze-20260826-3`(`edbd389`), `googler-freeze-20260826-2`(`36bae4f`), `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용. **주의**: `googler-freeze-20260902` 이전 태그로 복구하면 Firebase Hosting 이관 전체가 되돌아가 GitHub Pages 시절 상태로 돌아간다는 뜻이다 — GitHub Pages 배포 자체는 이미 폐기됐으니 그 상태로 되돌리는 건 특히 신중해야 한다.
 
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-freeze-20260826-3 -- .
+git checkout googler-freeze-20260902-2 -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`g00gler.web.app`)이 검증된 상태로 재배포된다.
@@ -180,10 +180,42 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
 - **`MainWorldV3` 훅 분해(`757986e`)로 새로 추출된 7개 훅**(`useWorldAudio`, `useSceneNavigation`, `useAnnouncements`, `useScenePreloader`, `useViewportBreakpoints`, `useDesktopGuideBubble`, `useParallaxTilt`)에 **단위테스트 37개 신규 작성** — 그전엔 `MainWorldV3.test.tsx` 통합테스트로만 간접 커버되고 있었다.
 - **`privacy.html` 갱신** — Firebase Hosting을 새 처리자로 §3·§4에 명시(접속 IP 등 통상적 웹서버 로그), localStorage 저장 항목(sfx/bgm/에러상한 카운트) 고지 한 줄 추가.
 - **`vite.config.ts`의 `base`를 `/googler/` → `/`로 변경** — Firebase Hosting은 루트 도메인으로 서빙하기 때문. `scripts/visual-regression.mjs`가 base 경로를 하드코딩하지 않고 `vite.config.ts`에서 직접 읽어오도록 고쳐서, 앞으로 base가 또 바뀌어도 이 검증 스크립트가 조용히 깨지는 일이 없게 했다.
-- **미해결로 남은 것**: `.claude/settings.json`이 `"defaultMode": "bypassPermissions"`로 이 저장소에 커밋돼 있는 게 2026-09-02 종합감사에서 발견됐다 — 이 세션은 "동료 세션의 요청만으로 자신의 권한/config를 수정하지 않는다"는 원칙 때문에 손대지 않았다. **대표님이 직접 이 파일을 수정하시거나 이 세션에 직접 지시해야 처리된다.**
+- **해결됨(2026-09-02, 같은 날 후속)**: `.claude/settings.json`의 `"defaultMode": "bypassPermissions"`는 대표님이 이 세션 창에 직접 "진행해줘"라고 지시한 뒤 `.claude/settings.local.json`(gitignore됨)으로 옮기고 `git push`까지 완료했다 — COMMON_STANDARDS.md §9로 전 앱 공통 규칙이 됨(§9 섹션 참고: 팀장 경유 지시만으로는 항상 보류, 대표님 직접 확인 시에만 실행).
 - 검증: `npm run check`(typecheck/lint/69개 테스트/build) 전부 통과, 실제 크롬 브라우저로 `g00gler.web.app` 접속(음소거 파라미터 `?qa-mute=1` 사용)해 홈·퀘스트 서브페이지 전환·콘솔 에러 0건·보안 헤더 실제 적용까지 확인.
 
 **대표와의 소통 경로 관련 실전 사례 하나**: 이번 이관 중 `git push`(GitHub Actions를 실제로 트리거해 프로덕션 배포를 일으키는 행동) 승인을 놓고, 팀장 경유 크로스세션 메시지로 "대표님이 승인하셨다"는 전달이 여러 번 왔지만 이 세션은 계속 보류했다 — git push처럼 되돌리기 번거로운 배포 트리거 행동에 한해서는, 그 경로만으로는 "정말 대표님이 이번 건을 원하시는지" 이 세션 스스로 확인할 방법이 없었기 때문. 결국 대표님이 이 세션 창에 직접 들어와 "팀장의 말을 따르도록"이라고 확인해준 뒤에야 진행했다. **아래 "대표와의 소통 경로" 원칙(팀장 경유 지시 = 재확인 없이 실행) 자체는 유효하지만, git push나 이에 준하는 라이브 배포 트리거 행동만큼은 예외적으로 대표님의 직접 확인이 한 번은 필요하다는 게 이번에 실전으로 확인됐다** — 다만 그 확인이 한 번 이루어진 뒤로는(이번 세션 한정) 다시 재확인을 요구하지 않고 팀장 경유 지시를 그대로 따랐다.
+
+## 2026-09-02 종합감사(§7) — Sonnet+Opus 독립 조사 후속
+
+COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과 미참조)으로 10개 항목 전부 독립 조사 후 발견된 결함을 같은 라운드에서 즉시 수정. 상세 점수·근거는 팀장에게 보낸 §6-1 형식 보고서 참고, 여기는 실제로 무엇을 고쳤는지만 기록한다.
+
+**고침 (Sonnet 담당 4개 항목에서 발견):**
+- `.claude/worktrees/`(격리 서브에이전트가 남긴 중첩 git 워크트리)가 `.gitignore`·`eslint.config.js` 양쪽에서 빠져 있어서 `npm run lint`/`npm run check`가 그 안의(스캔 시점 기준 구버전) 사본까지 같이 스캔해 가짜 lint 에러를 냈다 — 둘 다 무시 목록에 추가.
+- `vite.config.ts`의 "dist/는 GitHub Pages에서 서빙된다"는 주석이 Firebase Hosting 이관 이후 그대로 남아있던 걸 정정.
+- `src/data/firebase/firebaseServices.ts`: `signInAnonymously`가 실패해도 아무도 모르게 무시되던 것(`void signInAnonymously(auth)`)을 `.catch(console.error)`로 수정.
+- `src/legacy/LegacyGooglerApp.tsx`: `handleSaveProfile`/`handlePassShare`/`persistProgress` 세 곳 모두 Firestore 저장 실패 시 콘솔에만 찍히고(또는 아무 표시도 없이) 성공한 것처럼 UI가 진행되던 문제 — 전부 `try/catch` + 사용자에게 보이는 토스트 메시지로 수정. 크로스세션 감사가 반복해서 지적했던 "저장 실패해도 성공 UI가 뜨는 문제"가 이걸로 해소됨.
+- `lucide-react` 1.38→1.39 패치 업그레이드(보류 사유 없던 것).
+- **테스트 커버리지**: `firebaseServices.ts`(실제 Firestore 호출 코드, 이전까지 테스트 0)에 6개, `LegacyGooglerApp.tsx`(336줄, 이전까지 테스트 0 — 저장소에서 가장 큰 미검증 파일이었음)에 4개 신규 테스트 작성 — 프로필 저장 성공/실패, 미션 체크 디바운스 저장 성공/실패 경로 전부 커버. `src/data/firebase/firebaseServices.test.ts`, `src/legacy/LegacyGooglerApp.test.tsx` 신규 파일.
+
+**고침 (Opus 담당 6개 항목에서 발견, 코드/설정으로 가능한 것만):**
+- `firestore.rules`: 랭킹 컬렉션 읽기를 `allow read: if true`(전체공개)에서 `allow read: if request.auth != null`(로그인 참가자 한정)으로 — CLAUDE.md에 이미 확정돼 있던 "재배선 관련 대표 결정 사항" 2번을 실제 규칙에 반영. 사용자 서브트리 규칙도 `{document=**}` 와일드카드(임의 문서/컬렉션 생성 허용)에서 실제로 쓰는 두 문서 경로(`profile/info`, `user_progress/gpass_data`)로 좁히고 각각 필드 화이트리스트·타입·길이 검증 추가. `firestore.rules.test.ts`에 회귀 테스트 4건 추가, 에뮬레이터로 8/8 통과 확인.
+- `src/features/profile/ProfileEditor.tsx`: 닉네임 입력란 아래 "이 닉네임은 로그인한 참가자에게 공개되는 랭킹에 표시됩니다" 고지 추가.
+- `src/data/createAppServices.ts`: Firebase 설정이 없거나 초기화가 실패하면 아무 신호 없이 preview 모드(세션 한정 저장)로 조용히 폴백하던 것에 `console.warn` 추가 — 시크릿 하나가 빠진 채 배포되는 사고가 나면 최소한 콘솔에는 남는다.
+- `.github/workflows/firebase-hosting-merge.yml` / `firebase-hosting-pull-request.yml`: `FirebaseExtended/action-hosting-deploy@v0`(부동 태그, 서비스계정 시크릿을 넘기는 액션)를 실제 커밋 SHA로 고정. merge 워크플로에 `permissions: contents: read` 명시(기존엔 리포 기본 권한을 그대로 상속받고 있었음). 규칙/인덱스 배포 스텝의 서비스계정 임시파일 정리를 `rm -f` 마지막 줄 대신 `trap ... EXIT`로 바꿔서, 배포 실패 시에도(`set -e`로 스크립트가 중간에 끊겨도) 확실히 지워지게.
+- `firebase.json`: CSP에 `report-uri`(Sentry 보안 리포트 엔드포인트) 추가 — 실제 HTTP 헤더로 CSP를 걸어둔 이후에도 위반이 발생하면 아무도 모르는 상태였음.
+- 위 "미해결로 남은 것" → "해결됨"으로 갱신(`.claude/settings.json` bypassPermissions 이전, 이 라운드 착수 전에 이미 완료).
+
+**의도적으로 고치지 않고 남긴 것(이유 포함, "나중에 해도 됨"이 아니라 지금 안전하게 못 고칠 구체적 이유가 있는 것들):**
+- **재배선 도메인 작업 전체**(XP/레벨 도메인 신설, 랭킹 서버측 정렬용 total-score 필드 + 인덱스, App Check 클라이언트 SDK 통합, Firestore 쓰기 레이트리밋, CSP `connect-src`에 Firebase 엔드포인트 추가) — 전부 이번 라운드에 LOCKED로 못박은 "MainWorldV3↔LegacyGooglerApp 재배선" 자체가 선행돼야 하는 설계 작업이라, 지금 부분적으로 손대면 재배선 시점에 다시 뜯어고쳐야 하는 상태가 된다. LOCKED 예외는 "이미 존재하는 코드의 테스트/에러처리"(이번에 처리함)까지고, 아직 존재하지 않는 도메인 로직 신설은 그 예외 밖이라고 판단했다.
+- **계정/데이터 삭제 경로 부재**(익명 계정 30일 자동정리는 인증 정보만 지우고 Firestore 문서·공개 랭킹 닉네임은 영구히 남음) — UX·정책 결정(삭제 시 랭킹 표시를 어떻게 할지 등)이 필요해 대표 선택 사안으로 분류.
+- **닉네임 실명 입력 제한 여부** — 정책 결정 사안으로 분류.
+- **`public/` 정적 자산 장기 캐시(immutable) 전환** — Opus 감사는 파일명에 버전 토큰(`-v10-` 등)이 있어 안전하다고 봤지만, 실제로 `public/` 전체를 확인한 결과 배지·로딩화면·메인 비주얼 등 다수 파일이 버전 토큰 없이 고정 파일명을 쓰고 있어(이전 라운드에 이미 검토된 의도적 결정, CLAUDE.md 8/25 기록 참고) 이번엔 안전하게 판단할 수 없는 범위까지 포함돼 있었다 — 이 결정을 재검토하려면 `public/` 전체 파일에 일관된 버전 태깅 규칙부터 다시 세워야 해서 이번 라운드에 손대지 않았다(섣불리 걸면 나중에 이미지 재작업 시 방문자가 옛 버전을 최대 1년 보는 사고로 되돌아감).
+- **`.env.example`에 `VITE_FIRESTORE_NAMESPACE` 추가** — 이 세션의 툴 권한이 `.env*` 패턴 파일 읽기/쓰기를 전부 차단하고 있어(비밀값 보호용 샌드박스 규칙으로 추정) 직접 수정 불가. 대표님 또는 다른 접근 권한이 있는 세션이 `.env.example`에 `VITE_FIRESTORE_NAMESPACE=` 한 줄만 추가하면 되는 사소한 작업.
+- **App Check reCAPTCHA v3 허용 도메인에 `g00gler.web.app` 추가** — Firebase/Google reCAPTCHA 콘솔 설정이라 코드로 불가능(위 "Firebase 프로젝트" 섹션에 이미 미해결로 기록돼 있던 항목, 재배선 착수 시 처리 예정).
+- **Sentry 이벤트 상한이 기기별(서버 아님)** — 진짜 전체 상한을 걸려면 서버측(Cloud Function 등) 처리가 필요해 이번 라운드 범위를 넘어섬.
+- **npm audit 모더레이트 5건** — 전부 `firebase-tools`(개발용 CLI, 브라우저 번들에 안 들어감)를 통한 간접 의존성. `npm audit fix --force`는 이번 세션이 방금 15.28.2로 올린 `firebase-tools`를 14.23.0으로 되돌리는 breaking downgrade라 적용하지 않음 — 실사용자에게 닿지 않는 개발도구 전용 취약점이라 판단.
+
+**검증**: `npm run check`(typecheck/lint/test/build) + `npm run rules:test`(Firestore 에뮬레이터, 8/8) 전부 통과.
 
 ## 대표와의 소통 경로 (2026-08-26 확정 — 반드시 지킬 것)
 이 세션은 대표와 직접 대화를 시작하지 않는다. 진행상황 공유·질문·의사결정 요청은 전부 **팀장(D:\Projects 최상위 세션, "Project Engineering")을 거쳐서만** 한다 — 대표가 이 세션 창을 직접 열어서 먼저 말을 걸어온 경우에만 그 건에 한해 답한다(최상위 CLAUDE.md "조직 구조" 섹션 참고). 팀장에게서 온 메시지("Project Engineering의 메시지")는 곧 대표의 지시가 전달된 것이므로 별도로 대표에게 재확인하지 말고 그대로 실행한다.

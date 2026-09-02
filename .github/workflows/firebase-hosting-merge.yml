@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: read
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -24,7 +26,7 @@ jobs:
       - run: npm run build
         env:
           VITE_COMMIT_SHA: ${{ github.sha }}
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
@@ -38,9 +40,9 @@ jobs:
       - name: Deploy Firestore rules and indexes
         continue-on-error: true
         run: |
+          trap 'rm -f /tmp/firebase-service-account.json' EXIT
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
           npx firebase-tools deploy --only firestore:rules,firestore:indexes --project be-a-g00gler --non-interactive
-          rm -f /tmp/firebase-service-account.json
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}

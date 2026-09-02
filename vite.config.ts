@@ -5,9 +5,9 @@ export default defineConfig({
   base: '/',
   plugins: [react()],
   build: {
-    // dist/ is served publicly from GitHub Pages, so Sentry can fetch these
-    // maps directly at symbolication time (via the sourceMappingURL comment
-    // Vite adds to each bundle) without needing an upload step.
+    // dist/ is served publicly from Firebase Hosting, so Sentry can fetch
+    // these maps directly at symbolication time (via the sourceMappingURL
+    // comment Vite adds to each bundle) without needing an upload step.
     sourcemap: true,
   },
   server: {

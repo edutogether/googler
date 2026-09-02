@@ -63,8 +63,14 @@ export default function LegacyGooglerApp() {
 
     if (user) {
       const profile = { nickname: nicknameInput, emoji: selectedEmoji };
-      await services.profiles.save(user.uid, profile);
-      await services.leaderboard.save({ uid: user.uid, ...profile });
+      try {
+        await services.profiles.save(user.uid, profile);
+        await services.leaderboard.save({ uid: user.uid, ...profile });
+      } catch (error) {
+        console.error("프로필 저장 실패:", error);
+        showToastMsg("프로필 저장에 실패했어요. 다시 시도해주세요 😢");
+        return;
+      }
     }
 
     setUserProfile({ nickname: nicknameInput, emoji: selectedEmoji });
@@ -123,8 +129,13 @@ export default function LegacyGooglerApp() {
       const newProgress = { ...progress, [`passed${currentLevel}`]: true };
       setProgress(newProgress);
 
-      await services.progress.save(user.uid, newProgress);
-      await services.leaderboard.save({ uid: user.uid, ...userProfile, [`passed${currentLevel}`]: true });
+      try {
+        await services.progress.save(user.uid, newProgress);
+        await services.leaderboard.save({ uid: user.uid, ...userProfile, [`passed${currentLevel}`]: true });
+      } catch (error) {
+        console.error("합격 기록 저장 실패:", error);
+        showToastMsg("합격 기록 저장에 실패했어요. 잠시 후 다시 시도해주세요 😢");
+      }
 
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
@@ -153,6 +164,7 @@ export default function LegacyGooglerApp() {
       });
     } catch (error) {
       console.error("데이터 저장 실패:", error);
+      showToastMsg("저장에 실패했어요. 인터넷 연결을 확인해주세요 😢");
     }
   };
 

@@ -30,7 +30,7 @@ export function createFirebaseServices(config: FirebaseConfig): AppServices {
   return {
     mode: 'firebase',
     subscribeToSession: (onUser) => {
-      void signInAnonymously(auth);
+      signInAnonymously(auth).catch((error) => console.error('익명 로그인 실패:', error));
       return onAuthStateChanged(auth, (user) => onUser(user?.uid ?? null));
     },
     profiles: {

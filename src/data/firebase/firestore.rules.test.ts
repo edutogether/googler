@@ -33,9 +33,26 @@ describeRules('firestore.rules', () => {
     await assertFails(setDoc(progressRef(anonymous('attacker'), 'mobile'), { progress: { day1: true } }, { merge: true }));
   });
 
-  it('lets anyone read the public leaderboard', async () => {
+  it('rejects profile and progress writes with extra fields, wrong types, or oversized values', async () => {
+    const db = anonymous('mobile');
+    await assertFails(setDoc(profileRef(db, 'mobile'), { nickname: 'x', emoji: '🐧', role: 'admin' }));
+    await assertFails(setDoc(profileRef(db, 'mobile'), { nickname: 123, emoji: '🐧' }));
+    await assertFails(setDoc(profileRef(db, 'mobile'), { nickname: 'x'.repeat(31), emoji: '🐧' }));
+    await assertSucceeds(setDoc(profileRef(db, 'mobile'), { nickname: 'x', emoji: '🐧' }));
+
+    await assertFails(setDoc(progressRef(db, 'mobile'), { progress: {}, extra: true }));
+    await assertFails(setDoc(progressRef(db, 'mobile'), { progress: 'not-a-map' }));
+  });
+
+  it('no longer lets a signed-in user create arbitrary documents under their own uid', async () => {
+    const db = anonymous('mobile');
+    await assertFails(setDoc(doc(db, 'artifacts', appId, 'users', 'mobile', 'anything', 'else'), { open: true }));
+  });
+
+  it('lets signed-in participants read the public leaderboard, but not anonymous visitors', async () => {
     await environment.withSecurityRulesDisabled(async (context) => setDoc(rankingRef(context.firestore(), 'mobile'), entry('mobile')));
-    await assertSucceeds(getDocs(rankingsCollection(environment.unauthenticatedContext().firestore())));
+    await assertSucceeds(getDocs(rankingsCollection(anonymous('reader'))));
+    await assertFails(getDocs(rankingsCollection(environment.unauthenticatedContext().firestore())));
   });
 
   it('only lets a user write their own leaderboard entry, matching both the doc id and the uid field', async () => {

@@ -29,6 +29,9 @@ Thumbs.db
 # Local Claude Code settings (per-machine permission overrides)
 .claude/settings.local.json
 
+# Agent worktrees (nested repo checkouts left behind by isolated subagent runs)
+.claude/worktrees/
+
 # Visual regression artifacts (machine-specific renderings)
 .visual-baselines/
 .visual-diffs/
