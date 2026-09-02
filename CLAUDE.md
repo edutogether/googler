@@ -40,7 +40,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 
 ## 전시 프리즈 — 복구 지점 (최신: 2026-09-02)
 
-**태그 `googler-freeze-20260902`**(커밋 해시는 태그 발행 직후 이 문서 커밋 자체의 부모 커밋 `943e927` — 태그가 실제로 가리키는 커밋은 `git show googler-freeze-20260902`로 확인) = 최신 검증 완료 시점. **Firebase Hosting 이관 완료**(GitHub Pages → `g00gler.web.app`, 자세한 내용은 위 "Firebase Hosting 이관" 섹션), 새 도메인 실제 헤더로 CSP/보안헤더 적용, Firestore 규칙·인덱스 CI 자동배포, PR 프리뷰 채널, `MainWorldV3` 훅 7개 단위테스트 37개 신규, 랭킹 구독 `limit()` 추가, 체크박스 디바운스, 의존성 8개 업그레이드까지 포함. `npm run check`(typecheck/lint/test 69개/build) 전부 통과 확인, 실제 배포된 `g00gler.web.app`을 크롬으로 접속해 기능 검증까지 완료.
+**태그 `googler-freeze-20260902`** (커밋 `ddaf142`) = 최신 검증 완료 시점. **Firebase Hosting 이관 완료**(GitHub Pages → `g00gler.web.app`, 자세한 내용은 위 "Firebase Hosting 이관" 섹션), 새 도메인 실제 헤더로 CSP/보안헤더 적용, Firestore 규칙·인덱스 CI 자동배포, PR 프리뷰 채널, `MainWorldV3` 훅 7개 단위테스트 37개 신규, 랭킹 구독 `limit()` 추가, 체크박스 디바운스, 의존성 8개 업그레이드까지 포함. `npm run check`(typecheck/lint/test 69개/build) 전부 통과 확인, 실제 배포된 `g00gler.web.app`을 크롬으로 접속해 기능 검증까지 완료.
 
 **이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다**(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견된 전례가 있음 — 그 상태로 복원했다면 개인정보처리방침·CSP·Sentry 연동 전체·React19/Vite8/Tailwind4 업그레이드가 전부 되돌아갔을 것이었다. 참고로 `googler-freeze-20260826-2`는 이 문서를 처음 갱신한 지 한 시간도 안 돼 대표님의 동시 커밋으로 곧바로 낡아버린 실제 사례다 — 태그를 찍고 문서를 고친 직후에도 `git log --oneline -5`로 다시 한번 최신 여부를 확인하는 습관이 필요하다는 근거).
 
