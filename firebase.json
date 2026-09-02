@@ -43,6 +43,42 @@
         ]
       },
       {
+        "source": "visual-reset/*/*-v*-opt.webp",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "visual-reset/main/assets/*-v*-opt.webp",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "favicon/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "social/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
         "source": "*.html",
         "headers": [
           {
