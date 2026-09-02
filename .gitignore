@@ -26,6 +26,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local Claude Code settings (per-machine permission overrides)
+.claude/settings.local.json
+
 # Visual regression artifacts (machine-specific renderings)
 .visual-baselines/
 .visual-diffs/
