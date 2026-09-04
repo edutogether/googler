@@ -97,6 +97,7 @@
 .mw3-privacy-link { position: fixed; z-index: 4; right: 14px; bottom: 14px; padding: 4px 9px; color: rgb(255 255 255 / .82); border-radius: 8px; background: transparent; font-size: 11px; font-weight: 600; text-decoration: none; }
 .mw3-privacy-link:hover { color: #fff; background: rgb(20 22 18 / .55); }
 .mw3-privacy-link:focus-visible { color: #fff; background: rgb(20 22 18 / .55); outline: 2px solid rgb(39 121 230 / .72); outline-offset: 2px; }
+.mw3-privacy-link--hero { position: static; align-self: flex-start; margin-top: 14px; padding: 0 5px; color: #6a6a5f; font-size: 12px; font-weight: 600; }.mw3-privacy-link--hero:hover, .mw3-privacy-link--hero:focus-visible { color: #37372f; background: transparent; }
 /* Mouse/touch visitors reveal the "coming soon" card by tapping the scene;
    this gives keyboard users an equivalent trigger without changing what's
    visible on screen until it receives focus. */
