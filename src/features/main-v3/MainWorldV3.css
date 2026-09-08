@@ -82,6 +82,9 @@
 .mw3-hero h1 b { font-weight: 850; }
 .mw3-hero h1 b:nth-child(1) { color: #357ee6; }.mw3-hero h1 b:nth-child(2) { color: #d75148; }.mw3-hero h1 b:nth-child(3) { color: #dca329; }.mw3-hero h1 em { color: #2e7de5; font-style: normal; }
 .mw3-description { margin: 0; color: #40413d; font-size: 17px; font-weight: 520; line-height: 1.65; letter-spacing: -.03em; }
+/* The hero stacks 여정이란? → 개인정보처리방침 → CTA row, and those two gaps are
+   kept identical on purpose (founder request) — drive both from one value. */
+.mw3-hero { --mw3-hero-link-gap: 14px; }
 .mw3-cta-row { display: flex; gap: 12px; margin-top: 26px; }
 .mw3-primary-cta, .mw3-secondary-cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 62px; padding: 0 27px; border-radius: 19px; font: inherit; font-size: 17px; font-weight: 780; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
 .mw3-primary-cta { color: #fff; border: 1px solid rgb(255 255 255 / .22); background: linear-gradient(145deg, #4e96ff, #1766d4); box-shadow: 0 13px 24px rgb(26 94 190 / .27), inset 0 1px 1px rgb(255 255 255 / .42); }
@@ -97,7 +100,12 @@
 .mw3-privacy-link { position: fixed; z-index: 4; right: 14px; bottom: 14px; padding: 4px 9px; color: rgb(255 255 255 / .82); border-radius: 8px; background: transparent; font-size: 11px; font-weight: 600; text-decoration: none; }
 .mw3-privacy-link:hover { color: #fff; background: rgb(20 22 18 / .55); }
 .mw3-privacy-link:focus-visible { color: #fff; background: rgb(20 22 18 / .55); outline: 2px solid rgb(39 121 230 / .72); outline-offset: 2px; }
-.mw3-privacy-link--hero { position: static; align-self: flex-start; margin-top: 14px; padding: 0 5px; color: #6a6a5f; font-size: 12px; font-weight: 600; }.mw3-privacy-link--hero:hover, .mw3-privacy-link--hero:focus-visible { color: #37372f; background: transparent; }
+/* Reads as a link, not as grey caption text: brand blue, underlined, sized to
+   sit alongside 여정이란?. The white text-shadow keeps it legible where the
+   scene behind it turns busy. */
+.mw3-privacy-link--hero { position: static; align-self: flex-start; margin-top: var(--mw3-hero-link-gap); padding: 3px 6px; border-radius: 8px; color: #1559b8; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline; text-decoration-color: rgb(21 89 184 / .45); text-decoration-thickness: 1.5px; text-underline-offset: 4px; text-shadow: 0 1px 0 rgb(255 255 255 / .55); transition: color 180ms ease, background 180ms ease, text-decoration-color 180ms ease; }
+.mw3-privacy-link--hero:hover, .mw3-privacy-link--hero:focus-visible { color: #0e4391; background: rgb(255 255 255 / .58); text-decoration-color: currentcolor; }
+.mw3-privacy-link--hero:focus-visible { outline: 3px solid rgb(39 121 230 / .72); outline-offset: 2px; }
 /* Mouse/touch visitors reveal the "coming soon" card by tapping the scene;
    this gives keyboard users an equivalent trigger without changing what's
    visible on screen until it receives focus. */
@@ -451,7 +459,7 @@
   .mw3-hero { display: flex; flex-direction: column; }
   .mw3-description br { display: none; }
   .mw3-text-action { order: 0; align-self: flex-start; margin-top: 34px; }
-  .mw3-cta-row { order: 1; margin-top: 34px; }
+  .mw3-cta-row { order: 1; margin-top: var(--mw3-hero-link-gap); }
   .mw3-primary-cta {
     border-color: rgb(255 255 255 / .3);
     background: linear-gradient(150deg, #5496f1, #276ac6);
@@ -471,9 +479,12 @@
   .mw3-secondary-cta:hover { transform: translateY(-2px) scale(1.005); box-shadow: var(--mw3-pc-shadow-lift), inset 0 1px 0 rgb(255 255 255 / .94); }
   .mw3-primary-cta:active,
   .mw3-secondary-cta:active { box-shadow: 0 8px 16px rgb(39 69 106 / .14), inset 0 1px 0 rgb(255 255 255 / .58); transform: translateY(1px); }
-  .mw3-text-action { display: inline-flex; align-items: center; justify-content: center; min-height: 43px; gap: 6px; padding-inline: 13px; color: #28342d; border: 1px solid rgb(255 255 255 / .5); border-bottom-color: rgb(161 137 96 / .2); border-radius: 10px; background: rgb(255 251 240 / .42); box-shadow: inset 0 1px rgb(255 255 255 / .46); font-weight: 780; line-height: 1; text-decoration: none; text-shadow: 0 1px 0 rgb(255 255 255 / .3); transition: background var(--mw3-pc-motion), transform var(--mw3-pc-motion), box-shadow var(--mw3-pc-motion); }
+  /* Reads as a pressable control rather than a caption: brand-blue label on an
+     opaque pill with a visible blue rim, and a hover/focus state that actually
+     moves. */
+  .mw3-text-action { display: inline-flex; align-items: center; justify-content: center; min-height: 43px; gap: 6px; padding-inline: 15px; color: #1559b8; border: 2px solid rgb(43 108 196 / .45); border-radius: 12px; background: rgb(255 255 255 / .7); box-shadow: 0 2px 8px rgb(41 71 110 / .1), inset 0 1px rgb(255 255 255 / .8); font-weight: 800; line-height: 1; text-decoration: none; text-shadow: 0 1px 0 rgb(255 255 255 / .5); transition: background var(--mw3-pc-motion), transform var(--mw3-pc-motion), box-shadow var(--mw3-pc-motion), border-color var(--mw3-pc-motion), color var(--mw3-pc-motion); }
   .mw3-text-action span { display: inline-grid; width: .95em; place-items: center; padding-left: 0; font-size: 1.15em; line-height: 1; transition: transform var(--mw3-pc-motion); transform: translateY(-.02em); }
-  .mw3-text-action:hover { background: rgb(255 253 247 / .55); box-shadow: inset 0 1px rgb(255 255 255 / .5), 0 3px 9px rgb(70 56 37 / .06); }
+  .mw3-text-action:hover { color: #0e4391; border-color: rgb(43 108 196 / .78); background: rgb(255 255 255 / .92); box-shadow: 0 5px 14px rgb(41 71 110 / .16), inset 0 1px rgb(255 255 255 / .9); transform: translateY(-1px); }
   .mw3-text-action:hover span { transform: translateX(2px); }
   .mw3-text-action:active { box-shadow: inset 0 1px rgb(255 255 255 / .58); transform: translateY(1px); }
 
@@ -700,8 +711,9 @@
   .mw3-eyebrow { font-size: var(--mw3-pc-eyebrow-size); }
   .mw3-hero h1 { font-size: var(--mw3-pc-title-size); line-height: 1; }
   .mw3-description { font-size: var(--mw3-pc-body-size); line-height: 1.62; }
-  .mw3-text-action { min-height: clamp(35px, 1.6796875vw, 43px); margin-top: clamp(20px, 1.328125vw, 34px); padding-inline: clamp(10px, .5078125vw, 13px); font-size: clamp(12px, .5859375vw, 15px); }
-  .mw3-cta-row { gap: clamp(8px, .546875vw, 14px); margin-top: clamp(20px, 1.328125vw, 34px); }
+  .mw3-text-action { min-height: clamp(40px, 1.875vw, 48px); margin-top: clamp(20px, 1.328125vw, 34px); padding-inline: clamp(13px, .625vw, 16px); font-size: clamp(15px, .78vw, 18px); }
+  .mw3-privacy-link--hero { font-size: clamp(14px, .72vw, 17px); }
+  .mw3-cta-row { gap: clamp(8px, .546875vw, 14px); margin-top: var(--mw3-hero-link-gap); }
   .mw3-primary-cta,
   .mw3-secondary-cta { min-height: var(--mw3-pc-cta-height); padding-inline: clamp(16px, 1vw, 26px); font-size: clamp(15px, .78vw, 19px); }
   .mw3-guide { top: clamp(280px, calc(28vw + 10px), 395px); left: clamp(51%, 55vw, 58%); width: clamp(168px, 9vw, 228px); padding: clamp(17px, .875vw, 22px) clamp(17px, 1vw, 25px); border-radius: clamp(19px, 1.015625vw, 26px); opacity: 1; transform: none; transition: opacity 220ms ease, transform 260ms cubic-bezier(.2, .8, .2, 1); animation: none; }
@@ -802,7 +814,8 @@
   .mw3-hero h1 { margin: 8px 0 10px; }
   .mw3-eyebrow { font-size: 15px; }
   .mw3-description { font-size: 15px; margin-bottom: 2px; }
-  .mw3-cta-row { margin-top: 12px; }
+  /* Tighter stack gap here, still shared by both hero links and the CTA row. */
+  .mw3-hero { --mw3-hero-link-gap: 10px; }
   .mw3-text-action { margin-top: 8px; }
   /* Narrower canvas crops the hero character further right/up, so pull the
      guide bubble up toward the character instead of the wider-screen spot. */

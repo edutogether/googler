@@ -75,6 +75,11 @@ async function captureAll(chromePath) {
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, reducedMotion: 'reduce' });
     const page = await context.newPage();
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+    // The boot splash holds for a minimum on-screen time before fading (see
+    // App.tsx). Reduced motion — emulated above — skips that hold, but wait for
+    // the element to actually leave the DOM so a timing change there can never
+    // silently bake a splash frame into every baseline.
+    await page.waitForSelector('#boot-splash', { state: 'detached', timeout: 10000 });
     await page.waitForTimeout(700);
     for (const target of PAGES) {
       if (target.nav) {
