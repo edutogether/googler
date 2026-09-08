@@ -31,6 +31,15 @@ Thumbs.db
 
 # Agent worktrees (nested repo checkouts left behind by isolated subagent runs)
 .claude/worktrees/
+.claude/scheduled_tasks.lock
+
+# Secrets — this repo passes the Firebase service account through GitHub
+# secrets and never as a file, so these patterns are purely a guard against
+# one being dropped in by hand (CONVENTIONS §7)
+*.pem
+cert/
+serviceAccount*.json
+_backups/
 
 # Visual regression artifacts (machine-specific renderings)
 .visual-baselines/

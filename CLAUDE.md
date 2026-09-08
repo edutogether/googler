@@ -16,6 +16,11 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 - 랭킹 공개 범위는 로그인 참가자 한정(전체공개 아님), 예산 관리는 강제 차단 대신 레이트리밋 — "재배선 관련 대표 결정 사항" 섹션 참고.
 - **2026-09-02~2026-09-30: 실운영 모드.** 이 세션은 정기감사(9월 30일) 전까지 재감사·추가 작업을 먼저 제안하지 않는다 — 아래 "실운영 모드" 섹션 참고.
 
+## 현재 상태 (2026-09-02 기준)
+- 브랜치: `main` (배포 브랜치이자 작업 브랜치)
+- **배포처: Firebase Hosting** — 라이브 URL `https://g00gler.web.app/` (2026-09-02 GitHub Pages에서 이관, `_docs/CHANGELOG.md`의 "Firebase Hosting 이관" 섹션 참고). GitHub Pages 배포는 폐기했다(`deploy-pages.yml` 삭제).
+- 2026-08-10 외부 리뷰: `_docs/archive/EXTERNAL_HEALTH_REVIEW_20260810.md`
+
 ## 실운영 모드 (2026-09-02 확정, portal과 동일 방침)
 
 **(A)트랙(지금 만든 만큼 기준) 10개 항목 전부 100점**으로 2026-09-02 §7 종합감사(Sonnet+Opus 독립 조사)가 마무리됐다. 대표님 지시: **다음 정기감사(2026-09-30)까지 실운영 모드로 둔다** — 이 세션이 먼저 재감사·리팩터링·추가 개선 작업을 제안하지 않는다.
@@ -65,6 +70,10 @@ git checkout googler-freeze-20260902-2 -- .
 그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`g00gler.web.app`)이 검증된 상태로 재배포된다.
 
 **주의**: 이 저장소는 여러 세션에서 동시에 작업될 수 있다. 프리즈 태그를 새로 찍기 전에 항상 `git log --oneline -5`로 HEAD가 예상한 지점인지 먼저 확인할 것 — 마지막으로 내가 만든 커밋이 아닐 수 있다.
+
+**기존 태그를 옮기거나 덮어쓰지 말 것 — 항상 새 날짜 태그를 찍는다**(CONVENTIONS §3.4). 태그를 덮어쓰는 순간 되돌아갈 지점 자체가 사라지기 때문이다. `.githooks/pre-push`가 원격의 freeze 태그 삭제·이동을 실제로 차단한다(신규 생성은 통과). 훅은 클론마다 `git config core.hooksPath .githooks`로 켜야 한다.
+
+**찍은 태그는 반드시 push할 것** — `git push origin main`은 태그를 함께 보내지 않는다. 로컬에만 있는 복구 지점은 다른 기기에서 동작하지 않으므로 복구 지점이 아니다(2026-09-08에 `googler-freeze-20260902-2`가 실제로 이 상태로 발견돼 push함). `comm -23 <(git tag -l | sort) <(git ls-remote --tags origin | grep -v '\^{}' | awk '{print $2}' | sed 's|refs/tags/||' | sort)`로 대조한다.
 
 ## 시각 회귀 검사 (2026-08-13 도입)
 
