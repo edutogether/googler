@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import App from './App';
 import { bumpDailySentryEventCount, MAX_EVENTS_PER_DAY } from './sentryEventCap';
+import { installSplash } from './splash';
 import './index.css';
 
 // Only report from the real deployed build — not local dev or the test
@@ -28,6 +29,8 @@ if (import.meta.env.PROD) {
     },
   });
 }
+
+installSplash();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

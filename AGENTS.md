@@ -93,10 +93,14 @@ typecheck → lint → test → rules:test → build → Hosting 배포 → Fire
   (`visual-reset/**/*-v*-opt.webp`, 그리고 참조가 항상 `?v=`를 다는 `favicon/**`,
   `social/**`). 버전 토큰 없는 파일에 긴 캐시를 걸면 나중에 이미지를 갈아도
   방문자가 옛 버전을 최대 1년 본다.
-- **부팅 스플래시는 일부러 최소 1200ms 붙잡아 둔다**(`src/App.tsx`). "최소 시간"과
-  "페이지 로드 완료" 둘 다 만족해야 사라지고, 4초 상한이 있다. reduced-motion에서는
-  이 지연을 건너뛰는데, 시각 회귀 검사가 reduced-motion을 emulate하므로 이 동작을
-  바꾸면 스냅샷에 스플래시가 섞일 수 있다.
+- **부팅 스플래시는 전 앱 표준을 따른다**(`_shared/standards/splash-standard.md`).
+  마크업은 `index.html`의 정적 `#splash`, 타이밍(유지 1800ms → 페이드 500ms →
+  2400ms 소멸)은 `src/styles/splash.css`의 CSS 애니메이션이 잡는다. **JS 타이머로
+  시간을 재지 않는다** — 번들 로드 시점부터 재게 되어 기기마다 달라진다.
+  `src/splash.ts`는 시간을 재지 않고 "page load가 끝났는가"만 판정해, 아직이면
+  `.is-held`로 유지를 연장하고 끝나면 페이드 후 노드를 지운다(상한 4초).
+  스플래시 CSS는 번들이 아니라 `index.html`에서 직접 `<link>`로 불러온다 —
+  번들이 import하면 dev 서버에서 JS로 주입돼 첫 페인트에 무스타일로 보인다.
 - **Firebase 사이트/프로젝트 ID에 "google" 문자열을 쓸 수 없다**(상표 정책).
   그래서 프로젝트는 `be-a-g00gler`, 사이트는 `g00gler`다 — 오타가 아니다.
 - **`.claude/worktrees/`는 git과 eslint 양쪽에서 무시된다.** 격리 서브에이전트가
