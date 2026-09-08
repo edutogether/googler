@@ -46,8 +46,9 @@ npm run preview         # 프로덕션 빌드 미리보기
   새로 클론한 환경이나 CI에는 기준이 없어서 `npm run visual`이 바로 실패한다 —
   그 환경에서는 먼저 `npm run visual:update`로 기준을 만들고 시작한다.
 - 시스템에 설치된 Chrome을 직접 구동한다(Playwright 브라우저 다운로드 없음).
-  경로는 `scripts/visual-regression.mjs`의 `CHROME_CANDIDATES` 참고 — Windows
-  기본 설치 경로만 있으므로 다른 OS에서는 이 배열을 먼저 확인해야 한다.
+  Windows·macOS·Linux의 표준 설치 경로를 자동으로 찾고, 못 찾으면 어디를 찾아봤는지
+  출력하며 실패한다. 비표준 위치에 설치했다면 `CHROME_PATH`로 지정한다:
+  `CHROME_PATH=/path/to/chrome npm run visual`
 - 이 스크립트는 `vite.config.ts`의 `base` 값을 직접 읽는다. base를 바꾸면 스크립트도
   같이 따라가므로 손댈 필요 없다(예전에 두 값이 어긋나 조용히 깨진 적이 있어서 이렇게 바꿨다).
 

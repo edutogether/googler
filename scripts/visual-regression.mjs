@@ -22,10 +22,26 @@ import { PNG } from 'pngjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASELINE_DIR = path.join(root, '.visual-baselines');
 const DIFF_DIR = path.join(root, '.visual-diffs');
-const CHROME_CANDIDATES = [
-  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-];
+// Uses whatever Chrome the machine already has. CHROME_PATH wins if set, so a
+// non-standard install (or a pinned build) never needs a code change.
+const CHROME_CANDIDATES_BY_PLATFORM = {
+  win32: [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    path.join(process.env.LOCALAPPDATA ?? '', 'Google\\Chrome\\Application\\chrome.exe'),
+  ],
+  darwin: [
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+  ],
+  linux: [
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/snap/bin/chromium',
+  ],
+};
 const PORT = 43117;
 // Read Vite's base path from vite.config.ts instead of hardcoding it here —
 // this script broke silently (server never came up) the last time the two
@@ -55,9 +71,18 @@ const PAGES = [
 const updating = process.argv.includes('--update');
 
 function findChrome() {
-  const found = CHROME_CANDIDATES.find((p) => existsSync(p));
-  if (!found) { console.error('Chrome 실행 파일을 찾지 못했습니다.'); process.exit(1); }
-  return found;
+  if (process.env.CHROME_PATH) {
+    if (existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+    console.error(`CHROME_PATH가 가리키는 파일이 없습니다: ${process.env.CHROME_PATH}`);
+    process.exit(1);
+  }
+  const candidates = (CHROME_CANDIDATES_BY_PLATFORM[process.platform] ?? []).filter(Boolean);
+  const found = candidates.find((p) => existsSync(p));
+  if (found) return found;
+  console.error(`Chrome 실행 파일을 찾지 못했습니다 (platform: ${process.platform}).`);
+  console.error(candidates.length ? `찾아본 경로:\n${candidates.map((p) => `  - ${p}`).join('\n')}` : '이 플랫폼의 기본 경로 목록이 없습니다.');
+  console.error('CHROME_PATH 환경변수로 직접 지정할 수 있습니다. 예: CHROME_PATH=/path/to/chrome npm run visual');
+  process.exit(1);
 }
 
 async function waitForServer(url, tries = 40) {

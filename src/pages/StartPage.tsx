@@ -14,7 +14,7 @@ export function StartPage() {
                 <div className="bg-[#E8F0FE] text-[#1A73E8] font-black text-xl w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">1</div>
                 <div className="pt-1">
                   <h3 className="font-bold text-lg text-[#202124]">개인 구글 계정 준비</h3>
-                  <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">학교 계정은 나중에 시험 결제가 막힐 수 있습니다. 반드시 **개인 Gmail 계정**으로 진행해 주세요.</p>
+                  <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">학교 계정은 나중에 시험 결제가 막힐 수 있습니다. 반드시 <strong className="font-bold text-[#202124]">개인 Gmail 계정</strong>으로 진행해 주세요.</p>
                 </div>
               </div>
               <div className="flex gap-5 group">
@@ -31,7 +31,7 @@ export function StartPage() {
                 <div className="bg-[#FEF7E0] text-[#E37400] font-black text-xl w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">3</div>
                 <div className="pt-1">
                   <h3 className="font-bold text-lg text-[#202124]">언어 설정 확인 (필수)</h3>
-                  <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">우측 상단 내 프로필을 눌러 언어가 **'한국어'**로 설정되어 있는지 꼭 확인하세요.</p>
+                  <p className="text-[#5F6368] mt-1.5 leading-relaxed text-sm">우측 상단 내 프로필을 눌러 언어가 <strong className="font-bold text-[#202124]">'한국어'</strong>로 설정되어 있는지 꼭 확인하세요.</p>
                 </div>
               </div>
             </div>
