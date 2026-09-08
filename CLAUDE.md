@@ -53,18 +53,20 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
   - Google Cloud 예산 알림 설정 완료(Alerts only, googler 프로젝트 단독 스코프). **한계 인지할 것: 이건 임계값 넘으면 메일만 오는 것이고, 실제로 API 호출을 막거나 결제를 중단시키진 않는다.** 진짜 강제 차단이 필요하면 예산 초과 시 API를 비활성화하는 Cloud Function을 별도로 만들어야 함(아직 없음).
   - App Check 등록 완료(reCAPTCHA v3), **Cloud Firestore + Authentication 두 API 모두 Enforce 켜짐(2026-08-23)**. 최신 Firebase 콘솔은 앱 단위가 아니라 API 단위로 Enforce를 건다 — App Check → APIs 탭에서 각 항목을 켠 것. 이유: 클라이언트 코드가 Firebase를 안 부르더라도 Firestore/Auth 프로젝트 자체는 인터넷에 살아있어서, 프로젝트 ID만 알면 REST API로 직접 두드릴 수 있음 — App Check가 그 뒷문을 막는 유일한 방어선. **해결됨(2026-09-02, 대표님이 Google reCAPTCHA 관리 콘솔에서 직접 처리)**: reCAPTCHA v3 허용 도메인을 `g00gler.web.app` 추가 + `edutogether.github.io` 삭제(GitHub Pages 이미 폐기됨)로 정리 완료 — 현재 라이브 오리진과 정확히 일치한다.
 
-## 전시 프리즈 — 복구 지점 (최신: 2026-09-02)
+## 전시 프리즈 — 복구 지점 (최신: 2026-09-08)
 
-**태그 `googler-freeze-20260902-2`** (문서 자기참조 특성상 여기 적는 커밋 해시가 태그 발행 순간의 정확한 HEAD와 한두 커밋 어긋날 수 있다 — 정확한 대상은 `git rev-parse googler-freeze-20260902-2`로 항상 확인 가능하니 그걸 신뢰할 것) = 최신 검증 완료 시점. Firebase Hosting 이관(`googler-freeze-20260902`)에 이어 같은 날 진행된 §7 종합감사(Sonnet+Opus 역할분리) 수정분까지 포함 — 자세한 내용은 `_docs/CHANGELOG.md`의 "2026-09-02 종합감사(§7)" 섹션 참고. `npm run check`(typecheck/lint/test/build) + `npm run rules:test`(에뮬레이터) 전부 통과 확인.
+**태그 `googler-freeze-20260908-docs`** (문서 자기참조 특성상 여기 적는 커밋 해시가 태그 발행 순간의 정확한 HEAD와 한두 커밋 어긋날 수 있다 — 정확한 대상은 `git rev-parse googler-freeze-20260908-docs`로 항상 확인 가능하니 그걸 신뢰할 것) = 최신 검증 완료 시점. 문서 구조 정비 완료 지점(`_docs/` 통합, `AGENTS.md`·개별법 신설, CHANGELOG 분리, pre-push 훅 추가)이고, 그 직전의 홈 화면 3건(스플래시 지연, 히어로 링크 가독성, CTA 간격)까지 포함한다. `npm run check`(typecheck/lint/test 105개/build) 통과 + 시각 회귀 20/20 + 라이브 실측 확인.
+
+직전 지점 **`googler-freeze-20260902-2`**(`1165bad`) = Firebase Hosting 이관 + §7 종합감사 수정분까지 반영된 상태 — 자세한 내용은 `_docs/CHANGELOG.md`의 "2026-09-02 종합감사(§7)" 섹션 참고.
 
 **이 섹션은 다음 정밀감사 라운드마다 반드시 최신 태그로 갱신할 것 — 낡은 채로 방치되면 실제 장애 시 이 문서를 그대로 따르는 것 자체가 사고 원인이 된다**(2026-08-26 정밀 재감사에서 실제로 35커밋 낡은 채 방치돼 있던 것이 발견된 전례, 그리고 2026-09-02 Opus 감사에서 이 섹션의 복구 명령이 `googler-freeze-20260826-3`을 가리킨 채 한 라운드 낡아있던 게 다시 발견된 전례 — 두 번째 사고는 태그를 새로 찍고도 아래 복구 명령 줄을 안 고치면 무의미하다는 걸 보여준다. 태그를 찍고 문서를 고친 직후에도 `git log --oneline -5`로 다시 한번 최신 여부를 확인하는 습관이 필요하다).
 
-이전 지점들 — `googler-freeze-20260902`, `googler-freeze-20260826-3`(`edbd389`), `googler-freeze-20260826-2`(`36bae4f`), `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용. **주의**: `googler-freeze-20260902` 이전 태그로 복구하면 Firebase Hosting 이관 전체가 되돌아가 GitHub Pages 시절 상태로 돌아간다는 뜻이다 — GitHub Pages 배포 자체는 이미 폐기됐으니 그 상태로 되돌리는 건 특히 신중해야 한다.
+이전 지점들 — `googler-freeze-20260902-2`(`1165bad`), `googler-freeze-20260902`, `googler-freeze-20260826-3`(`edbd389`), `googler-freeze-20260826-2`(`36bae4f`), `googler-freeze-20260826`(`b74face`), `googler-exhibition-freeze-2026-08-17`(`e936bfe`), `googler-exhibition-freeze-2026-08-14`(`5413b7c`), `googler-exhibition-freeze-2026-08-13`(`990046e`) — 도 그대로 보존돼 있다. 더 이전 상태로 돌아가야 할 특수한 경우에만 사용. **주의**: `googler-freeze-20260902` 이전 태그로 복구하면 Firebase Hosting 이관 전체가 되돌아가 GitHub Pages 시절 상태로 돌아간다는 뜻이다 — GitHub Pages 배포 자체는 이미 폐기됐으니 그 상태로 되돌리는 건 특히 신중해야 한다.
 
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-freeze-20260902-2 -- .
+git checkout googler-freeze-20260908-docs -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`g00gler.web.app`)이 검증된 상태로 재배포된다.
