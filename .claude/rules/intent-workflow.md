@@ -1,6 +1,6 @@
 # Intent 워크플로
 
-이 문서는 `docs/intents/`를 쓰는 모든 저장소가 공유하는 규칙 원본이다. 원본은
+이 문서는 `_docs/intents/`를 쓰는 모든 저장소가 공유하는 규칙 원본이다. 원본은
 `D:\Projects\_shared\intent-kit\intent-workflow.md` 하나뿐이고, 각 저장소는
 `.claude/rules/intent-workflow.md`에 이 파일의 사본을 둔다(그래야 git에 들어가고,
 그 저장소만 따로 클론해도 규칙이 같이 딸려온다). 사본을 고칠 일이 생기면 원본을
@@ -42,7 +42,7 @@ CLAUDE.md는 "이 저장소는 항상 이렇게 동작한다"는 **상시 규칙
 ## 폴더 구조
 
 ```
-docs/intents/
+_docs/intents/
   README.md              (등급표 + 인덱스 표 — README-template.md에서 복사)
   TEMPLATE.md             (TEMPLATE.md에서 복사, 새 intent 쓸 때 이걸 복사해서 시작)
   00-charter.md            (선택 — 초기 개발 단계에서 건별 intent 대신 쓰는 전체 헌장)

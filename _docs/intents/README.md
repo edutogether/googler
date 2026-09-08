@@ -1,8 +1,3 @@
-<!--
-아래 인덱스 표는 이 저장소의 intent가 생길 때마다 한 줄씩 채워 넣는다.
-원본 템플릿: D:\Projects\_shared\intent-kit\README-template.md
--->
-
 # Intent 문서
 
 이 폴더는 이 저장소에서 진행한(또는 진행 중인) 의미 있는 작업 하나하나가
@@ -25,8 +20,8 @@
 
 ## 폴더 규칙
 
-- 새 intent: `docs/intents/YYYY-MM-DD-슬러그/intent.md` (TEMPLATE.md 복사해서 시작)
+- 새 intent: `_docs/intents/YYYY-MM-DD-슬러그/intent.md` (TEMPLATE.md 복사해서 시작)
 - 초기 개발 단계(기능이 아직 잡히는 중)라 건별 intent보다 전체 방향 문서가 더
-  맞으면, 건별 대신 `docs/intents/00-charter.md` 하나로 시작해도 된다.
+  맞으면, 건별 대신 `_docs/intents/00-charter.md` 하나로 시작해도 된다.
 - `done`/`abandoned` 상태가 된 intent도 지우지 않는다 — 나중에 "왜 그때 이렇게
   안 했는지"를 다시 확인할 수 있는 유일한 기록이다.

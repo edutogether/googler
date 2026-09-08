@@ -42,6 +42,8 @@
 - 로컬 실행: `npm run dev` / 빌드 미리보기: `npm run preview`
 - 시각 회귀: `npm run visual` (기준 갱신은 `npm run visual:update`)
 - 에뮬레이터: `rules:test`가 `firebase emulators:exec`로 Firestore만 띄운다
+- git 훅 활성화(클론마다 1회): `git config core.hooksPath .githooks`
+  — `.githooks/pre-push`가 freeze 태그 삭제·이동을 차단한다(생성은 허용)
 
 ## 자주 틀리는 것
 - **브라우저로 열 때 `?qa-mute=1`을 빠뜨린다.** 방문 즉시 BGM이 자동 재생돼

@@ -101,10 +101,22 @@ typecheck → lint → test → rules:test → build → Hosting 배포 → Fire
 - **`.claude/worktrees/`는 git과 eslint 양쪽에서 무시된다.** 격리 서브에이전트가
   남긴 중첩 체크아웃을 lint가 같이 스캔해 가짜 에러를 낸 적이 있다.
 
+## git 훅 (클론마다 한 번)
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`.githooks/pre-push`가 freeze 태그(`*-freeze-*`)의 **삭제·이동을 차단**한다. 새
+freeze 태그를 만드는 것과 일반 브랜치 push는 그대로 통과한다. 훅은 클라이언트
+쪽이라 클론할 때마다 위 한 줄을 실행해야 켜진다.
+
 ## 문서 위치
 
-- `CLAUDE.md` — Claude Code 세션용 상세 문서(확정 결정, 이력, 감사 기록).
+- `CLAUDE.md` — Claude Code 세션용 상세 문서(확정 결정, 살아있는 규칙).
+- `_docs/CHANGELOG.md` — 날짜별 작업 이력.
 - `.claude/rules/app.md` — 이 앱의 개별 규칙(공통 헌법에 없는 것만).
 - `.claude/rules/intent-workflow.md` — intent 문서 작성 규칙.
-- `docs/intents/` — 작업별 intent 문서. 새 intent는 `TEMPLATE.md`를 복사해 시작.
+- `_docs/intents/` — 작업별 intent 문서. 새 intent는 `TEMPLATE.md`를 복사해 시작.
+- `docs/` — 예전 리뷰·핸드오프 기록(보존용).
 - `README.md` — GitHub 첫 화면용 앱 소개.
