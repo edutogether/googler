@@ -4,7 +4,7 @@
 Educator 인증 학습용 20일 60미션 동료학습 앱 (React 19 / TypeScript / Vite 8 /
 Tailwind 4 / Firebase 12).
 
-- 라이브: <https://g00gler.web.app/> (Firebase Hosting)
+- 라이브: <https://googler.edutogether.kr/> (Firebase Hosting, 2026-09-10 정식 도메인 연결. Firebase 기본 주소 `https://g00gler.web.app/`도 계속 살아있다)
 - 배포 브랜치이자 작업 브랜치: `main` (PR 없이 직접 커밋)
 
 ## 지금 실제로 렌더링되는 것

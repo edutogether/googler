@@ -137,3 +137,18 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 **"계정이 없는 목업인데 계정 얘기를 왜 하냐"는 대표님 반응에 코드로 재확인한 사실(2026-09-02)**: `src/App.tsx`는 `MainWorldV3` 하나만 렌더링하고, 실제 배포 번들(`dist/assets/*.js`)을 grep하면 `firebase`/`signInAnonymously`/`getFirestore`/`LegacyGooglerApp` 문자열이 전부 0건이다 — 즉 **지금 `g00gler.web.app` 방문자에게는 계정도 닉네임 저장도 전혀 발생하지 않는다.** 위에 나온 P-1(랭킹 공개 고지)/P-2(계정 삭제)/P-4(닉네임 정책) findings는 Opus 감사의 "(B) 원래 계획한 전체 제품 기준" 트랙 — 재배선 이후를 가정한 참고 메모였다는 점을 분명히 한다. 다만 Firestore/Auth **백엔드 자체**는 이미 살아있는 인프라라(프로젝트 ID만 알면 REST로 직접 접근 가능) `firestore.rules`의 랭킹 읽기 제한(S-1)은 이 구분과 무관하게 지금도 유효한 보안 조치였다.
 
 **검증**: `npm run check`(typecheck/lint/test/build) + `npm run rules:test`(Firestore 에뮬레이터, 8/8) 전부 통과.
+
+## 2026-09-10 정식 도메인 연결 — `googler.edutogether.kr`
+
+대표님 지시로 이 앱에 정식 주소가 붙었다. **`https://googler.edutogether.kr`** — 라이브 200, 인증서 정상, `http`→`https` 자동 전환까지 팀장이 확인.
+
+**바꾼 곳**: README.md, CLAUDE.md("현재 상태" 섹션 + 개인정보처리방침 링크 + 프리즈 복구 절차 안내문), AGENTS.md — "이 앱 주소는 ~이다" 서술을 새 도메인으로 갱신.
+
+**일부러 안 바꾼 곳**:
+- `deploy.yml`/`firebase.json`/`.firebaserc`의 `g00gler` — 배포 대상 식별자라 주소가 아니다.
+- 이 문서(CHANGELOG)의 지난 기록 — 그때는 `g00gler.web.app`이 맞는 주소였다. 새 줄만 추가.
+- `g00gler.web.app` 자체 — 계속 살려둔다. 이미 나간 링크가 죽으면 안 된다.
+
+**주소 정리 중 발견한 결함**: CLAUDE.md의 개인정보처리방침 링크가 `https://edutogether.github.io/googler/privacy.html`을 가리키고 있었는데, 실제로 열어보니 GitHub Pages 자체가 폐기되어(`Site not found · GitHub Pages`) **이미 죽은 링크였다.** `public/privacy.html`은 정적 파일이라 `dist/` 루트로 그대로 나가므로 `googler.edutogether.kr/privacy.html`에서 정상 서빙되는 것을 확인하고 그 주소로 정정.
+
+**확인**: 새로 적어 넣은 링크(`googler.edutogether.kr`의 홈·`/privacy.html`, `g00gler.web.app`)를 실제 브라우저로 열어 전부 정상 응답 확인.

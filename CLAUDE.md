@@ -16,9 +16,9 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 - 랭킹 공개 범위는 로그인 참가자 한정(전체공개 아님), 예산 관리는 강제 차단 대신 레이트리밋 — "재배선 관련 대표 결정 사항" 섹션 참고.
 - **2026-09-02~2026-09-30: 실운영 모드.** 이 세션은 정기감사(9월 30일) 전까지 재감사·추가 작업을 먼저 제안하지 않는다 — 아래 "실운영 모드" 섹션 참고.
 
-## 현재 상태 (2026-09-02 기준)
+## 현재 상태 (2026-09-10 기준)
 - 브랜치: `main` (배포 브랜치이자 작업 브랜치)
-- **배포처: Firebase Hosting** — 라이브 URL `https://g00gler.web.app/` (2026-09-02 GitHub Pages에서 이관, `_docs/CHANGELOG.md`의 "Firebase Hosting 이관" 섹션 참고). GitHub Pages 배포는 폐기했다(`deploy-pages.yml` 삭제).
+- **배포처: Firebase Hosting** — **정식 라이브 URL `https://googler.edutogether.kr/`**(2026-09-10 정식 도메인 연결, 인증서·`http`→`https` 자동 전환 확인됨). 사람에게 안내할 땐 이 주소를 쓴다. Firebase 기본 주소 `https://g00gler.web.app/`도 계속 살려둔다(2026-09-02 GitHub Pages에서 이관, `_docs/CHANGELOG.md`의 "Firebase Hosting 이관" 섹션 참고) — 이미 나간 링크가 있어 내리지 않는다. GitHub Pages 배포는 폐기했다(`deploy-pages.yml` 삭제).
 - 2026-08-10 외부 리뷰: `_docs/archive/EXTERNAL_HEALTH_REVIEW_20260810.md`
 
 ## 실운영 모드 (2026-09-02 확정, portal과 동일 방침)
@@ -69,7 +69,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 git checkout googler-freeze-20260908-docs -- .
 ```
 
-그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`g00gler.web.app`)이 검증된 상태로 재배포된다.
+그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`https://googler.edutogether.kr/`, 구 주소 `g00gler.web.app`도 동일하게 갱신됨)이 검증된 상태로 재배포된다.
 
 **주의**: 이 저장소는 여러 세션에서 동시에 작업될 수 있다. 프리즈 태그를 새로 찍기 전에 항상 `git log --oneline -5`로 HEAD가 예상한 지점인지 먼저 확인할 것 — 마지막으로 내가 만든 커밋이 아닐 수 있다.
 
@@ -105,7 +105,7 @@ CSS/화면 수정 후 배포 전에 반드시 실행:
 - **보류: `typescript` 5→7** — 사용자 결정(2026-08-25): 일반적인 메이저 버전이 아니라 tsc를 통째로 Go로 새로 짠 네이티브 컴파일러 전환(6.x 정식 출시 없이 바로 7.0)이라 아직 생태계가 덜 다져졌다고 판단, 안정화되면 그때 다시 검토하기로 함.
 - **2026-09-02 추가로 올린 것(8개, 전부 차단 사유 없던 것들)**: `@sentry/react`(10.71→10.73), `@testing-library/react`(16.3.2→16.3.3), `@vitejs/plugin-react`(6.1.0→6.1.1), `firebase-tools`(15.28.1→15.28.2), `lucide-react`(1.34→1.38), `typescript-eslint`(8.65→8.69), `eslint-plugin-react-refresh`(0.4→0.5, 기존 semver 범위 밖이라 range 자체를 올림), `globals`(15→17, 마찬가지로 range를 올림 — `globals.browser`/`globals.node`만 쓰는 단순 사용이라 메이저 점프여도 위험 낮다고 판단). typecheck/lint/test/build 전부 재확인 후 반영. eslint/jsdom/typescript 메이저 3건은 이번에도 그대로 보류.
 3. **Sentry 에러 모니터링** — 완료·배포됨. Sentry 프로젝트 "Be a Googler"(조직: 817beatles 개인 계정, codyssey와 별개 프로젝트). `src/main.tsx`에서 `import.meta.env.PROD`일 때만 `Sentry.init()` 실행(로컬 개발/테스트 중엔 잡음 안 남), `<Sentry.ErrorBoundary>`로 `<App />` 감싸서 렌더 크래시 시 한국어 폴백 문구 표시. DSN(`https://bb25f9469e6a53b7fb3b8c4dbaac0965@o4511966927912960.ingest.us.sentry.io/4511966996267008`)은 GitHub secret이 아니라 소스에 그대로 하드코딩 — Firebase API 키와 달리 Sentry는 DSN을 "전송 전용 공개 주소"로 문서화해 클라이언트 코드 노출이 안전하다고 명시함. 로컬 프로덕션 빌드에서 강제로 에러를 던져 실제로 Sentry ingest 엔드포인트로 전송되는 것까지 확인 후 배포(커밋 `5266e73`).
-4. **개인정보처리방침 페이지** — 완료. `public/privacy.html`, 라이브: `https://edutogether.github.io/googler/privacy.html`.
+4. **개인정보처리방침 페이지** — 완료. `public/privacy.html`, 라이브: `https://googler.edutogether.kr/privacy.html`. (예전에 적혀 있던 `https://edutogether.github.io/googler/privacy.html`은 GitHub Pages 배포 폐기 이후 죽은 링크였다 — 2026-09-10 주소 정리 중 발견해 정정. `public/`의 정적 파일이라 `dist/` 루트에 그대로 서빙되므로 `g00gler.web.app/privacy.html`에서도 동일하게 열린다.)
 
 ## 재배선 관련 대표 결정 사항 (2026-08-26 확정 — 결정만 남겨둠, 재배선 자체는 아직 착수 안 함)
 

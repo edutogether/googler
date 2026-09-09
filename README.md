@@ -23,7 +23,7 @@ npm run check
 npm run preview
 ```
 
-Vite base는 `/`이며(Firebase Hosting은 루트 도메인으로 서빙), 공식 URL은 `https://g00gler.web.app/`입니다 — 사이트 ID `googler`는 프로젝트 ID와 같은 이유(상표 정책)로 거부되어 `g00gler`로 대체했습니다.
+Vite base는 `/`이며(Firebase Hosting은 루트 도메인으로 서빙), 공식 URL은 `https://googler.edutogether.kr/`입니다(2026-09-10 정식 도메인 연결. Firebase 기본 주소 `https://g00gler.web.app/`도 계속 살아있습니다 — 사이트 ID `googler`는 프로젝트 ID와 같은 이유(상표 정책)로 거부되어 `g00gler`로 대체했던 것이라, 그 주소 자체는 그대로입니다).
 
 ## 구조
 
