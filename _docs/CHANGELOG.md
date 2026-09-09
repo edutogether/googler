@@ -152,3 +152,9 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 **주소 정리 중 발견한 결함**: CLAUDE.md의 개인정보처리방침 링크가 `https://edutogether.github.io/googler/privacy.html`을 가리키고 있었는데, 실제로 열어보니 GitHub Pages 자체가 폐기되어(`Site not found · GitHub Pages`) **이미 죽은 링크였다.** `public/privacy.html`은 정적 파일이라 `dist/` 루트로 그대로 나가므로 `googler.edutogether.kr/privacy.html`에서 정상 서빙되는 것을 확인하고 그 주소로 정정.
 
 **확인**: 새로 적어 넣은 링크(`googler.edutogether.kr`의 홈·`/privacy.html`, `g00gler.web.app`)를 실제 브라우저로 열어 전부 정상 응답 확인.
+
+## 2026-09-10 공유 카드 주소도 정식 도메인으로 (대표님 승인 "새 주소로 바꾸자")
+
+`index.html`의 `og:url`·`og:image`·`og:image:secure_url`·`twitter:image` — `g00gler.web.app`를 참조하던 4곳 전부 `googler.edutogether.kr`로 교체. 카카오톡·트위터 공유 카드가 정식 주소를 가리키게 된다.
+
+**확인은 소스가 아니라 배포 결과로 했다** — `npm run build`가 만든 `dist/index.html`을 grep해 실제로 새 주소가 나가는 것 확인 후 push. 배포 완료 뒤 `curl`로 라이브 `index.html`의 값과 `og:image`가 가리키는 이미지의 실제 HTTP 상태까지 재확인한다 — 주소만 바꾸고 이미지 경로가 죽어 있으면 카드에 이미지가 안 뜨는 게 이 작업에서 제일 흔한 실수.
