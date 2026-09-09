@@ -157,4 +157,8 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 
 `index.html`의 `og:url`·`og:image`·`og:image:secure_url`·`twitter:image` — `g00gler.web.app`를 참조하던 4곳 전부 `googler.edutogether.kr`로 교체. 카카오톡·트위터 공유 카드가 정식 주소를 가리키게 된다.
 
-**확인은 소스가 아니라 배포 결과로 했다** — `npm run build`가 만든 `dist/index.html`을 grep해 실제로 새 주소가 나가는 것 확인 후 push. 배포 완료 뒤 `curl`로 라이브 `index.html`의 값과 `og:image`가 가리키는 이미지의 실제 HTTP 상태까지 재확인한다 — 주소만 바꾸고 이미지 경로가 죽어 있으면 카드에 이미지가 안 뜨는 게 이 작업에서 제일 흔한 실수.
+**확인은 소스가 아니라 배포 결과로 했다.** `npm run build`가 만든 `dist/index.html`을 grep해 새 주소가 나가는 것을 먼저 확인한 뒤 push, CI 배포(`build_and_deploy` 성공) 완료 후 라이브에 `curl`로 재확인:
+
+- `https://googler.edutogether.kr/`에서 받은 실제 HTML의 `og:url`·`og:image`·`og:image:secure_url`·`twitter:image` 4곳 전부 `googler.edutogether.kr`로 나가는 것 확인.
+- `og:image`가 가리키는 `https://googler.edutogether.kr/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1`를 직접 curl — `200`, `image/jpeg`, 421063바이트로 정상 응답(주소만 바꾸고 이미지 경로가 죽어 있는 게 이 작업에서 제일 흔한 실수라 별도로 확인).
+- `g00gler.web.app`도 여전히 `200`으로 살아있는 것 확인.
