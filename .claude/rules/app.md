@@ -9,6 +9,15 @@
   (같은 사람의 반복 방문이 아님 — BGM 리셋 설계의 근거).
 - 배포: Firebase Hosting. 사이트 `g00gler`, 프로젝트 `be-a-g00gler`
   (상표 정책상 ID에 "google" 문자열을 못 써서 `0`을 쓴 것 — 오타 아님).
+- **정식 라이브 주소는 `googler.edutogether.kr`(영문 o)** — 위 `g00gler`(숫자 0
+  둘)는 Firebase 배포 식별자(사이트 ID·프로젝트 ID)일 뿐, 사람에게 안내하는
+  주소가 아니다. 서로 다른 오타가 아니라 애초에 다른 값이니 문서에서 바꿔
+  쓰지 않는다. Firebase 기본 주소 `g00gler.web.app`도 계속 살아있다(이미
+  나간 링크 보존용).
+- App Check(reCAPTCHA v3)가 Firestore·Auth 두 API 모두 Enforce 상태 — 클라이언트
+  코드가 Firebase를 안 부르는 지금도 프로젝트 자체는 REST로 직접 두드릴 수 있어서
+  걸어둔 방어선. Google Cloud 예산 알림은 임계값 초과 시 메일만 온다(API 호출을
+  실제로 막지는 않음) — 강제 차단이 필요하면 별도 Cloud Function이 있어야 한다.
 
 ## 배포 폴더
 - `firebase.json` public = `dist`. `dist/`는 `vite build` 산출물이라
@@ -24,6 +33,17 @@
   CI 3개 워크플로 전부에서 build 앞에 실행됨.
 - localStorage: BGM/효과음 설정, Sentry 일일 이벤트 상한 카운트
   (`public/privacy.html`에 고지됨).
+
+## 소셜 공유 카드 (og/twitter)
+- `og:title`/`og:description`은 `{앱 이름} | {hook}` 규칙으로 6개 앱이 통일돼
+  있음(Portal `apps.ts` 기준, 2026-09-10 확정). **포털이 카드 문구·그림을
+  바꾸면 여기(`index.html`)도 같이 바꾼다.**
+- `og:image`는 `public/og.jpg`(자기 도메인에서 배포) — 다른 저장소 도메인을
+  직접 가리키지 않는다. 그쪽 배포가 막히면 이 앱 카드까지 같이 죽는다(2026-09-10
+  Portal CI가 40분 넘게 막혔던 사례로 확인된 리스크).
+- 기존 썸네일 파일(`public/social/be-a-googler-kakao-thumbnail.jpg`)은 카드
+  그림을 바꾼 뒤에도 지우지 않는다 — 카카오톡 캐시에 그 주소로 이미 공유된
+  카드가 남아있을 수 있다.
 
 ## 이 앱에서 절대 하면 안 되는 것
 - **재배선 금지** — `MainWorldV3`를 `LegacyGooglerApp`/Firebase에 연결하지 않는다.
