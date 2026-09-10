@@ -272,3 +272,19 @@ Portal의 6개 앱 카카오톡 공유 카드 감시 검사가 이 앱의 `og:im
 **`npm audit`과 개수가 다른 이유**: `npm audit`은 이번 6건 수정 후에도 `stream-json`(같은 이유로 유지) 외에 `@google-cloud/pubsub`/`@opentelemetry/core`/`firebase-tools` 자체(전부 `firebase-tools` 10.1.1로 **메이저 다운그레이드**해야 고쳐지는 것들 — CLAUDE.md에 이미 기록된 결정과 같은 이유로 적용 안 함)와 `body-parser`/`express`/`qs`(이번 7건 밖, 시간 관계상 이번엔 손 안 댐 — 다음 라운드 후보)를 추가로 보여준다. Dependabot의 7건은 GitHub가 추적하는 GHSA 권고 기준이고, `npm audit`은 npm 레지스트리 권고 기준이라 모집단이 다르다.
 
 **낡은 경보로 판명된 것**: 없음 — 7건 전부 실제로 취약 버전이 설치돼 있었다(manifest 경로 확인 결과 전부 root `package-lock.json`, 다른 경로 착오 없음).
+
+### 후속 — `npm audit`에만 있던 3건도 판정 (§22-3, "범위 밖"은 처리 사유가 아니다)
+
+Dependabot 7건과 `npm audit` 결과의 모집단이 다른 이유(GHSA 기준 vs npm 레지스트리 권고 기준)를 밝힌 것으로 끝내지 않고, 그 차집합 3건(`body-parser`/`express`/`qs`)도 같은 형식으로 판정했다.
+
+| 패키지 | scope | 누가 물고 있는가 | 처리 |
+|---|---|---|---|
+| `qs` | development | `firebase-tools`(`body-parser`/`express`/`exegesis`/`googleapis-common` 등 여러 경로에서 공통으로 물림) | **고침** → 6.16.0 (기존 6.15.3이 두 GHSA 권고 범위에 모두 걸림: `array-limit bypass`(≤6.15.3), `DoS via isBuffer`(<6.16.0)) |
+| `body-parser` | development | `firebase-tools` — `qs`를 통한 간접 취약점, 자체 결함 아님(`npm audit`의 `via: ["qs"]`) | **고침** — `qs` override로 같이 해소 |
+| `express` | development | `firebase-tools` — 마찬가지로 `qs`를 통한 간접 취약점 | **고침** — `qs` override로 같이 해소 |
+
+이 앱은 정적 사이트라 `express`/`body-parser`가 런타임 경로에 있을 리 없다는 전제를 `npm ls`로 확인했다 — 셋 다 `firebase-tools`(devDependencies) 밑에만 존재, production 번들에는 애초에 안 들어간다.
+
+`qs` override 하나로 세 패키지 전부 해소 — `npm ls qs`로 모든 인스턴스가 `6.16.0`으로 deduped된 것 확인(인스턴스가 여럿이라도 전부 같은 안전 버전으로 합쳐져서 `uuid` 때와 달리 scope 분리가 필요 없었다). `npm audit` 취약점 수 7 → 4(남은 4개는 전부 `firebase-tools`를 10.1.1로 메이저 다운그레이드해야 고쳐지는 것들 — 기존 CLAUDE.md 결정과 같은 사유로 유지).
+
+**검증**: `npm run check`(120 테스트) + `npm run rules:test`(에뮬레이터 실제 기동, 8/8) + `npx firebase-tools --version` 전부 정상 재확인.
