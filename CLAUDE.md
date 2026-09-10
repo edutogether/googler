@@ -22,7 +22,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 - 브랜치: `main` (배포 브랜치이자 작업 브랜치)
 - **배포처: Firebase Hosting** — **정식 라이브 URL `https://googler.edutogether.kr/`**(2026-09-10 정식 도메인 연결, 인증서·`http`→`https` 자동 전환 확인됨). 사람에게 안내할 땐 이 주소를 쓴다. Firebase 기본 주소 `https://g00gler.web.app/`도 계속 살려둔다(2026-09-02 GitHub Pages에서 이관, `_docs/CHANGELOG.md`의 "Firebase Hosting 이관" 섹션 참고) — 이미 나간 링크가 있어 내리지 않는다. GitHub Pages 배포는 폐기했다(`deploy-pages.yml` 삭제).
 - 2026-08-10 외부 리뷰: `_docs/archive/EXTERNAL_HEALTH_REVIEW_20260810.md`
-- 전시 프리즈 최신 태그: `googler-freeze-20260910-audited-100` — 복구 절차 전체는 `_docs/ops/freeze-recovery.md`.
+- 전시 프리즈 최신 태그: `googler-freeze-20260910-audited-100-2` — 복구 절차 전체는 `_docs/ops/freeze-recovery.md`.
 - 개인정보처리방침: `public/privacy.html`, 라이브 `https://googler.edutogether.kr/privacy.html`.
 
 ## 정기감사 라운드 (2026-09-10 시작, 대표 지시로 실운영 모드 대체)

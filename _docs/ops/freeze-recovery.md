@@ -6,9 +6,11 @@
 
 ## 전시 프리즈 — 복구 지점 (최신: 2026-09-10)
 
-**태그 `googler-freeze-20260910-audited-100`** (`git rev-parse googler-freeze-20260910-audited-100`로 항상 정확한 대상 확인 가능) = 대표 지시 순서(문서 정리 → 종합감사 100 → 배포 → 프리즈)의 완료 지점. `_shared/DOC-STANDARD.md` 기준 문서 정리 + COMMON_STANDARDS §4~§7·§21 종합감사((A)트랙 10개 항목 100점, 발견한 검사 결함 2건 수정) + 배포 성공까지 반영. `npm run check` 통과 + 시각 회귀 20/20 + 실제로 `git checkout <태그> -- .` 실행해 배포 직후 상태와 차이 0건 확인(아래 복구 명령이 실제로 되돌아가는지까지 검증됨) 후 원위치.
+**태그 `googler-freeze-20260910-audited-100-2`** (`git rev-parse googler-freeze-20260910-audited-100-2`로 항상 정확한 대상 확인 가능, 태그 메시지에 고친 결함 목록·재채점 근거·검증 규모·라이브 실측값 전부 있음 — `git show googler-freeze-20260910-audited-100-2`) = 대표 지시 순서(문서 정리 → 종합감사 100 → 배포 → 프리즈)의 완료 지점. `_shared/DOC-STANDARD.md` 기준 문서 정리 + COMMON_STANDARDS §4~§7·§21 종합감사((A)트랙 10개 항목 100점, 검사·테스트 결함 3건 수정) + 배포 성공까지 반영. `npm run check` 통과 + 시각 회귀 20/20 + 실제로 `git checkout <태그> -- .` 실행해 차이 0건 확인 후 원위치.
 
-직전 지점 **`googler-freeze-20260908-docs`** (문서 자기참조 특성상 여기 적는 커밋 해시가 태그 발행 순간의 정확한 HEAD와 한두 커밋 어긋날 수 있다) = 문서 구조 정비 완료 지점(`_docs/` 통합, `AGENTS.md`·개별법 신설, CHANGELOG 분리, pre-push 훅 추가)이고, 그 직전의 홈 화면 3건(스플래시 지연, 히어로 링크 가독성, CTA 간격)까지 포함한다.
+직전 지점 **`googler-freeze-20260910-audited-100`**(`dfa5fb3`) = 위와 같은 라운드지만 결함 3(MainWorldV3.test.tsx의 두 번째 같은 패턴)을 찾기 전 시점 — 하루 안에 같은 라운드가 갱신된 경우라 시간차가 짧다.
+
+그 전 **`googler-freeze-20260908-docs`** (문서 자기참조 특성상 여기 적는 커밋 해시가 태그 발행 순간의 정확한 HEAD와 한두 커밋 어긋날 수 있다) = 문서 구조 정비 완료 지점(`_docs/` 통합, `AGENTS.md`·개별법 신설, CHANGELOG 분리, pre-push 훅 추가)이고, 그 직전의 홈 화면 3건(스플래시 지연, 히어로 링크 가독성, CTA 간격)까지 포함한다.
 
 그 전 **`googler-freeze-20260902-2`**(`1165bad`) = Firebase Hosting 이관 + §7 종합감사 수정분까지 반영된 상태 — 자세한 내용은 `_docs/CHANGELOG.md`의 "2026-09-02 종합감사(§7)" 섹션 참고.
 
@@ -19,7 +21,7 @@
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-freeze-20260910-audited-100 -- .
+git checkout googler-freeze-20260910-audited-100-2 -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`https://googler.edutogether.kr/`, 구 주소 `g00gler.web.app`도 동일하게 갱신됨)이 검증된 상태로 재배포된다.
