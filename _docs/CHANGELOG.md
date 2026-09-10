@@ -205,3 +205,13 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 **감점하지 않은 것(§4-4 근거)**: 2026-09-02 확정 100점 항목 10개는 재조사하지 않았다. 미완성 월드(재배선 전)는 의도된 설계라 감점 대상이 아니다.
 
 **검증**: `npm run check` 통과, `npm run visual` 20/20(0.000%), `npm run rules:test`는 이 라운드에서 별도로 다시 안 돌렸다(규칙 파일 변경 없음, 직전 통과 유지).
+
+## 2026-09-10 배포 확인 + 프리즈 태그 (③④단계)
+
+**③ 배포**: `dfa5fb3`(②단계 감사 수정 반영) push 후 `firebase-hosting-merge.yml`(Hosting 배포·Firestore 규칙 배포) 성공, `ci.yml`도 성공 — ①단계에서 CI에만 뜬 플레이크가 ②단계 수정으로 해소된 것을 실제 CI 재실행으로 확인. 라이브 `googler.edutogether.kr`·`g00gler.web.app` 둘 다 curl 200 확인.
+
+**④ 프리즈 태그**: `googler-freeze-20260910-audited-100`(`dfa5fb3`) 생성·push. **되돌리는 명령을 실제로 실행해 검증**: `git checkout googler-freeze-20260910-audited-100 -- .` 실행 후 `git status --short`·`git diff --stat`로 차이 0건(추적 안 되는 `public/visual-reset/main/be-a-googler-g-mark.svg` 하나만 그대로, 이건 태그·커밋과 무관한 별건이라 손대지 않음) 확인, `git checkout HEAD -- .`로 원위치.
+
+`CLAUDE.md`·`_docs/ops/freeze-recovery.md`의 복구 명령 줄을 새 태그로 갱신(이전에 태그만 찍고 이 줄을 안 고쳐 낡은 채 방치된 사고가 두 번 있었던 것 — `.claude/rules/app.md` "자주 틀리는 것" 참고).
+
+**대표 지시 순서(문서 정리 → 종합감사 100 → 배포 → 프리즈) 4단계 전부 완료.**
