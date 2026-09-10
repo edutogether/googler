@@ -146,7 +146,23 @@ async function main() {
   const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: root, shell: true, stdio: 'ignore' });
   try {
     await waitForServer(`http://localhost:${PORT}${BASE_PATH}`);
+
+    // A gate whose success condition is "0 mismatches" is indistinguishable
+    // from one that looked at nothing (COMMON_STANDARDS §21-1). Comparing
+    // shots.size to VIEWPORTS.length * PAGES.length would be a tautology —
+    // if PAGES/VIEWPORTS is ever emptied, that expected count becomes 0 too,
+    // and the check still "passes". So the floor here is a number
+    // independent of those arrays, not derived from them.
+    const MIN_EXPECTED_SHOTS = 20;
+    if (VIEWPORTS.length === 0 || PAGES.length === 0) {
+      console.error('VIEWPORTS 또는 PAGES가 비어 있습니다 — 검사가 화면을 하나도 찍지 않게 됩니다.');
+      process.exit(1);
+    }
     const shots = await captureAll(chromePath);
+    if (shots.size < MIN_EXPECTED_SHOTS) {
+      console.error(`캡처된 스크린샷이 ${shots.size}장뿐입니다(최소 ${MIN_EXPECTED_SHOTS}장 기대). 검사가 실제로 화면을 보지 못했을 수 있습니다.`);
+      process.exit(1);
+    }
 
     if (updating) {
       rmSync(BASELINE_DIR, { recursive: true, force: true });
