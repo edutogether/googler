@@ -253,3 +253,22 @@ Portal의 6개 앱 카카오톡 공유 카드 감시 검사가 이 앱의 `og:im
 ## 2026-09-10 경로 필터 검증 — 한쪽만 확인된 상태로 기록
 
 §23-3 경로 필터(`fbb3956`)의 양방향 중 **"문서만 바뀌면 배포가 안 돈다" 한쪽만 확인됨**(위 항목, 커밋 `4c7213d`로 검증). **반대 방향("코드가 바뀌면 배포가 정상 실행된다")은 아직 확인 전이다** — 확인하려고 의미 없는 코드 커밋을 만들지 않는다(그 자체가 §23-1 위반). 다음에 실제 코드 변경이 나갈 때 그 배포 실행을 확인하고 이 항목을 갱신한다.
+
+## 2026-09-10 Dependabot 경보 7건 추적 (§22-3, 지금까지 꺼져 있던 것을 대표님이 켬)
+
+전부 `firebase-tools`(dev 전용 CLI, 브라우저 번들 미포함)의 간접 의존성. `package.json`에 `overrides`로 안전 버전을 강제.
+
+| 패키지 | 심각도 | manifest | 처리 |
+|---|---|---|---|
+| `js-yaml` | high | `package-lock.json` (root) | **고침** → 4.3.2 |
+| `hono` (경보 2건, GHSA 2개) | medium | `package-lock.json` (root) | **고침** → 4.13.5 |
+| `morgan` | medium | `package-lock.json` (root) | **고침** → 1.12.0 |
+| `csv-parse` | medium | `package-lock.json` (root) | **고침** → 7.0.2 |
+| `uuid` | medium | `package-lock.json` (root) | **고침** — `gaxios`가 물고 있는 인스턴스(9.0.1)만 11.1.1로 지정. `universal-analytics`가 물고 있는 인스턴스(14.0.2, 이미 패치 버전 이상)는 안 건드림 — 전체를 하나로 강제했다가 npm이 `invalid` 상태로 표시하는 충돌을 겪고 되돌린 뒤 이 방식으로 좁혔다. |
+| `stream-json` | medium | `package-lock.json` (root) | **되돌림(구조적 상한)** — 3.5.0으로 올리자마자 `npm run rules:test`가 `Cannot find module '.../stream-json/src/filters/Pick'`로 실제로 깨졌다(1.x→3.x 사이 내부 모듈 경로가 바뀐 것을 `firebase-tools`가 구버전 경로로 계속 참조). **전제 붕괴 조건**: `firebase-tools`가 자기 코드에서 쓰는 `stream-json` 참조를 새 버전에 맞게 갱신하면(다음 `firebase-tools` 업그레이드에서 확인) 그때 다시 시도한다. |
+
+**검증**: 6건 반영 후 `npm run check`(typecheck/lint/test 120개/build) + `npm run rules:test`(에뮬레이터 실제 기동, Firestore 규칙 8/8) + `npx firebase-tools --version` 전부 정상. `stream-json`은 되돌린 뒤 같은 검증으로 정상 복귀 재확인.
+
+**`npm audit`과 개수가 다른 이유**: `npm audit`은 이번 6건 수정 후에도 `stream-json`(같은 이유로 유지) 외에 `@google-cloud/pubsub`/`@opentelemetry/core`/`firebase-tools` 자체(전부 `firebase-tools` 10.1.1로 **메이저 다운그레이드**해야 고쳐지는 것들 — CLAUDE.md에 이미 기록된 결정과 같은 이유로 적용 안 함)와 `body-parser`/`express`/`qs`(이번 7건 밖, 시간 관계상 이번엔 손 안 댐 — 다음 라운드 후보)를 추가로 보여준다. Dependabot의 7건은 GitHub가 추적하는 GHSA 권고 기준이고, `npm audit`은 npm 레지스트리 권고 기준이라 모집단이 다르다.
+
+**낡은 경보로 판명된 것**: 없음 — 7건 전부 실제로 취약 버전이 설치돼 있었다(manifest 경로 확인 결과 전부 root `package-lock.json`, 다른 경로 착오 없음).
