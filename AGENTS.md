@@ -93,14 +93,17 @@ typecheck → lint → test → rules:test → build → Hosting 배포 → Fire
   (`visual-reset/**/*-v*-opt.webp`, 그리고 참조가 항상 `?v=`를 다는 `favicon/**`,
   `social/**`). 버전 토큰 없는 파일에 긴 캐시를 걸면 나중에 이미지를 갈아도
   방문자가 옛 버전을 최대 1년 본다.
-- **부팅 스플래시는 전 앱 표준을 따른다**(`_shared/standards/splash-standard.md`).
-  마크업은 `index.html`의 정적 `#splash`, 타이밍(유지 1800ms → 페이드 500ms →
-  2400ms 소멸)은 `src/styles/splash.css`의 CSS 애니메이션이 잡는다. **JS 타이머로
-  시간을 재지 않는다** — 번들 로드 시점부터 재게 되어 기기마다 달라진다.
+- **부팅 스플래시는 전 앱 표준을 따른다**(`_shared/standards/splash-standard.md`,
+  2026-09-09 전환). 마크업과 타이밍(유지 1800ms → 페이드 500ms → 2400ms 소멸)
+  CSS는 **`index.html` 헤드의 인라인 `<style>`** — 별도 `.css` 파일이 아니다.
+  외부 스타일시트(번들 포함)로 두면 그 CSS가 렌더를 막아 느린 회선에서
+  스플래시 자체가 늦게 뜬다(3G급 실측 6.3초 지연 확인, 인라인 후 475ms). **JS
+  타이머로 시간을 재지 않는다** — 번들 로드 시점부터 재게 되어 기기마다 달라진다.
   `src/splash.ts`는 시간을 재지 않고 "page load가 끝났는가"만 판정해, 아직이면
-  `.is-held`로 유지를 연장하고 끝나면 페이드 후 노드를 지운다(상한 4초).
-  스플래시 CSS는 번들이 아니라 `index.html`에서 직접 `<link>`로 불러온다 —
-  번들이 import하면 dev 서버에서 JS로 주입돼 첫 페인트에 무스타일로 보인다.
+  `.is-held`로 유지를 연장하고 끝나면 페이드 후 노드를 지운다(상한 4초). 애니메이션이
+  이미 끝난 뒤에 뒤늦게 실행되는 분기를 유지 연장으로 보내면 이미 사라진 스플래시가
+  되살아나는 깜빡임이 생긴다 — 그 분기는 노드만 지운다(`src/splash.test.ts` 회귀
+  테스트로 고정).
 - **Firebase 사이트/프로젝트 ID에 "google" 문자열을 쓸 수 없다**(상표 정책).
   그래서 프로젝트는 `be-a-g00gler`, 사이트는 `g00gler`다 — 오타가 아니다.
 - **`.claude/worktrees/`는 git과 eslint 양쪽에서 무시된다.** 격리 서브에이전트가
@@ -123,5 +126,6 @@ freeze 태그를 만드는 것과 일반 브랜치 push는 그대로 통과한�
 - `.claude/rules/app.md` — 이 앱의 개별 규칙(공통 헌법에 없는 것만).
 - `.claude/rules/intent-workflow.md` — intent 문서 작성 규칙.
 - `_docs/intents/` — 작업별 intent 문서. 새 intent는 `TEMPLATE.md`를 복사해 시작.
-- `docs/` — 예전 리뷰·핸드오프 기록(보존용).
+- `_docs/archive/` — 지금은 유효하지 않지만 근거로 남기는 지난 기록(예전 리뷰·핸드오프).
+- `_docs/ops/` — 사람이 손으로 따라 하는 절차(배포·백업·복구).
 - `README.md` — GitHub 첫 화면용 앱 소개.

@@ -162,3 +162,26 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 - `https://googler.edutogether.kr/`에서 받은 실제 HTML의 `og:url`·`og:image`·`og:image:secure_url`·`twitter:image` 4곳 전부 `googler.edutogether.kr`로 나가는 것 확인.
 - `og:image`가 가리키는 `https://googler.edutogether.kr/social/be-a-googler-kakao-thumbnail.jpg?v=20260825-1`를 직접 curl — `200`, `image/jpeg`, 421063바이트로 정상 응답(주소만 바꾸고 이미지 경로가 죽어 있는 게 이 작업에서 제일 흔한 실수라 별도로 확인).
 - `g00gler.web.app`도 여전히 `200`으로 살아있는 것 확인.
+
+## 2026-09-10 문서 정리 라운드 (①단계, 대표 지시: 문서 정리 → 종합감사 100 → 배포 → 프리즈)
+
+`_shared/DOC-STANDARD.md` 기준 점검. 필수 문서 7종 전부 있음(확인만, 변경 없음).
+
+**옮긴 것 — 문단 단위로 대조, 키워드 grep 없이 확인:**
+- `CLAUDE.md`의 "Firebase 프로젝트" 완료 이력(2026-08-17~09-02, 23줄) → `_docs/archive/firebase-project-setup-20260823.md`
+- `CLAUDE.md`의 "전시 프리즈 — 복구 지점"(사람이 손으로 따라 하는 백업·복구 절차, 23줄) → `_docs/ops/freeze-recovery.md`
+- `CLAUDE.md`의 "실운영 모드(2026-09-02 확정)" 전문(7줄, 이번 대표 지시로 대체됨) → `_docs/archive/operational-mode-20260902.md`
+- `CLAUDE.md`의 "나머지 outdated 패키지 정리" 아래 잘못 끼어 있던 항목 3(Sentry)·항목 4(개인정보처리방침) — 원래 패키지 업그레이드와 무관한데 번호가 그 섹션 밑에 남아 있던 구조적 오류. Sentry 항목 + 이미 올린 패키지 목록 2건 → `_docs/archive/completed-work-log-20260825-20260902.md`. 개인정보처리방침 항목은 "현재 상태" 섹션으로 재배치.
+- **중복 제거**: `CLAUDE.md`의 "시각 회귀 검사" 섹션(7줄)을 삭제 — `AGENTS.md`의 같은 섹션이 이미 상위집합(같은 명령 + Chrome 탐색 실패 시 안내 + `vite.config.ts` base 연동까지 추가)이라 정보 손실 없음.
+
+**결과**: `CLAUDE.md` 123줄/21,879자 → **67줄/10,385자**. `AGENTS.md` 127→131줄(정정 반영, 목표 범위 100~180 안). `app.md`는 59→78줄(제한 없음).
+
+**충돌·낡은 서술 정정(발견분):**
+- `AGENTS.md`의 "알려진 함정" — 부팅 스플래시가 `src/styles/splash.css`를 `<link>`로 불러온다고 적혀 있었는데, 2026-09-09 전 앱 표준 전환 이후 실제로는 `index.html` 인라인 `<style>`이다(그 파일 자체가 더 이상 존재하지 않음, `ls`로 확인). CLAUDE.md에 이미 정확하게 적혀 있던 내용과도 어긋나 있었다 — AGENTS.md 쪽을 정정.
+- `AGENTS.md`의 "문서 위치"에 이미 폐기된 `docs/`(2026-09-08에 `_docs/archive`로 통합됨, `ls`로 부재 확인)가 남아 있던 것을 `_docs/archive/`·`_docs/ops/`로 정정.
+- `g00gler`(숫자 0 둘, 배포 식별자)와 `googler.edutogether.kr`(영문 o, 정식 주소)를 헷갈리지 않게 `.claude/rules/app.md`에 한 줄 추가. 전체 문서 grep 결과 실제 오혼용 사례는 없었음(0건).
+- **죽은 링크**: 오늘 이전 커밋에서 이미 발견·정정(개인정보처리방침 GitHub Pages 링크). 추가로 발견된 죽은 링크는 없음.
+
+**빠진 것 점검**: 라이브 주소·빌드/테스트/배포 명령·롤백 절차·앱 고유 함정 — 전부 있음(위 이동 후에도 각자의 새 위치에서 확인 가능).
+
+**검증**: `npm run check`(typecheck/lint/test/build) 통과. 판단이 애매했던 것은 없어 팀장에게 올릴 사안 없음.
