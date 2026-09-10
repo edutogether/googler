@@ -288,3 +288,14 @@ Dependabot 7건과 `npm audit` 결과의 모집단이 다른 이유(GHSA 기준 
 `qs` override 하나로 세 패키지 전부 해소 — `npm ls qs`로 모든 인스턴스가 `6.16.0`으로 deduped된 것 확인(인스턴스가 여럿이라도 전부 같은 안전 버전으로 합쳐져서 `uuid` 때와 달리 scope 분리가 필요 없었다). `npm audit` 취약점 수 7 → 4(남은 4개는 전부 `firebase-tools`를 10.1.1로 메이저 다운그레이드해야 고쳐지는 것들 — 기존 CLAUDE.md 결정과 같은 사유로 유지).
 
 **검증**: `npm run check`(120 테스트) + `npm run rules:test`(에뮬레이터 실제 기동, 8/8) + `npx firebase-tools --version` 전부 정상 재확인.
+
+## 2026-09-10 Dependabot 자동 PR 억제 (§22-5)
+
+대표님이 오늘 8개 저장소 전부 Dependabot 자동 보안 수정을 켜서, 이미 실패로 판정한 `stream-json` 업그레이드가 계속 다시 열릴 수 있는 상태가 됐다. **실제로 열린 PR은 없었다** — Dependabot의 자동 업데이트 실행 자체가 에러로 끝났다(`gh run view`로 확인, "The updater encountered one or more errors"). 원인은 확인 못 했지만(`overrides`와 상충했을 가능성), 닫을 PR이 없어 1번 항목(PR 코멘트 후 닫기)은 해당 없음 — 대신 재발 방지만 처리.
+
+`.github/dependabot.yml` 신설:
+- `stream-json` 2.x 이상 전체를 `ignore` — 사유·전제 붕괴 조건을 주석으로 명시(firebase-tools가 내부 참조를 갱신하면 재시도).
+- `npm audit`에서 "firebase-tools를 10.1.1로 다운그레이드해야 고침"으로 나오는 `@google-cloud/pubsub`·`@opentelemetry/core`도 같이 `ignore` — firebase-tools 자체 업그레이드는 계속 받는다(막지 않음, 이 둘만 개별로 올리는 게 의미 없어서 막는 것).
+- `open-pull-requests-limit: 0`으로 일반 버전 업데이트 PR도 원천 차단 — 이 저장소는 의존성 업그레이드를 세션이 직접 검토·기록해온 방식(CLAUDE.md "나머지 outdated 패키지 정리")이라, 자동 PR이 그 절차 밖에서 쌓이는 걸 막는다. 보안 업데이트는 `ignore` 목록에 없는 패키지에 한해 계속 열린다(GitHub 문서 기준 `open-pull-requests-limit`은 보안 업데이트엔 적용 안 됨).
+
+**확인**: 이 파일이 실제로 GitHub에 유효한 설정으로 반영되는지는 push 후 저장소 Insights → Dependency graph → Dependabot에서 파싱 에러가 없는지로 확인 예정.

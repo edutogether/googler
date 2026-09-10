@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    ignore:
+      # stream-json 3.x는 내부 모듈 경로가 바뀌어 firebase-tools가 구경로를
+      # 참조한다(2026-09-10 npm run rules:test 실제 실패 확인:
+      # "Cannot find module '.../stream-json/src/filters/Pick'"). 3.x 전체를
+      # 막는다 — firebase-tools가 자기 내부 참조를 새 경로로 갱신하면(다음
+      # firebase-tools 업그레이드에서 확인) 재시도한다.
+      - dependency-name: "stream-json"
+        versions: [">= 2.0.0"]
+      # 아래 둘은 npm audit이 "firebase-tools를 10.1.1로 메이저 다운그레이드"를
+      # 고침으로 제시하는 항목이다(2026-09-10 확인) — 실제로는 firebase-tools를
+      # 최신으로 유지하는 게 맞는 방향이라 이 둘을 개별로 올리는 건 의미가
+      # 없다. firebase-tools 자체 업그레이드는 계속 받는다(막지 않음).
+      - dependency-name: "@google-cloud/pubsub"
+      - dependency-name: "@opentelemetry/core"
