@@ -245,3 +245,7 @@ Portal의 6개 앱 카카오톡 공유 카드 감시 검사가 이 앱의 `og:im
 팀장이 8개 저장소 전수 대조에서 잡은 유실 1건. 스플래시가 "CSS 애니메이션 종료"+"page load 완료" 둘 다 만족해야 사라지고, `npm run visual`이 `reduced-motion`을 emulate해서 돌기 때문에 이 지연 자체가 사실상 안 걸린다는 서술이 문서에서 빠져 있었다(코드에는 살아 있음 — `MainWorldV3.css`의 `prefers-reduced-motion` 분기 3곳, `visual-regression.mjs`의 관련 주석). `.claude/rules/app.md`의 "자주 틀리는 것"에 복원 — 시각 회귀 통과를 "스플래시가 즉시 사라진다"로 오독하지 않게.
 
 프리즈 태그는 다시 찍지 않음(팀장 지시).
+
+## 2026-09-10 배포 워크플로에 경로 필터 추가 (§23-3)
+
+`firebase-hosting-merge.yml`·`firebase-hosting-pull-request.yml`의 트리거에 `paths-ignore: ['**/*.md', '_docs/**', '.claude/**']` 추가 — 문서만 바뀐 커밋은 배포를 태우지 않는다. `ci.yml`(순수 검증, 배포 없음)에는 걸지 않아 문서 커밋에도 테스트는 계속 돈다. 뒤집어 확인: 이 CHANGELOG 한 줄짜리 커밋으로 실제 검증 예정.
