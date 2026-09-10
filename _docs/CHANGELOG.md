@@ -231,3 +231,11 @@ COMMON_STANDARDS.md §7 방식(Agent 도구 두 번 별도 호출, 서로 결과
 **태그 재발행**: `googler-freeze-20260910-audited-100`(dfa5fb3)을 찍은 뒤 위 결함을 발견해 고쳤으므로, **기존 태그는 그대로 두고**(옮기지 않음, `.githooks/pre-push`가 애초에 재작성을 막는다) 새 태그 **`googler-freeze-20260910-audited-100-2`**(`33c52a7`)를 생성. 태그 메시지에 고친 결함 3건·재채점 근거·검증 규모(테스트 수·통과 횟수)·라이브 실측값(ETag/Last-Modified로 이 커밋의 빌드가 실제 배포됐음을 확인한 방법 포함)을 전부 기록. `git checkout googler-freeze-20260910-audited-100-2 -- .` 실제 실행, 차이 0건 확인 후 원위치. `CLAUDE.md`·`_docs/ops/freeze-recovery.md`의 복구 명령 줄 갱신.
 
 **③ 라이브 응답이 무엇을 증명하는가 — 재정리**: 이번 라운드 마지막 커밋(`33c52a7`)은 테스트 파일만 바꿔 `dist/` 산출물에 시각적 변화가 없다. 그래서 "화면이 바뀌었다"가 아니라 **"이 커밋의 빌드가 실제로 배포됐다"**를 증명하는 방식을 썼다 — 빌드 스텝의 `env: VITE_COMMIT_SHA: ${{ github.sha }}`가 커밋마다 산출물을 다르게 만들기 때문에, 배포 전후 `curl -I`의 ETag/Last-Modified가 실제로 갱신되는 것이 "캐시된 옛 배포가 아니라 이 커밋이 배포됐다"는 증거다.
+
+## 2026-09-10 공유 카드 이미지를 Portal 표준으로 교체
+
+Portal의 6개 앱 카카오톡 공유 카드 감시 검사가 이 앱의 `og:image`가 org 표준 이미지가 아닌 걸 잡아냈다. `portal/public/assets/og/googler.jpg`(1200×630, jpg)를 `public/og.jpg`로 복사해 자기 도메인(`googler.edutogether.kr/og.jpg`)에서 서빙하도록 `index.html`의 `og:image`·`og:image:secure_url`·`twitter:image`·width/height 갱신. 기존 `public/social/be-a-googler-kakao-thumbnail.jpg`는 카카오톡 캐시 보존을 위해 그대로 둠.
+
+**검증**: 복사 시점 sha256 일치 확인 → 배포 후 라이브 `curl`로 받은 파일도 동일 해시(`77189d4...44c4bb`) 확인 — 인코딩 변형 없이 바이트 단위로 동일. 태그 값도 라이브 HTML에서 재확인.
+
+이 건은 눈에 보이는 짧은 수정이라 프리즈 태그는 다시 찍지 않음(팀장 지시) — 다음 감사 라운드에서 함께 태그.
