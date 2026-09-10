@@ -3,6 +3,14 @@ on:
   push:
     branches:
       - main
+    # Deploy job only — do not add this to ci.yml, which must keep running on
+    # every push (COMMON_STANDARDS §23-3: doc-only commits skip deploy, not
+    # tests). This repo has no test that reads docs, so nothing else depends
+    # on this workflow's own (duplicate) test steps running for doc changes.
+    paths-ignore:
+      - '**/*.md'
+      - '_docs/**'
+      - '.claude/**'
 permissions:
   contents: read
 jobs:
