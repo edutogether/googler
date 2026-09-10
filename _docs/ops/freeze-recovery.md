@@ -31,3 +31,7 @@ git checkout googler-freeze-20260910-audited-100-2 -- .
 **기존 태그를 옮기거나 덮어쓰지 말 것 — 항상 새 날짜 태그를 찍는다**(CONVENTIONS §3.4). 태그를 덮어쓰는 순간 되돌아갈 지점 자체가 사라지기 때문이다. `.githooks/pre-push`가 원격의 freeze 태그 삭제·이동을 실제로 차단한다(신규 생성은 통과). 훅은 클론마다 `git config core.hooksPath .githooks`로 켜야 한다.
 
 **찍은 태그는 반드시 push할 것** — `git push origin main`은 태그를 함께 보내지 않는다. 로컬에만 있는 복구 지점은 다른 기기에서 동작하지 않으므로 복구 지점이 아니다(2026-09-08에 `googler-freeze-20260902-2`가 실제로 이 상태로 발견돼 push함). `comm -23 <(git tag -l | sort) <(git ls-remote --tags origin | grep -v '\^{}' | awk '{print $2}' | sed 's|refs/tags/||' | sort)`로 대조한다.
+
+**되돌리는 절차를 실제로 검증할 때 원위치가 `git checkout HEAD -- .`만으로 끝나지 않을 수 있다** — 되돌린 태그 시점에는 있었지만 지금 HEAD엔 없는 파일(예: 나중에 옮기거나 지운 문서)은 `git checkout HEAD -- .`로 지워지지 않고 그대로 남는다(2026-09-10 태그 정리 검증에서 `docs/` 아래 3개 파일이 이렇게 남았던 것 확인). 원위치 후 `git status --short`로 잔여물이 없는지 반드시 확인하고, 남은 게 있으면 그 경로를 지운다.
+
+**태그 관련 참조를 옮길 때 커밋 SHA가 아니라 태그(오브젝트) 자체를 옮겨야 한다** — annotated 태그는 태그 메시지가 담긴 별도 오브젝트다. `git update-ref <새 이름> <커밋 SHA>`로 만들면 그 메시지가 통째로 빠진다. `git update-ref <새 이름> <원래 태그 이름 또는 태그 오브젝트 SHA>`로 만들어야 한다.
