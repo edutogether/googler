@@ -100,9 +100,11 @@ async function captureAll(chromePath) {
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, reducedMotion: 'reduce' });
     const page = await context.newPage();
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-    // The boot splash holds for 1800ms before fading, and longer if the page
-    // hasn't finished loading (see src/styles/splash.css and src/splash.ts).
-    // Reduced motion — emulated above — collapses that animation, but wait for
+    // The boot splash holds for 2300ms before fading (two loops of its own
+    // loading-bar animation, COMMON_STANDARDS §27), and longer if the page
+    // hasn't finished loading (see index.html's inline <style> and
+    // src/splash.ts). Reduced motion — emulated above — collapses that
+    // animation, but wait for
     // the element to actually leave the DOM so a timing change there can never
     // silently bake a splash frame into every baseline.
     await page.waitForSelector('#splash', { state: 'detached', timeout: 10000 });

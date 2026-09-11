@@ -35,9 +35,16 @@
       /* 사라지는 타이밍을 CSS로 잡는다 — JS 타이머로 시작하면 번들이 로드된 뒤부터
          재는 셈이라 그만큼 늦게 사라진다. CSS 애니메이션은 문서가 그려지는 순간부터
          흐르므로 첫 페인트 기준에 맞는다.
-         1800ms 유지 → 500ms 페이드 → 2400ms에 제거. */
+
+         SPLASH_TIMING: hold=2300ms fade=500ms tail=100ms total=2900ms sbarLoop=1150ms
+         (COMMON_STANDARDS §27, 2026-09-11 — 대표 지시: 스플래시·로딩 화면은 자기
+         애니메이션이 최소 두 바퀴 도는 동안 떠 있어야 한다. 로딩바 `.sbar i`의
+         splashBar 애니메이션이 1.15s/바퀴라 hold는 최소 2×1150=2300ms — "초"가
+         아니라 "바퀴" 기준이라, splashBar 주기를 바꾸면 이 값도 같이 바꿔야 한다.
+         src/splash.test.ts의 "holds for at least two sbar loop cycles"가 이 관계를
+         고정한다. 2300ms 유지 → 500ms 페이드 → 2900ms에 제거.) */
       #splash {
-        animation: splashOut 2400ms ease forwards;
+        animation: splashOut 2900ms ease forwards;
         position: fixed;
         inset: 0;
         z-index: 999;
@@ -50,22 +57,22 @@
       }
       @keyframes splashOut {
         0%,
-        74.99% {
+        79.31% {
           opacity: 1;
           pointer-events: auto;
         }
-        75% {
+        79.32% {
           opacity: 1;
           pointer-events: none;
         }
-        95.83%,
+        96.55%,
         100% {
           opacity: 0;
           pointer-events: none;
         }
       }
 
-      /* 로드 게이트(표준 개정 2026-09-09 §1): 2400ms가 지나도 page load가 아직이면
+      /* 로드 게이트(표준 개정 2026-09-09 §1): 2900ms가 지나도 page load가 아직이면
          src/splash.ts가 .is-held를 붙여 유지를 연장하고, load가 끝나면 .is-leaving으로
          500ms 페이드 후 제거한다. JS는 시간을 재지 않고 "끝났는가"만 판정한다. */
       #splash.is-held {
@@ -195,7 +202,7 @@
   </head>
   <body>
     <!-- 스플래시는 정적 마크업으로 둔다 — 리액트가 그리면 번들 로드 전까지 빈
-         화면이 잠깐 보인다. 사라지는 타이밍은 src/styles/splash.css의 애니메이션이
+         화면이 잠깐 보인다. 사라지는 타이밍은 위 헤드의 인라인 <style> 애니메이션이
          잡고, src/splash.ts는 다 끝난 노드를 치우는 일과 page load 대기만 맡는다.
          앱 이름은 브랜드 이미지에 이미 들어 있어 .name은 두지 않는다. -->
     <div id="splash">

@@ -1,5 +1,9 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installSplash } from './splash';
+
+const indexHtmlPath = path.join(import.meta.dirname, '..', 'index.html');
 
 function mountSplash() {
   document.body.innerHTML = '<div id="splash"><img class="logo" /><div class="stagline"></div><span class="sbar"><i></i></span></div>';
@@ -127,5 +131,40 @@ describe('installSplash', () => {
   it('does nothing when the page has no splash', () => {
     document.body.innerHTML = '<div id="root"></div>';
     expect(() => installSplash()).not.toThrow();
+  });
+});
+
+// COMMON_STANDARDS §27 (2026-09-11): a splash/loading screen must stay up for
+// at least two loops of its own animation, on any device — otherwise a fast
+// load reads as a glitch rather than an intentional screen. The rule is
+// framed in loops, not seconds, so this reads the real values straight out
+// of index.html's CSS rather than hardcoding milliseconds — if the loading
+// bar's loop period ever changes, this recomputes the required minimum
+// instead of silently going stale.
+describe('boot splash timing (index.html)', () => {
+  const html = readFileSync(indexHtmlPath, 'utf8');
+
+  it('actually read index.html — a parsing bug here would make every check below vacuous', () => {
+    expect(html.length).toBeGreaterThan(0);
+    expect(html).toContain('#splash');
+  });
+
+  it('holds for at least two loops of the .sbar loading-bar animation before it starts fading', () => {
+    const loopMatch = html.match(/animation:\s*splashBar\s+([\d.]+)s\s+ease-in-out\s+infinite/);
+    expect(loopMatch).not.toBeNull();
+    const loopMs = Number(loopMatch![1]) * 1000;
+    expect(loopMs).toBeGreaterThan(0);
+
+    const totalMatch = html.match(/animation:\s*splashOut\s+(\d+)ms\s+ease\s+forwards/);
+    expect(totalMatch).not.toBeNull();
+    const totalMs = Number(totalMatch![1]);
+
+    // The keyframe stop where opacity is still 1 but pointer-events switches
+    // to none marks the end of the hold (fade starts right after it).
+    const holdPctMatch = html.match(/(\d+(?:\.\d+)?)%\s*\{\s*opacity:\s*1;\s*pointer-events:\s*none;/);
+    expect(holdPctMatch).not.toBeNull();
+    const holdMs = totalMs * (Number(holdPctMatch![1]) / 100);
+
+    expect(holdMs).toBeGreaterThanOrEqual(2 * loopMs);
   });
 });
