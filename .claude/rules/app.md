@@ -14,22 +14,22 @@
   주소가 아니다. 서로 다른 오타가 아니라 애초에 다른 값이니 문서에서 바꿔
   쓰지 않는다. Firebase 기본 주소 `g00gler.web.app`도 계속 살아있다(이미
   나간 링크 보존용).
-- App Check(reCAPTCHA v3)가 Firestore·Auth 두 API 모두 Enforce 상태 — 클라이언트
+- 🟢 App Check(reCAPTCHA v3)가 Firestore·Auth 두 API 모두 Enforce 상태 — 클라이언트
   코드가 Firebase를 안 부르는 지금도 프로젝트 자체는 REST로 직접 두드릴 수 있어서
   걸어둔 방어선. Google Cloud 예산 알림은 임계값 초과 시 메일만 온다(API 호출을
   실제로 막지는 않음) — 강제 차단이 필요하면 별도 Cloud Function이 있어야 한다.
 
 ## 배포 폴더
 - `firebase.json` public = `dist`. `dist/`는 `vite build` 산출물이라
-  `docs/`·`.claude/`는 구조상 포함될 수 없음 — 실제 산출물로 확인함 (확인일 9/8)
+  `docs/`·`.claude/`는 구조상 포함될 수 없음 — 🟢 실제 산출물로 확인함 (확인일 9/8)
 
 ## 데이터
-- 개인정보·미성년자 데이터: **현재 라이브에는 없음.** 배포 번들에
+- 🟢 개인정보·미성년자 데이터: **현재 라이브에는 없음.** 배포 번들에
   `firebase`/`getFirestore`/`signInAnonymously`가 0건이라 방문자에게 계정 생성도
   닉네임 저장도 일어나지 않는다. 재배선하는 순간 이 문장은 더 이상 사실이 아니다.
 - 보관·삭제 정책: 익명 계정 30일 자동정리(Firebase Auth). 단 이건 인증 정보만
   지우고 Firestore 문서·공개 랭킹 닉네임은 남는다 — 삭제 경로는 재배선 라운드 과제.
-- rules: `firestore.rules` 있음 + `npm run rules:test`로 에뮬레이터 테스트,
+- 🟢 rules: `firestore.rules` 있음 + `npm run rules:test`로 에뮬레이터 테스트,
   CI 3개 워크플로 전부에서 build 앞에 실행됨.
 - localStorage: BGM/효과음 설정, Sentry 일일 이벤트 상한 카운트
   (`public/privacy.html`에 고지됨).
@@ -48,10 +48,10 @@
 ## 이 앱에서 절대 하면 안 되는 것
 - **재배선 금지** — `MainWorldV3`를 `LegacyGooglerApp`/Firebase에 연결하지 않는다.
 - **BGM 매 방문 초기화를 "고치지" 말 것** — 공용 키오스크 특성상 확정된 설계.
-- **배포 워크플로 스텝 순서 변경 금지** — Hosting 배포가 먼저, Firestore
+- 🔴 **배포 워크플로 스텝 순서 변경 금지** — Hosting 배포가 먼저, Firestore
   규칙·인덱스 배포가 뒤(+`continue-on-error: true`). 반대로 두면 규칙 배포 실패
   하나로 사이트 배포가 통째로 스킵된다(실제로 발생한 사고).
-- **랭킹 읽기 규칙을 전체공개로 되돌리지 말 것** — 로그인 참가자 한정이 확정 결정.
+- 🔴 **랭킹 읽기 규칙을 전체공개로 되돌리지 말 것** — 로그인 참가자 한정이 확정 결정.
 - **`eslint` 10 / `jsdom` 30 / `typescript` 7 업그레이드 금지** — 각각 구체적
   이유로 보류 중(CLAUDE.md "나머지 outdated 패키지 정리" 참고).
 - **제품 코드를 기본 무음으로 바꾸지 말 것** — 확인용으로 열 때만 `?qa-mute=1`.
@@ -84,7 +84,7 @@
   일반 회선에서의 실제 타이밍은 `_docs/CHANGELOG.md`의 스플래시 표준
   전환 실측치를 본다.
 - **다른 저장소의 "번들 안 안전판" 결함을 이 앱에도 있다고 단정한다.**
-  **스플래시 안전판이 번들 안에 있어도 이 앱은 갇히지 않는다.** `#splash`의
+  🟢 **스플래시 안전판이 번들 안에 있어도 이 앱은 갇히지 않는다.** `#splash`의
   페이드가 `animation: splashOut 2900ms forwards`라는 **순수 CSS**라, JS가
   한 줄도 안 돌아도 브라우저가 스스로 재생한다. 번들을 영원히 멈춰 놓고 재도
   **3.1초에 `opacity:0`·`pointer-events:none`**이 되고 12초간 그 상태를

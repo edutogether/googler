@@ -20,7 +20,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 
 ## 현재 상태 (2026-09-10 기준)
 - 브랜치: `main` (배포 브랜치이자 작업 브랜치)
-- **배포처: Firebase Hosting** — **정식 라이브 URL `https://googler.edutogether.kr/`**(2026-09-10 정식 도메인 연결, 인증서·`http`→`https` 자동 전환 확인됨). 사람에게 안내할 땐 이 주소를 쓴다. Firebase 기본 주소 `https://g00gler.web.app/`도 계속 살려둔다(2026-09-02 GitHub Pages에서 이관, `_docs/CHANGELOG.md`의 "Firebase Hosting 이관" 섹션 참고) — 이미 나간 링크가 있어 내리지 않는다. GitHub Pages 배포는 폐기했다(`deploy-pages.yml` 삭제).
+- **배포처: Firebase Hosting** — **정식 라이브 URL `https://googler.edutogether.kr/`**(🟢 2026-09-10 정식 도메인 연결, 인증서·`http`→`https` 자동 전환 확인됨). 사람에게 안내할 땐 이 주소를 쓴다. Firebase 기본 주소 `https://g00gler.web.app/`도 계속 살려둔다(2026-09-02 GitHub Pages에서 이관, `_docs/CHANGELOG.md`의 "Firebase Hosting 이관" 섹션 참고) — 이미 나간 링크가 있어 내리지 않는다. GitHub Pages 배포는 폐기했다(`deploy-pages.yml` 삭제).
 - 2026-08-10 외부 리뷰: `_docs/archive/EXTERNAL_HEALTH_REVIEW_20260810.md`
 - 전시 프리즈 최신 태그: `googler-freeze-20260910-audited-100-2` — 복구 절차 전체는 `_docs/ops/freeze-recovery.md`.
 - 개인정보처리방침: `public/privacy.html`, 라이브 `https://googler.edutogether.kr/privacy.html`.
@@ -29,7 +29,7 @@ Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite)
 
 **규칙**: 정기 종합감사는 분기 말(3월·6월·9월·12월 마지막 날)에 돈다 — 여덟 저장소가 같은 날짜를 쓴다. **다음 정기감사: 2026-09-30.** 개발 중인 지금은 그 사이에도 Bumm님이 필요하다고 판단할 때 수시로 돌 수 있지만, **세션이 먼저 재감사·추가 작업을 제안하지 않는다**(§19). 종합감사가 **10/10(만점)** 확정되면 그게 "앱 개발을 그만해도 된다"는 신호다 — 그 이후는 운영 단계이고, 사소한 수정이 쌓이면 그때 다시 돌리거나 다음 분기 말을 기다린다(둘 다 정당).
 
-**2026-09-10 라운드 기록**: org 전체가 "문서 정리 → 종합감사 10/10 → 배포 → 프리즈 태그" 순서로 돈 라운드에 이 저장소도 포함됐다(위 규칙이 확정되기 전, 2026-09-02~09-30 실운영 모드 방침을 대체한 라운드). 진행 상황과 최종 점수는 `_docs/CHANGELOG.md`에 있다. 지난 2026-09-02 §7 종합감사(Sonnet+Opus 독립 조사, A트랙 10개 항목 10/10)의 전체 내용은 `_docs/archive/operational-mode-20260902.md`와 `_docs/CHANGELOG.md`의 해당 섹션에 그대로 있다. **현재 점수: 10/10** (2026-09-10 트리 `33c52a7` = `googler-freeze-20260910-audited-100-2` 기준. 그 이후 커밋 수는 `git rev-list --count googler-freeze-20260910-audited-100-2..main`으로 항상 직접 센다 — 문서에 숫자를 박지 않는다, COMMON_STANDARDS §29. 지금까지의 이후 커밋은 전부 §4-2 재채점 확인됨.)
+**2026-09-10 라운드 기록**: org 전체가 "문서 정리 → 종합감사 10/10 → 배포 → 프리즈 태그" 순서로 돈 라운드에 이 저장소도 포함됐다(위 규칙이 확정되기 전, 2026-09-02~09-30 실운영 모드 방침을 대체한 라운드). 진행 상황과 최종 점수는 `_docs/CHANGELOG.md`에 있다. 지난 2026-09-02 §7 종합감사(Sonnet+Opus 독립 조사, A트랙 10개 항목 10/10)의 전체 내용은 `_docs/archive/operational-mode-20260902.md`와 `_docs/CHANGELOG.md`의 해당 섹션에 그대로 있다. 🟢 **현재 점수: 10/10** (2026-09-10 트리 `33c52a7` = `googler-freeze-20260910-audited-100-2` 기준. 그 이후 커밋 수는 `git rev-list --count googler-freeze-20260910-audited-100-2..main`으로 항상 직접 센다 — 문서에 숫자를 박지 않는다, COMMON_STANDARDS §29. 지금까지의 이후 커밋은 전부 §4-2 재채점 확인됨.)
 
 ## Firebase 프로젝트
 
