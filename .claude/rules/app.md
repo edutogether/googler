@@ -1,6 +1,8 @@
 # Be a Googler (googler) 개별 규칙
 헌법(D:\Projects\CLAUDE.md → _shared/CONVENTIONS.md)에 없는 것만.
 
+표시: 🔴 어기면 실사용자 화면이 깨지거나 개인정보가 샌다 · 🟠 중간 · 🟡 낮음 · 🟢 확인 끝남 (COMMON_STANDARDS §30)
+
 ## 앱
 - 무엇: Google Educator 인증 학습용 20일 60미션 동료학습 앱. 현재는 전시용 정적
   셸(`MainWorldV3`) 하나만 렌더링되고, 실제 기능 코드(`LegacyGooglerApp`)는
