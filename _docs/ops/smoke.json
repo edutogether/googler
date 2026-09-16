@@ -1,0 +1,26 @@
+{
+  "$comment": "배포 후 검증용 주요 화면 선언 (_shared/CONVENTIONS.md §3.5). 화면 문구를 바꾸면 이 파일의 expect도 같은 커밋에서 고친다.",
+  "baseUrl": "https://googler.edutogether.kr",
+  "screens": [
+    {
+      "name": "첫 화면 (여정 시작)",
+      "path": "/",
+      "expect": [
+        "배움이 모험이 되는 곳",
+        "Googler 의 여정을",
+        "새로운 여정 시작하기"
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "screen": "퀘스트·플래너·도감·커뮤니티 탭",
+      "reason": "URL이 바뀌지 않는 같은 화면의 탭이다. 첫 화면 하나로 앱이 떴는지 판정된다."
+    },
+    {
+      "screen": "레벨·XP·배지·새 소식 카드",
+      "reason": "진행 상태에 따라 계속 바뀌는 숫자와 문구라 expect로 쓰면 멀쩡한 배포가 실패로 뜬다."
+    }
+  ],
+  "$note": "이 앱은 agent-browser의 접근성 트리(read)가 비어서 돌아온다. 검사기가 자동으로 렌더된 본문 텍스트로 내려가 대조한다(_shared/ops/smoke-check.mjs)."
+}
