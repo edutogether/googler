@@ -22,5 +22,5 @@
       "reason": "진행 상태에 따라 계속 바뀌는 숫자와 문구라 expect로 쓰면 멀쩡한 배포가 실패로 뜬다."
     }
   ],
-  "$note": "이 앱은 agent-browser의 접근성 트리(read)가 비어서 돌아온다. 검사기가 자동으로 렌더된 본문 텍스트로 내려가 대조한다(_shared/ops/smoke-check.mjs)."
+  "$note": "이 앱은 agent-browser의 본문 추출(read)이 빈 값으로 돌아온다. 접근성 문제가 아니다 — 접근성 트리(agent-browser snapshot)는 main·navigation·이름 있는 버튼·h1까지 정상이다(2026-09-17 실측). 본문 추출기가 이 페이지에서만 빈 문서를 내놓는 것이고, 검사기가 자동으로 렌더된 본문 텍스트로 내려가 대조한다(_shared/ops/smoke-check.mjs)."
 }
