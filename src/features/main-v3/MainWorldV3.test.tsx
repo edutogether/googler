@@ -325,7 +325,12 @@ describe('MainWorldV3 final preview', () => {
     expect(plannerScene).toHaveAttribute('alt', '');
     expect(plannerScene).toHaveAttribute('aria-hidden', 'true');
     expect(document.querySelector('.mw3-shell')).toHaveClass('mw3-shell--planner');
-    expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull();
+    // 위 루프 검사와 같은 이유로 **기다렸다가** 확인한다. 이전 장면의 coming-soon 카드는
+    // activeNav를 키로 하는 useEffect가 지우는데, 그건 클릭과 동시에 일어나지 않는다.
+    // 그냥 동기로 null을 확인하면 «아직 안 켜졌다»와 «지워졌다»를 구분하지 못하고, 곧바로
+    // 클릭해 켜 놓아도 뒤늦게 도착한 그 effect가 다시 꺼 버린다 — CI에서만 가끔 지던
+    // 원인이 이것이었다(2026-09-17).
+    await waitFor(() => expect(screen.queryByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeNull());
     fireEvent.click(document.querySelector('.mw3-shell') as HTMLElement);
     await waitFor(() => expect(screen.getByRole('region', { name: '새로운 여정이 준비되고 있어요.' })).toBeInTheDocument(), { timeout: 2000 });
     expect(document.querySelector('.mw3-hero')).toBeNull();
