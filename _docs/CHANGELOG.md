@@ -337,3 +337,7 @@ Dependabot 7건과 `npm audit` 결과의 모집단이 다른 이유(GHSA 기준 
 ## 2026-09-27 React 19.2.8 → 19.3.0 (지시 Bumm/팀장 9/27)
 
 `react`·`react-dom`·`@types/react`·`@types/react-dom` 네 개만 19.3.0으로 (다른 의존성은 이번에 건드리지 않음, 한 번에 한 변화). 프리즈 태그 `pre-react-19.3.0-20260927` 찍고 진행. 검증: `npm run check`(typecheck/lint/단위 122개/build) + `npm run rules:test`(Firestore 규칙 8개) + `npm run visual` 20/20, 전부 통과, 새로 생긴 경고 없음. 라이브 배포 후 세션 자신의 브라우저로 직접 확인.
+
+## 2026-09-27 AGENTS.md에 조직 공통 규칙 절 추가 (지시 Bumm/팀장, Codex·클라우드 준비)
+
+Codex 클라우드·Claude Code 클라우드처럼 이 저장소 하나만 받아서 여는 도구는 `D:\Projects`의 공통 문서(헌법·COMMON_STANDARDS)를 못 본다. 그래서 `_shared/constitution.md` 요약을 `AGENTS.md`에 "조직 공통 규칙" 절로 그대로 옮겨 넣었다(사람·호칭·보고 경로·main 직접 푸시 금지·멈추고 물을 것·한 번에 완성·숨길 것·인계·로컬 전용 작업). "로컬 전용 작업" 항목엔 이 앱 고유 항목(Firebase 콘솔의 App Check·예산 알림 확인, 실물 키오스크에서 BGM·스플래시 육안 확인)을 덧붙였다. 문서만 변경(156줄, DOC-STANDARD 100~180줄 범위 안).
