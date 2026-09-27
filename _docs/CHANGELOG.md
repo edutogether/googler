@@ -333,3 +333,7 @@ Dependabot 7건과 `npm audit` 결과의 모집단이 다른 이유(GHSA 기준 
 **남는 것**: DOM 노드 자체는 (번들이 끝내 안 오면) 안 지워지고 남는다 — 하지만 투명하고 클릭도 안 되는 빈 요소 하나일 뿐, 화면 차단이나 사용성 문제는 없다. 고칠 값어치 없음으로 판정.
 
 `.claude/rules/app.md` "자주 틀리는 것"에 이 결론과 **"DOM 존재 여부가 아니라 opacity/pointer-events를 재야 한다"**는 측정 방법 자체의 함정을 같이 기록 — 다음 정기감사에서 같은 오탐이 나오지 않게.
+
+## 2026-09-27 React 19.2.8 → 19.3.0 (지시 Bumm/팀장 9/27)
+
+`react`·`react-dom`·`@types/react`·`@types/react-dom` 네 개만 19.3.0으로 (다른 의존성은 이번에 건드리지 않음, 한 번에 한 변화). 프리즈 태그 `pre-react-19.3.0-20260927` 찍고 진행. 검증: `npm run check`(typecheck/lint/단위 122개/build) + `npm run rules:test`(Firestore 규칙 8개) + `npm run visual` 20/20, 전부 통과, 새로 생긴 경고 없음. 라이브 배포 후 세션 자신의 브라우저로 직접 확인.
