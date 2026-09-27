@@ -106,6 +106,10 @@ typecheck → lint → test → rules:test → build → Hosting 배포 → Fire
 - **랭킹 읽기 규칙을 전체공개로 되돌리지 말 것** — `firestore.rules`의
   `rankings` 읽기는 로그인 참가자 한정(`request.auth != null`)이 확정 결정이다.
 - **배포 워크플로 스텝 순서 변경 금지** (위 "배포" 참고).
+- **`.claude/rules/app.md`의 금지·함정 목록도 반드시 읽는다** — Codex 등은 이
+  파일을 자동으로 읽지 않는다. 지금 기준 여기 없는 것: 브라우저 선택 규칙
+  (기본값은 도구 자신의 브라우저, 대표님 크롬은 대표님 지시나 로그인 필요한
+  «쓰기» 작업일 때만).
 
 ## 알려진 함정
 
