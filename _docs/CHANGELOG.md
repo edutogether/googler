@@ -343,3 +343,13 @@ Dependabot 7건과 `npm audit` 결과의 모집단이 다른 이유(GHSA 기준 
 Codex 클라우드·Claude Code 클라우드처럼 이 저장소 하나만 받아서 여는 도구는 `D:\Projects`의 공통 문서(헌법·COMMON_STANDARDS)를 못 본다. 그래서 `_shared/constitution.md` 요약을 `AGENTS.md`에 "조직 공통 규칙" 절로 그대로 옮겨 넣었다(사람·호칭·보고 경로·main 직접 푸시 금지·멈추고 물을 것·한 번에 완성·숨길 것·인계·로컬 전용 작업). "로컬 전용 작업" 항목엔 이 앱 고유 항목(Firebase 콘솔의 App Check·예산 알림 확인, 실물 키오스크에서 BGM·스플래시 육안 확인)을 덧붙였다. 문서만 변경(156줄, DOC-STANDARD 100~180줄 범위 안).
 
 이어서 팀장 확인 요청: Codex는 `.claude/rules/app.md`를 자동으로 안 읽는다는 점 때문에, 거기에만 있고 AGENTS.md엔 없는 항목이 있는지 재점검했다. **브라우저 선택 규칙**(2026-09-22 확정 — 기본값은 도구 자신의 브라우저, 대표님 크롬은 지시받거나 로그인 필요한 «쓰기» 작업일 때만)이 app.md에만 있고 AGENTS.md엔 없어 "절대 하면 안 되는 것"에 "app.md 금지·함정 목록도 반드시 읽는다" 한 줄과 그 구체 항목을 추가했다(160줄, 범위 안).
+
+## 2026-09-29 클라우드 세션 준비 — SessionStart 훅 (지시 Bumm 9/29, 가지에만 — 미배포)
+
+- `scripts/cloud-session-start.sh`(원본은 `817beatles/projects`의 `_shared/cloud/`)와 `.claude/settings.json`의
+  `SessionStart` 훅. **Anthropic 클라우드 세션(`CLAUDE_CODE_REMOTE=true`)에서만** 돈다 — ① `node_modules`가 없는
+  패키지만 `npm ci` ② Playwright 설정이 있으면 이 저장소가 고정한 Chromium ③ `AGENTS.md`의 «조직 공통 규칙» 절을
+  세션 컨텍스트에 넣는다(클라우드에는 상위 `D:\Projects\CLAUDE.md`가 없다). 집 PC 로컬 세션에서는 첫 줄에서 끝나
+  아무 일도 하지 않는다. 가지 `claude/cloud-session-setup`에만 있고 `main` 반영은 팀장 확인 뒤.
+  설정·여는 법 원문은 `_shared/CLAUDE-CLOUD.md`.
+- 클라우드 실측(2026-09-29, Anthropic 클라우드 Ubuntu 24.04 · Node 22): typecheck·lint·test·build·`rules:test`(Firestore 에뮬레이터) 전부 통과.
