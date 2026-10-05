@@ -355,3 +355,7 @@ Portal이 PR #8에서 먼저 검증한 구조를 그대로 옮겼다 — job을 
 ## 2026-10-05 Firestore 규칙 정합성 강화 (보안 지적 대응, 지시 Bumm/팀장)
 
 `firestore.rules`를 앱 실제 값에 맞췄다. 경로의 `{appId}` 와일드카드를 클라이언트가 쓰는 고정 네임스페이스(`gpass-custom-app-id`)로 좁혔고, 랭킹 점수 상한을 임의 값(100000)에서 실제 최대치(레벨별 미션 30개)로, 형식을 정수로 제한했다. 규칙은 모양과 범위만 검사하며 클라이언트 값의 진위는 확인하지 못한다 — 서버 쪽 검증은 재배선 라운드의 일이다. `firestore.rules.test.ts`에 다른 네임스페이스 거부·상한 검사를 추가하고, 규칙의 상한·네임스페이스가 앱 데이터와 어긋나면 실패하는 `firestoreRulesContent.test.ts`를 새로 넣었다(에뮬레이터 없이 `test:run`에서 돈다). 새 검사 5개가 옛 규칙에서는 실제로 실패하는 것을 확인한 뒤 통과시켰다.
+
+## 2026-10-05 PR 미리보기 — Dependabot PR은 미리보기 단계만 건너뜀 (지시 Bumm/팀장)
+
+Dependabot이 연 PR에는 저장소 비밀이 전달되지 않아 `firebase-hosting-pull-request.yml`의 `preview`가 서비스계정 입력이 비어 매번 실패로 표시됐다(실제 코드 실패가 아님 — `verify`·`build`는 통과). 비밀을 Dependabot에 주는 대신 `preview` job에만 «PR 작성자가 `dependabot[bot]`이면 건너뜀» 조건을 넣었다. 검사(`build`)는 그대로 돌고, 사람이 연 PR의 미리보기는 그대로 동작한다.
