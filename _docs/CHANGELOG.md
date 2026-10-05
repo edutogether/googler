@@ -351,3 +351,7 @@ Codex 클라우드·Claude Code 클라우드처럼 이 저장소 하나만 받�
 Portal이 PR #8에서 먼저 검증한 구조를 그대로 옮겼다 — job을 둘로 가름: **`build`**(PR 코드 실행, 비밀 참조 없음, `contents: read`만, 결과물을 `dist/` artifact로 업로드) → **`preview`**(`needs: build`, 비밀 사용, PR 코드를 전혀 실행하지 않음 — checkout을 PR이 아니라 `github.event.pull_request.base.sha`로 받아 `firebase.json`도 main 것을 쓴다, artifact를 받아 배포). artifact 업로드/다운로드 액션은 SHA 고정(`upload-artifact@ea165f8…` v4.6.2, `download-artifact@d3f86a1…` v4.3.0), 배포 전 `dist/index.html`이 비어 있지 않은지 확인하는 단계 추가(§21-1 빈 게이트 방지). 기존 checkout/setup-node(`@v6`)·setup-java(`@v4`)·Hosting 배포 액션 SHA는 그대로 유지, 동작(같은 저장소 PR만, 미리보기 주소가 PR에 달림)은 그대로다.
 
 검증: 이 변경을 올린 PR에서 `build`→`preview` 둘 다 성공, 미리보기 주소가 PR에 달리는지 확인.
+
+## 2026-10-05 Firestore 규칙 정합성 강화 (보안 지적 대응, 지시 Bumm/팀장)
+
+`firestore.rules`를 앱 실제 값에 맞췄다. 경로의 `{appId}` 와일드카드를 클라이언트가 쓰는 고정 네임스페이스(`gpass-custom-app-id`)로 좁혔고, 랭킹 점수 상한을 임의 값(100000)에서 실제 최대치(레벨별 미션 30개)로, 형식을 정수로 제한했다. 규칙은 모양과 범위만 검사하며 클라이언트 값의 진위는 확인하지 못한다 — 서버 쪽 검증은 재배선 라운드의 일이다. `firestore.rules.test.ts`에 다른 네임스페이스 거부·상한 검사를 추가하고, 규칙의 상한·네임스페이스가 앱 데이터와 어긋나면 실패하는 `firestoreRulesContent.test.ts`를 새로 넣었다(에뮬레이터 없이 `test:run`에서 돈다). 새 검사 5개가 옛 규칙에서는 실제로 실패하는 것을 확인한 뒤 통과시켰다.

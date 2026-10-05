@@ -1,15 +1,20 @@
 rules_version = '2';
 
 // Data model (see src/data/firebase/firebaseServices.ts):
-//   artifacts/{appId}/users/{uid}/profile/info          — private profile
-//   artifacts/{appId}/users/{uid}/user_progress/gpass_data — private progress
-//   artifacts/{appId}/public/data/rankings/{uid}        — public leaderboard entry
+//   artifacts/gpass-custom-app-id/users/{uid}/profile/info          — private profile
+//   artifacts/gpass-custom-app-id/users/{uid}/user_progress/gpass_data — private progress
+//   artifacts/gpass-custom-app-id/public/data/rankings/{uid}        — public leaderboard entry
 //
 // Without these rules, Firestore's default (once security rules exist at all)
 // denies everything; but with NO rules file at all — the state this repo was
 // in — a freshly created Firestore database is wide open. The leaderboard in
 // particular writes a document whose ID is the client-supplied uid, so an
 // unauthenticated ruleset lets anyone overwrite anyone else's score.
+//
+// The namespace segment is the literal 'gpass-custom-app-id' — the only value
+// the client uses (firebaseServices.ts: VITE_FIRESTORE_NAMESPACE ?? that
+// default). If the client's namespace is ever changed, change it here too, or
+// every write will be denied.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -19,14 +24,14 @@ service cloud.firestore {
     // {document=**} wildcard so a signed-in user can't create arbitrary
     // extra documents/collections under their own uid, and each document is
     // shape-validated the same way the leaderboard entry already was.
-    match /artifacts/{appId}/users/{uid}/profile/info {
+    match /artifacts/gpass-custom-app-id/users/{uid}/profile/info {
       allow read, write: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['nickname', 'emoji'])
         && request.resource.data.nickname is string && request.resource.data.nickname.size() <= 30
         && request.resource.data.emoji is string && request.resource.data.emoji.size() <= 8;
     }
 
-    match /artifacts/{appId}/users/{uid}/user_progress/gpass_data {
+    match /artifacts/gpass-custom-app-id/users/{uid}/user_progress/gpass_data {
       allow read, write: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['progress'])
         && request.resource.data.progress is map;
@@ -40,12 +45,16 @@ service cloud.firestore {
     // another entrant. The write also has to match this exact shape: no
     // extra fields, and each field bounded in type/length/range — Firestore
     // rules have no single "document byte size" check, so bounding every
-    // allowed field is what stands in for a size limit here. The score
-    // ceiling (100000) is a generous sanity cap, not a real business rule —
-    // domain/progress.ts doesn't define an actual max score yet, so this
-    // just blocks obviously abusive values (e.g. 999999999) rather than
-    // enforcing a precise range.
-    match /artifacts/{appId}/public/data/rankings/{uid} {
+    // allowed field is what stands in for a size limit here.
+    //
+    // The score ceiling (30) is the real maximum: each level has 30 missions
+    // (10 days x 3), and the client's score is the count of completed ones
+    // (src/domain/progress.ts countCompletedMissions). Rules check shape and
+    // range only — they cannot recompute the score or verify passedL1/passedL2,
+    // which come from the client. Server-side scoring is for the rewiring round.
+    // src/data/firebase/firestoreRulesContent.test.ts fails if 30 drifts from
+    // the actual mission counts in src/content/courses.ts.
+    match /artifacts/gpass-custom-app-id/public/data/rankings/{uid} {
       allow read: if request.auth != null;
       allow write: if request.auth != null
         && request.auth.uid == uid
@@ -53,8 +62,8 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uid', 'nickname', 'emoji', 'scoreL1', 'scoreL2', 'passedL1', 'passedL2'])
         && request.resource.data.nickname is string && request.resource.data.nickname.size() <= 30
         && request.resource.data.emoji is string && request.resource.data.emoji.size() <= 8
-        && (!('scoreL1' in request.resource.data) || (request.resource.data.scoreL1 is number && request.resource.data.scoreL1 >= 0 && request.resource.data.scoreL1 <= 100000))
-        && (!('scoreL2' in request.resource.data) || (request.resource.data.scoreL2 is number && request.resource.data.scoreL2 >= 0 && request.resource.data.scoreL2 <= 100000))
+        && (!('scoreL1' in request.resource.data) || (request.resource.data.scoreL1 is int && request.resource.data.scoreL1 >= 0 && request.resource.data.scoreL1 <= 30))
+        && (!('scoreL2' in request.resource.data) || (request.resource.data.scoreL2 is int && request.resource.data.scoreL2 >= 0 && request.resource.data.scoreL2 <= 30))
         && (!('passedL1' in request.resource.data) || request.resource.data.passedL1 is bool)
         && (!('passedL2' in request.resource.data) || request.resource.data.passedL2 is bool);
     }

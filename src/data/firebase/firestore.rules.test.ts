@@ -14,7 +14,7 @@ const rankingRef = (db: ReturnType<typeof anonymous>, uid: string) => doc(db, 'a
 const rankingsCollection = (db: ReturnType<typeof anonymous>) => collection(db, 'artifacts', appId, 'public', 'data', 'rankings');
 
 const entry = (uid: string, overrides: Record<string, unknown> = {}) => ({
-  uid, nickname: '탐험가', emoji: '🐧', scoreL1: 80, scoreL2: 90, passedL1: true, passedL2: false, ...overrides,
+  uid, nickname: '탐험가', emoji: '🐧', scoreL1: 20, scoreL2: 30, passedL1: true, passedL2: false, ...overrides,
 });
 
 beforeAll(async () => { environment = await initializeTestEnvironment({ projectId, firestore: { rules: readFileSync('firestore.rules', 'utf8') } }); });
@@ -72,6 +72,29 @@ describeRules('firestore.rules', () => {
     await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 999999999 })));
     await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { passedL1: 'yes' })));
     await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile')));
+  });
+
+  // Each level has 30 missions, so 30 is the real maximum score. Rules cannot
+  // recompute the score — this only stops impossible values.
+  it('caps each level score at the real maximum (30 missions) and requires whole numbers', async () => {
+    const db = anonymous('mobile');
+    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 30, scoreL2: 30 })));
+    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 0, scoreL2: 0 })));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 31 })));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL2: 31 })));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 99999 })));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 10.5 })));
+  });
+
+  // The namespace used to be an {appId} wildcard, so a signed-in user could
+  // create unlimited namespaces under their own uid.
+  it('only allows the single namespace the client uses, not arbitrary appIds', async () => {
+    const db = anonymous('mobile');
+    const other = 'attacker-namespace';
+    await assertFails(setDoc(doc(db, 'artifacts', other, 'users', 'mobile', 'profile', 'info'), { nickname: 'x', emoji: '🐧' }));
+    await assertFails(setDoc(doc(db, 'artifacts', other, 'users', 'mobile', 'user_progress', 'gpass_data'), { progress: {} }));
+    await assertFails(setDoc(doc(db, 'artifacts', other, 'public', 'data', 'rankings', 'mobile'), entry('mobile')));
+    await assertSucceeds(setDoc(profileRef(db, 'mobile'), { nickname: 'x', emoji: '🐧' }));
   });
 
   it('rejects leaderboard writes with an oversized nickname or emoji', async () => {
