@@ -115,3 +115,10 @@
   🟠 **재는 방법도 주의**: DOM에 요소가 있는지로 판정하면 속는다 — 노드
   자체는 안 지워지고 그대로 남는다. **실제 `opacity`와 `pointer-events`를
   샘플링해야** 진짜 상태가 보인다.
+- 🔴 **PR 워크플로는 PR 코드를 실행하는 job과 비밀을 쓰는 job을 가른다.**
+  (`firebase-hosting-pull-request.yml`, 2026-10-05 보안 스캔 Medium 수정) 한
+  job 안에서 PR 코드를 실행한 뒤 같은 job에서 서비스계정 비밀로 배포하면,
+  빌드 단계가 `$GITHUB_ENV`·`$GITHUB_PATH`를 오염시켜 비밀이 있는 단계에서
+  PR 코드가 실행될 수 있다. `build`(PR 코드 실행, 비밀 없음) →
+  `preview`(비밀 사용, PR 코드 미실행, base 커밋으로 checkout) 구조를 되돌리지
+  말 것.
