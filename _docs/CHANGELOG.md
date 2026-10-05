@@ -343,3 +343,11 @@ Dependabot 7건과 `npm audit` 결과의 모집단이 다른 이유(GHSA 기준 
 Codex 클라우드·Claude Code 클라우드처럼 이 저장소 하나만 받아서 여는 도구는 `D:\Projects`의 공통 문서(헌법·COMMON_STANDARDS)를 못 본다. 그래서 `_shared/constitution.md` 요약을 `AGENTS.md`에 "조직 공통 규칙" 절로 그대로 옮겨 넣었다(사람·호칭·보고 경로·main 직접 푸시 금지·멈추고 물을 것·한 번에 완성·숨길 것·인계·로컬 전용 작업). "로컬 전용 작업" 항목엔 이 앱 고유 항목(Firebase 콘솔의 App Check·예산 알림 확인, 실물 키오스크에서 BGM·스플래시 육안 확인)을 덧붙였다. 문서만 변경(156줄, DOC-STANDARD 100~180줄 범위 안).
 
 이어서 팀장 확인 요청: Codex는 `.claude/rules/app.md`를 자동으로 안 읽는다는 점 때문에, 거기에만 있고 AGENTS.md엔 없는 항목이 있는지 재점검했다. **브라우저 선택 규칙**(2026-09-22 확정 — 기본값은 도구 자신의 브라우저, 대표님 크롬은 지시받거나 로그인 필요한 «쓰기» 작업일 때만)이 app.md에만 있고 AGENTS.md엔 없어 "절대 하면 안 되는 것"에 "app.md 금지·함정 목록도 반드시 읽는다" 한 줄과 그 구체 항목을 추가했다(160줄, 범위 안).
+
+## 2026-10-05 PR 미리보기 워크플로 — job을 둘로 갈라 비밀 노출 경로를 닫음 (보안 스캔 Medium, 지시 Bumm/팀장)
+
+`.github/workflows/firebase-hosting-pull-request.yml`이 한 job(`build_and_preview`) 안에서 PR 코드를 실행(npm ci·typecheck·lint·test·rules:test·build)한 뒤 **같은 job에서** 서비스계정 비밀(`FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER`, main 배포와 같은 비밀)로 미리보기를 배포하던 구조였다. 빌드 단계가 `$GITHUB_ENV`·`$GITHUB_PATH` 등으로 뒤 단계를 오염시키면 비밀이 있는 단계에서 PR 코드가 실행될 수 있는 경로가 있었다.
+
+Portal이 PR #8에서 먼저 검증한 구조를 그대로 옮겼다 — job을 둘로 가름: **`build`**(PR 코드 실행, 비밀 참조 없음, `contents: read`만, 결과물을 `dist/` artifact로 업로드) → **`preview`**(`needs: build`, 비밀 사용, PR 코드를 전혀 실행하지 않음 — checkout을 PR이 아니라 `github.event.pull_request.base.sha`로 받아 `firebase.json`도 main 것을 쓴다, artifact를 받아 배포). artifact 업로드/다운로드 액션은 SHA 고정(`upload-artifact@ea165f8…` v4.6.2, `download-artifact@d3f86a1…` v4.3.0), 배포 전 `dist/index.html`이 비어 있지 않은지 확인하는 단계 추가(§21-1 빈 게이트 방지). 기존 checkout/setup-node(`@v6`)·setup-java(`@v4`)·Hosting 배포 액션 SHA는 그대로 유지, 동작(같은 저장소 PR만, 미리보기 주소가 PR에 달림)은 그대로다.
+
+검증: 이 변경을 올린 PR에서 `build`→`preview` 둘 다 성공, 미리보기 주소가 PR에 달리는지 확인.
