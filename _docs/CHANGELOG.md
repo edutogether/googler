@@ -359,3 +359,7 @@ Portal이 PR #8에서 먼저 검증한 구조를 그대로 옮겼다 — job을 
 ## 2026-10-05 PR 미리보기 — Dependabot PR은 미리보기 단계만 건너뜀 (지시 Bumm/팀장)
 
 Dependabot이 연 PR에는 저장소 비밀이 전달되지 않아 `firebase-hosting-pull-request.yml`의 `preview`가 서비스계정 입력이 비어 매번 실패로 표시됐다(실제 코드 실패가 아님 — `verify`·`build`는 통과). 비밀을 Dependabot에 주는 대신 `preview` job에만 «PR 작성자가 `dependabot[bot]`이면 건너뜀» 조건을 넣었다. 검사(`build`)는 그대로 돌고, 사람이 연 PR의 미리보기는 그대로 동작한다.
+
+## 2026-10-07 파비콘을 같이교육 로고로 통일, 비활성 회색 전환 폐기 (COMMON_STANDARDS §33, 지시 Bumm/팀장)
+
+탭·즐겨찾기 파비콘을 Calendar와 같은 같이교육 로고(`calendar/dist/favicon-black.png`, 64×64 투명 PNG, 바이트 동일)로 바꿨다(`public/favicon/edutogether-favicon-black.png`, `index.html`의 `<link rel="icon">`). 탭이 비활성일 때 아이콘이 회색으로 바뀌던 `public/favicon-toggle.js`와 그 `<script>` 태그, 옛 아이콘(`gemini-star-active/inactive.png`)을 삭제했다 — 이제 탭에 뜰 때와 즐겨찾기에 들어갈 때 항상 같은 아이콘이다. 홈 화면 아이콘(apple-touch-icon·manifest)은 이 앱에 원래 없고 이번에도 건드리지 않았다.
