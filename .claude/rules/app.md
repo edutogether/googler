@@ -59,7 +59,8 @@
 - **제품 코드를 기본 무음으로 바꾸지 말 것** — 확인용으로 열 때만 `?qa-mute=1`.
 - 🔴 **Codex 인계 가지 `codex/be-a-googler-brand-favicon`의 favicon 변경분(G 마크 파비콘·비활성 회색 전환 정비)은
   COMMON_STANDARDS §33(2026-10-07)으로 폐기됐다 — 그 가지를 합칠 때 favicon 변경분은 버린다.** 파비콘은
-  같이교육 로고 하나(`public/favicon/edutogether-favicon-black.png`)이고 회색 전환은 없다. 가지는 지우지 않는다.
+  Calendar의 «Google Calendar» 버튼에 있는 컬러 Google «G»(`public/favicon/google-g.png`, §33 개정 2026-10-07)이고
+  회색 전환은 없다. 가지는 지우지 않는다.
 
 ## 브라우저 선택 (2026-09-22 확정 — COMMON_STANDARDS §10)
 - **기본값은 세션 자신의 브라우저**(내부 Browser 패널, 또는 창 없는 `agent-browser`)다.

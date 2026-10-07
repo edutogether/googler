@@ -363,3 +363,7 @@ Dependabot이 연 PR에는 저장소 비밀이 전달되지 않아 `firebase-hos
 ## 2026-10-07 파비콘을 같이교육 로고로 통일, 비활성 회색 전환 폐기 (COMMON_STANDARDS §33, 지시 Bumm/팀장)
 
 탭·즐겨찾기 파비콘을 Calendar와 같은 같이교육 로고(`calendar/dist/favicon-black.png`, 64×64 투명 PNG, 바이트 동일)로 바꿨다(`public/favicon/edutogether-favicon-black.png`, `index.html`의 `<link rel="icon">`). 탭이 비활성일 때 아이콘이 회색으로 바뀌던 `public/favicon-toggle.js`와 그 `<script>` 태그, 옛 아이콘(`gemini-star-active/inactive.png`)을 삭제했다 — 이제 탭에 뜰 때와 즐겨찾기에 들어갈 때 항상 같은 아이콘이다. 홈 화면 아이콘(apple-touch-icon·manifest)은 이 앱에 원래 없고 이번에도 건드리지 않았다.
+
+## 2026-10-07 파비콘을 Calendar의 Google «G»로 변경 (COMMON_STANDARDS §33 개정, 지시 Bumm/팀장)
+
+앱마다 로고를 따로 정하기로 해서, 같은 날 앞서 넣은 같이교육 로고(`edutogether-favicon-black.png`) 대신 Calendar 첫 화면 «Google Calendar» 버튼의 컬러 Google «G»를 쓴다. 원본은 Calendar `dist/shared.css`의 `.google::before`에 들어 있는 SVG(viewBox `10 10 20 20`)이고, 이를 64×64 투명 PNG로 렌더링했다(`public/favicon/google-g.png`, `index.html`의 `?v=20261007-2`). 회색 전환 폐기는 그대로다. 옛 파일 이름이 `favicon/**`의 1년 immutable 캐시에 걸려 있어 파일 이름과 `?v=`를 함께 바꿨다.
