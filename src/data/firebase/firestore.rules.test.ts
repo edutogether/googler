@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, afterEach, beforeAll, describe, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, query, setDoc } from 'firebase/firestore';
 
 let environment: RulesTestEnvironment;
 const projectId = 'googler-rules-test';
@@ -51,8 +51,19 @@ describeRules('firestore.rules', () => {
 
   it('lets signed-in participants read the public leaderboard, but not anonymous visitors', async () => {
     await environment.withSecurityRulesDisabled(async (context) => setDoc(rankingRef(context.firestore(), 'mobile'), entry('mobile')));
-    await assertSucceeds(getDocs(rankingsCollection(anonymous('reader'))));
-    await assertFails(getDocs(rankingsCollection(environment.unauthenticatedContext().firestore())));
+    await assertSucceeds(getDoc(rankingRef(anonymous('reader'), 'mobile')));
+    await assertSucceeds(getDocs(query(rankingsCollection(anonymous('reader')), limit(200))));
+    await assertFails(getDocs(query(rankingsCollection(environment.unauthenticatedContext().firestore()), limit(200))));
+  });
+
+  // The client always reads the leaderboard with limit(200); the rules enforce
+  // the same ceiling so a modified client cannot pull the whole collection.
+  it('caps leaderboard list reads at 200 documents and rejects unbounded lists', async () => {
+    const db = anonymous('reader');
+    await assertSucceeds(getDocs(query(rankingsCollection(db), limit(1))));
+    await assertSucceeds(getDocs(query(rankingsCollection(db), limit(200))));
+    await assertFails(getDocs(query(rankingsCollection(db), limit(201))));
+    await assertFails(getDocs(rankingsCollection(db)));
   });
 
   it('only lets a user write their own leaderboard entry, matching both the doc id and the uid field', async () => {

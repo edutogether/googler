@@ -371,3 +371,7 @@ Dependabot이 연 PR에는 저장소 비밀이 전달되지 않아 `firebase-hos
 ## 2026-10-09 Firestore 규칙 — 랭킹의 점수·합격 필드 클라이언트 쓰기 닫음 (보안 지적 대응, 지시 Bumm/팀장)
 
 `rankings` 규칙에서 `scoreL1`·`scoreL2`·`passedL1`·`passedL2`를 클라이언트가 쓰거나 바꿀 수 없게 닫았다(저장된 값과 같을 때만 통과). 라이브는 이 쓰기를 쓰지 않는다. 이 필드를 쓰는 `LegacyGooglerApp`을 재배선할 때는 서버 쪽 점수 계산과 함께 다시 연다. 이전 라운드의 점수 상한 검사·동기화 검사는 이 규칙으로 대체돼 `firestoreRulesContent.test.ts`를 잠금 검사로 바꿨다.
+
+## 2026-10-09 PR 미리보기 기준 브랜치 결속, 랭킹 목록 읽기 상한 (보안 지적 대응, 지시 Bumm/팀장)
+
+PR 미리보기 워크플로가 기준 브랜치가 `main`인 PR에서만 돌고 `preview` job도 같은 조건을 확인한다(`src/ci/previewWorkflow.test.ts`가 고정). Firestore 규칙은 랭킹 목록 읽기에 클라이언트와 같은 상한(200)을 요구하고 문서 하나 읽기는 그대로 둔다.
