@@ -367,3 +367,7 @@ Dependabot이 연 PR에는 저장소 비밀이 전달되지 않아 `firebase-hos
 ## 2026-10-07 파비콘을 Calendar의 Google «G»로 변경 (COMMON_STANDARDS §33 개정, 지시 Bumm/팀장)
 
 앱마다 로고를 따로 정하기로 해서, 같은 날 앞서 넣은 같이교육 로고(`edutogether-favicon-black.png`) 대신 Calendar 첫 화면 «Google Calendar» 버튼의 컬러 Google «G»를 쓴다. 원본은 Calendar `dist/shared.css`의 `.google::before`에 들어 있는 SVG(viewBox `10 10 20 20`)이고, 이를 64×64 투명 PNG로 렌더링했다(`public/favicon/google-g.png`, `index.html`의 `?v=20261007-2`). 회색 전환 폐기는 그대로다. 옛 파일 이름이 `favicon/**`의 1년 immutable 캐시에 걸려 있어 파일 이름과 `?v=`를 함께 바꿨다.
+
+## 2026-10-09 Firestore 규칙 — 랭킹의 점수·합격 필드 클라이언트 쓰기 닫음 (보안 지적 대응, 지시 Bumm/팀장)
+
+`rankings` 규칙에서 `scoreL1`·`scoreL2`·`passedL1`·`passedL2`를 클라이언트가 쓰거나 바꿀 수 없게 닫았다(저장된 값과 같을 때만 통과). 라이브는 이 쓰기를 쓰지 않는다. 이 필드를 쓰는 `LegacyGooglerApp`을 재배선할 때는 서버 쪽 점수 계산과 함께 다시 연다. 이전 라운드의 점수 상한 검사·동기화 검사는 이 규칙으로 대체돼 `firestoreRulesContent.test.ts`를 잠금 검사로 바꿨다.
