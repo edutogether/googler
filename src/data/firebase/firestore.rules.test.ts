@@ -14,7 +14,7 @@ const rankingRef = (db: ReturnType<typeof anonymous>, uid: string) => doc(db, 'a
 const rankingsCollection = (db: ReturnType<typeof anonymous>) => collection(db, 'artifacts', appId, 'public', 'data', 'rankings');
 
 const entry = (uid: string, overrides: Record<string, unknown> = {}) => ({
-  uid, nickname: '탐험가', emoji: '🐧', scoreL1: 20, scoreL2: 30, passedL1: true, passedL2: false, ...overrides,
+  uid, nickname: '탐험가', emoji: '🐧', ...overrides,
 });
 
 beforeAll(async () => { environment = await initializeTestEnvironment({ projectId, firestore: { rules: readFileSync('firestore.rules', 'utf8') } }); });
@@ -64,26 +64,36 @@ describeRules('firestore.rules', () => {
     await assertFails(setDoc(rankingRef(anonymous('attacker'), 'victim'), entry('victim')));
   });
 
-  it('rejects leaderboard writes with extra fields, wrong types, or out-of-range scores', async () => {
+  it('rejects leaderboard writes with extra fields or wrong types', async () => {
     const db = anonymous('mobile');
     await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { email: 'blocked@example.test' })));
     await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { nickname: 123 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: -1 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 999999999 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { passedL1: 'yes' })));
     await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile')));
   });
 
-  // Each level has 30 missions, so 30 is the real maximum score. Rules cannot
-  // recompute the score — this only stops impossible values.
-  it('caps each level score at the real maximum (30 missions) and requires whole numbers', async () => {
+  // Score and pass fields are not client-writable: the client cannot be trusted
+  // to report them. They are reopened when scoring moves server-side.
+  it('does not let a client write or change score and pass fields', async () => {
     const db = anonymous('mobile');
-    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 30, scoreL2: 30 })));
-    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 0, scoreL2: 0 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 31 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL2: 31 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 99999 })));
-    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 10.5 })));
+    for (const field of ['scoreL1', 'scoreL2'] as const) {
+      await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { [field]: 0 })));
+      await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { [field]: 30 })));
+      await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { [field]: 99999 })));
+    }
+    for (const field of ['passedL1', 'passedL2'] as const) {
+      await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { [field]: true })));
+      await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { [field]: false })));
+    }
+    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), entry('mobile')));
+  });
+
+  it('lets a client update its profile fields while leaving server-set scores untouched, but not change them', async () => {
+    await environment.withSecurityRulesDisabled(async (context) => setDoc(rankingRef(context.firestore(), 'mobile'), entry('mobile', { scoreL1: 12, scoreL2: 3, passedL1: true })));
+    const db = anonymous('mobile');
+    await assertSucceeds(setDoc(rankingRef(db, 'mobile'), { nickname: '새이름' }, { merge: true }));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), { scoreL1: 30 }, { merge: true }));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), { passedL2: true }, { merge: true }));
+    await assertFails(setDoc(rankingRef(db, 'mobile'), entry('mobile', { scoreL1: 12 })));
   });
 
   // The namespace used to be an {appId} wildcard, so a signed-in user could

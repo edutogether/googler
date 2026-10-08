@@ -43,18 +43,21 @@ service cloud.firestore {
     // it claims to be — both the document ID and the uid field inside the
     // entry must match the caller, so no one can write to, or masquerade as,
     // another entrant. The write also has to match this exact shape: no
-    // extra fields, and each field bounded in type/length/range — Firestore
-    // rules have no single "document byte size" check, so bounding every
-    // allowed field is what stands in for a size limit here.
+    // extra fields, and each field bounded in type/length — Firestore rules
+    // have no single "document byte size" check, so bounding every allowed
+    // field is what stands in for a size limit here.
     //
-    // The score ceiling (30) is the real maximum: each level has 30 missions
-    // (10 days x 3), and the client's score is the count of completed ones
-    // (src/domain/progress.ts countCompletedMissions). Rules check shape and
-    // range only — they cannot recompute the score or verify passedL1/passedL2,
-    // which come from the client. Server-side scoring is for the rewiring round.
-    // src/data/firebase/firestoreRulesContent.test.ts fails if 30 drifts from
-    // the actual mission counts in src/content/courses.ts.
+    // Score and pass fields (scoreL1/scoreL2/passedL1/passedL2) are not
+    // client-writable: a client cannot be trusted to report them, so a write
+    // must leave each one exactly as stored (absent stays absent). The client
+    // that writes them is not wired up yet; reopen these fields only together
+    // with server-side scoring (src/legacy/LegacyGooglerApp.tsx writes them
+    // today and would be denied here).
     match /artifacts/gpass-custom-app-id/public/data/rankings/{uid} {
+      function unchanged(field) {
+        return request.resource.data.get(field, null) == (resource == null ? null : resource.data.get(field, null));
+      }
+
       allow read: if request.auth != null;
       allow write: if request.auth != null
         && request.auth.uid == uid
@@ -62,10 +65,8 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uid', 'nickname', 'emoji', 'scoreL1', 'scoreL2', 'passedL1', 'passedL2'])
         && request.resource.data.nickname is string && request.resource.data.nickname.size() <= 30
         && request.resource.data.emoji is string && request.resource.data.emoji.size() <= 8
-        && (!('scoreL1' in request.resource.data) || (request.resource.data.scoreL1 is int && request.resource.data.scoreL1 >= 0 && request.resource.data.scoreL1 <= 30))
-        && (!('scoreL2' in request.resource.data) || (request.resource.data.scoreL2 is int && request.resource.data.scoreL2 >= 0 && request.resource.data.scoreL2 <= 30))
-        && (!('passedL1' in request.resource.data) || request.resource.data.passedL1 is bool)
-        && (!('passedL2' in request.resource.data) || request.resource.data.passedL2 is bool);
+        && unchanged('scoreL1') && unchanged('scoreL2')
+        && unchanged('passedL1') && unchanged('passedL2');
     }
 
     // Everything else: denied by default.
