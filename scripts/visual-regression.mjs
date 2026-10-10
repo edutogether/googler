@@ -43,6 +43,10 @@ const CHROME_CANDIDATES_BY_PLATFORM = {
   ],
 };
 const PORT = 43117;
+// Vite가 자동 선택한 IPv6 루프백(::1)과 Node의 localhost IPv4 해석이 엇갈리면,
+// 서버는 떠 있어도 준비 확인이 실패한다. 수신·확인·브라우저 접근을 같은 IPv4
+// 루프백으로 고정해 OS별 DNS 우선순위에 영향을 받지 않게 한다.
+const PREVIEW_HOST = '127.0.0.1';
 // Read Vite's base path from vite.config.ts instead of hardcoding it here —
 // this script broke silently (server never came up) the last time the two
 // drifted apart (GitHub Pages' `/googler/` vs. Firebase Hosting's `/`).
@@ -50,7 +54,7 @@ const viteConfigSource = readFileSync(path.join(root, 'vite.config.ts'), 'utf8')
 const baseMatch = viteConfigSource.match(/base:\s*['"]([^'"]*)['"]/);
 if (!baseMatch) { console.error('vite.config.ts에서 base 경로를 찾지 못했습니다.'); process.exit(1); }
 const BASE_PATH = baseMatch[1];
-const BASE_URL = `http://localhost:${PORT}${BASE_PATH}?preview=main-v3&qa-mute=1`;
+const BASE_URL = `http://${PREVIEW_HOST}:${PORT}${BASE_PATH}?preview=main-v3&qa-mute=1`;
 // 대비 임계값: 전체 픽셀의 0.2% 초과가 다르면 실패로 간주.
 const FAIL_RATIO = 0.002;
 
@@ -145,9 +149,12 @@ async function main() {
   const chromePath = findChrome();
   console.log(updating ? '기준(정답지) 스크린샷을 새로 저장합니다…' : '현재 화면을 기준과 비교합니다…');
   execSync('npm run build', { cwd: root, stdio: 'inherit' });
-  const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: root, shell: true, stdio: 'ignore' });
+  // npx + shell은 Windows에서 중간 cmd.exe를 남길 수 있어 실패 뒤 Vite가 고아
+  // 프로세스로 남는다. 프로젝트에 설치된 Vite CLI를 Node로 직접 실행한다.
+  const viteCli = path.join(root, 'node_modules', 'vite', 'bin', 'vite.js');
+  const server = spawn(process.execPath, [viteCli, 'preview', '--host', PREVIEW_HOST, '--port', String(PORT), '--strictPort'], { cwd: root, stdio: 'ignore' });
   try {
-    await waitForServer(`http://localhost:${PORT}${BASE_PATH}`);
+    await waitForServer(`http://${PREVIEW_HOST}:${PORT}${BASE_PATH}`);
 
     // A gate whose success condition is "0 mismatches" is indistinguishable
     // from one that looked at nothing (COMMON_STANDARDS §21-1). Comparing
@@ -193,7 +200,6 @@ async function main() {
     console.log(`\n전부 통과: ${results.length}장 모두 기준과 일치합니다.`);
   } finally {
     server.kill();
-    execSync(`taskkill /F /T /PID ${server.pid} > nul 2>&1 || exit 0`, { shell: true });
   }
 }
 

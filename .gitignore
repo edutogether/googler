@@ -44,3 +44,6 @@ _backups/
 # Visual regression artifacts (machine-specific renderings)
 .visual-baselines/
 .visual-diffs/
+
+# Codex 로컬 설정(사용자 권한 설정 상속 파일) — 저장소에 올리지 않는다
+.codex/

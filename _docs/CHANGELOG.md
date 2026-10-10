@@ -375,3 +375,7 @@ Dependabot이 연 PR에는 저장소 비밀이 전달되지 않아 `firebase-hos
 ## 2026-10-09 PR 미리보기 기준 브랜치 결속, 랭킹 목록 읽기 상한 (보안 지적 대응, 지시 Bumm/팀장)
 
 PR 미리보기 워크플로가 기준 브랜치가 `main`인 PR에서만 돌고 `preview` job도 같은 조건을 확인한다(`src/ci/previewWorkflow.test.ts`가 고정). Firestore 규칙은 랭킹 목록 읽기에 클라이언트와 같은 상한(200)을 요구하고 문서 하나 읽기는 그대로 둔다.
+
+## 2026-10-10 정리와 보안 알림 0 (지시 Bumm/팀장)
+
+옛 Codex 인계 가지와 병합이 끝난 작업 가지를 정리하고(고유하게 남길 것은 시각 회귀 도구의 IPv4·고아 프로세스 개선뿐이라 그것만 반영), `.codex/`를 `.gitignore`에 넣었다. 의존성은 `firebase` 12.19.0, `firebase-tools` 15.33.0으로 올리고 `overrides`를 고친 버전으로 갱신해 `npm audit`·Dependabot 열린 알림을 0으로 맞췄다. 지난 라운드에 막아 두었던 `stream-json`은 firebase-tools 15.33.0이 새 구조를 따라와 3.7.0으로 올랐고, 그래서 낡은 `dependabot.yml` ignore를 걷었다. 검사·규칙 테스트·시각 회귀 20장이 그대로 통과한다.
