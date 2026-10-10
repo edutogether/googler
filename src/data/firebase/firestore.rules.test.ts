@@ -48,6 +48,20 @@ describeRules('firestore.rules', () => {
     await assertFails(setDoc(progressRef(db, 'mobile'), { progress: 'not-a-map' }));
   });
 
+  // Progress is a flat map of mission flags (60 missions + 2 pass flags). Nested
+  // maps, other value types and oversized maps are rejected.
+  it('only accepts a flat, bounded map of boolean progress flags', async () => {
+    const db = anonymous('mobile');
+    const flags = (count: number) => Object.fromEntries(Array.from({ length: count }, (_, i) => [`k${i}`, true]));
+    await assertSucceeds(setDoc(progressRef(db, 'mobile'), { progress: flags(62) }));
+    await assertFails(setDoc(progressRef(db, 'mobile'), { progress: flags(63) }));
+    await assertFails(setDoc(progressRef(db, 'mobile'), { progress: { day1: { nested: true } } }));
+    await assertFails(setDoc(progressRef(db, 'mobile'), { progress: { day1: 'x'.repeat(1000) } }));
+    await assertFails(setDoc(progressRef(db, 'mobile'), { progress: { day1: 1 } }));
+    // A normal merge write from a fresh user, as the client does it.
+    await assertSucceeds(setDoc(progressRef(anonymous('other'), 'other'), { progress: { day1: true, day2: false } }, { merge: true }));
+  });
+
   it('no longer lets a signed-in user create arbitrary documents under their own uid', async () => {
     const db = anonymous('mobile');
     await assertFails(setDoc(doc(db, 'artifacts', appId, 'users', 'mobile', 'anything', 'else'), { open: true }));

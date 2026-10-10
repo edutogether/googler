@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { courses } from '../../content/courses';
 
 // firestore.rules hard-codes the namespace segment (the client's default), which
 // cannot be imported into the rules, so this reads both sides and fails if they
@@ -17,6 +18,14 @@ describe('firestore.rules stays in sync with the app', () => {
 
   it.each(['scoreL1', 'scoreL2', 'passedL1', 'passedL2'])('keeps %s locked against client writes', (field) => {
     expect(rules).toContain(`unchanged('${field}')`);
+  });
+
+  it('caps the progress map at the real mission count plus the two pass flags', () => {
+    const missions = courses.reduce((total, course) => total + course.days.reduce((count, day) => count + day.missions.length, 0), 0);
+    expect(missions).toBeGreaterThan(0);
+    const match = rules.match(/progress\.size\(\) <= (\d+)/);
+    expect(match).not.toBeNull();
+    expect(Number(match![1])).toBe(missions + 2);
   });
 
   it('uses the same namespace as the client default, with no {appId} wildcard left', () => {
