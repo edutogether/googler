@@ -119,3 +119,4 @@
   자체는 안 지워지고 그대로 남는다. **실제 `opacity`와 `pointer-events`를
   샘플링해야** 진짜 상태가 보인다.
 - 🔴 **PR로 도는 워크플로에 배포 비밀을 넣지 말 것.** PR 미리보기 배포(`firebase-hosting-pull-request.yml`)는 보안 강화로 없앴고(2026-10-10), PR에서는 `ci.yml`의 검사만 돈다. 배포 비밀(`FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER`)은 `main` 푸시 배포에서만 쓴다 — 미리보기 배포를 되살리려면 비밀을 `main`으로 한정한 GitHub Environment에 둬야 한다.
+- **감수 — 쓰기 권한자 2명 모두 대표님이 확인한 정당한 권한, 외부 PR은 비밀에 닿지 않음(2026-10-10).** 배포 비밀을 main 한정 Environment로 옮기지 않기로 했다.
