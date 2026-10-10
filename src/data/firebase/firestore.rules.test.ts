@@ -28,9 +28,13 @@ describeRules('firestore.rules', () => {
     await assertSucceeds(setDoc(profileRef(anonymous('mobile'), 'mobile'), { nickname: 'x', emoji: '🐧' }));
     await assertFails(setDoc(profileRef(anonymous('attacker'), 'mobile'), { nickname: 'x', emoji: '🐧' }));
     await assertFails(getDoc(profileRef(anonymous('attacker'), 'mobile')));
+    // The owner must also be able to read back what they wrote.
+    await assertSucceeds(getDoc(profileRef(anonymous('mobile'), 'mobile')));
 
     await assertSucceeds(setDoc(progressRef(anonymous('mobile'), 'mobile'), { progress: { day1: true } }, { merge: true }));
     await assertFails(setDoc(progressRef(anonymous('attacker'), 'mobile'), { progress: { day1: true } }, { merge: true }));
+    await assertSucceeds(getDoc(progressRef(anonymous('mobile'), 'mobile')));
+    await assertFails(getDoc(progressRef(anonymous('attacker'), 'mobile')));
   });
 
   it('rejects profile and progress writes with extra fields, wrong types, or oversized values', async () => {

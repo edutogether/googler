@@ -379,3 +379,9 @@ PR 미리보기 워크플로가 기준 브랜치가 `main`인 PR에서만 돌고
 ## 2026-10-10 정리와 보안 알림 0 (지시 Bumm/팀장)
 
 옛 Codex 인계 가지와 병합이 끝난 작업 가지를 정리하고(고유하게 남길 것은 시각 회귀 도구의 IPv4·고아 프로세스 개선뿐이라 그것만 반영), `.codex/`를 `.gitignore`에 넣었다. 의존성은 `firebase` 12.19.0, `firebase-tools` 15.33.0으로 올리고 `overrides`를 고친 버전으로 갱신해 `npm audit`·Dependabot 열린 알림을 0으로 맞췄다. 지난 라운드에 막아 두었던 `stream-json`은 firebase-tools 15.33.0이 새 구조를 따라와 3.7.0으로 올랐고, 그래서 낡은 `dependabot.yml` ignore를 걷었다. 검사·규칙 테스트·시각 회귀 20장이 그대로 통과한다.
+
+## 2026-10-10 종합감사 10/10 — 프리즈 `googler-freeze-20261010-audited-100` (지시 Bumm/팀장)
+
+마지막 프리즈(`googler-freeze-20260910-audited-100-2`) 이후 쌓인 변경과 플랫폼 설정·문서를 종합감사(§7: Sonnet 직접 + Opus 독립 조사)로 점검했다. 찾은 것을 전부 고쳤다. 코드: 규칙에서 본인 프로필·진행률 읽기가 거부되던 결함(읽기에 `request.resource`가 없어 모양 검사가 읽기까지 막음)을 읽기·쓰기 분리로 고치고 본인 읽기 검사를 추가했다(검사는 고치기 전에 실패 확인). CI: `ubuntu-latest`를 `ubuntu-24.04`로 못 박고(2026-10-19부터 `latest`가 Ubuntu 26으로 바뀐다는 예고), 폐기 예고된 `setup-java` v4와 낡은 artifact 액션을 올렸으며, 배포 워크플로에 `concurrency`를 넣어 배포가 겹쳐 돌지 않게 했다. 의존성: 범위 안의 낡은 것을 갱신하고 `firebase` 13·`@firebase/rules-unit-testing` 6·`pixelmatch` 8로 올렸다(검사·규칙 테스트·시각 회귀 20장 통과, 시각 회귀는 기준을 일부러 바꿔 빨간불이 뜨는 것까지 확인). `@sentry/react` 11은 라이브 번들에 들어가는데 오류 보고 경로를 배포 전에 실제로 확인할 수 없어 올리지 않았다.
+
+2026-10-10 정리 때 넣은 `overrides`의 이유(다음에 올릴 때의 판단 근거): `morgan` 1.12.1·`hono` 4.13.13 — 보안 수정 버전 강제 / `basic-ftp` 6.2.3 — firebase-tools의 프록시 의존 체인(`get-uri`)이 쓰는 FTP 파서의 보안 수정 / `chokidar` 4.0.3 — 3.x가 끌어오는 `braces`에는 npm에 고친 버전이 없어 의존 자체를 없앴다(firebase-tools는 에뮬레이터에서 파일 하나만 감시하므로 호환, 규칙 테스트로 확인) / `@firebase/firestore`→`@grpc/grpc-js` 1.13.7, `google-gax`→`@grpc/grpc-js` 1.14.6 — 두 경로가 요구하는 줄기별 보안 수정 버전 / `@google-cloud/pubsub`→`@opentelemetry/core` 2.12.0 — 보안 수정(이 앱은 pubsub를 쓰지 않는다). 이 중 하나라도 firebase-tools가 자기 의존을 올려 필요 없어지면 걷어낸다. 참고: 이 중첩 override 때문에 `npm ls`가 `protobufjs`를 두고 오탐으로 실패(exit 1)할 수 있다 — `npm ci`·CI는 정상이다.
