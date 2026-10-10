@@ -13,9 +13,13 @@ on:
       - '.claude/**'
 permissions:
   contents: read
+# 배포가 겹쳐 돌면 나중 것이 먼저 끝나 옛 화면이 덮어쓸 수 있어, 한 번에 하나씩 순서대로 돈다(진행 중인 배포는 끊지 않는다).
+concurrency:
+  group: deploy-live
+  cancel-in-progress: false
 jobs:
   build_and_deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -26,7 +30,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test:run
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '21'
