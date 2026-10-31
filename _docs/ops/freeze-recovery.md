@@ -4,11 +4,13 @@
 사람이 실제로 따라 하는 백업·복구 절차라 `_docs/ops/`에 둔다.
 `CLAUDE.md`의 "현재 상태" 섹션에 최신 태그 이름만 요약돼 있다.
 
-## 전시 프리즈 — 복구 지점 (최신: 2026-10-10)
+## 전시 프리즈 — 복구 지점 (최신: 2026-10-31)
+
+**태그 `googler-freeze-20261031-audited-100`** = 2026-10-31 수시 종합감사 완료 지점(개발 도구 부품 고정으로 `npm audit` 0, 훅 실행 권한, 쓰이지 않는 override 제거; 라이브 smoke 통과). 태그 메시지에 요약. 아래는 그 직전 지점이다.
 
 **태그 `googler-freeze-20261010b-audited-100`** (`git rev-parse googler-freeze-20261010b-audited-100`로 항상 정확한 대상 확인 가능, 태그 메시지에 고친 결함 목록·재채점 근거·검증 규모·라이브 실측값 전부 있음 — `git show googler-freeze-20261010b-audited-100`) = 대표 지시 순서(문서 정리 → 종합감사 10/10 → 배포 → 프리즈)의 완료 지점. `_shared/DOC-STANDARD.md` 기준 문서 정리 + COMMON_STANDARDS §4~§7·§21 종합감사((A)트랙 10개 항목 10/10, 검사·테스트 결함 3건 수정) + 배포 성공까지 반영. `npm run check` 통과 + 시각 회귀 20/20 + 실제로 `git checkout <태그> -- .` 실행해 차이 0건 확인 후 원위치.
 
-직전 지점 **`googler-freeze-20261010-audited-100`**(`19533bf`) = 같은 날 첫 종합감사 완료 지점(이후 보안 강화 두 건이 더 들어가 `b` 태그가 최신이다). 그 전 **`googler-freeze-20260910-audited-100-2`**(`33c52a7`) = 2026-09-10 감사 완료 지점.
+직전 지점 **`googler-freeze-20261010b-audited-100`**(`39bbf79`) = 위 설명 지점. 그 전 **`googler-freeze-20261010-audited-100`**(`19533bf`) = 같은 날 첫 종합감사 완료 지점(이후 보안 강화 두 건이 더 들어가 `b` 태그가 최신이다). 그 전 **`googler-freeze-20260910-audited-100-2`**(`33c52a7`) = 2026-09-10 감사 완료 지점.
 
 그 전 **`googler-freeze-20260910-audited-100`**(`dfa5fb3`) = 위와 같은 라운드지만 결함 3(MainWorldV3.test.tsx의 두 번째 같은 패턴)을 찾기 전 시점 — 하루 안에 같은 라운드가 갱신된 경우라 시간차가 짧다.
 
@@ -23,7 +25,7 @@
 이후 수정으로 뭔가 망가졌을 때 복구 절차 (디버깅하지 말고 바로 복원):
 
 ```bash
-git checkout googler-freeze-20261010b-audited-100 -- .
+git checkout googler-freeze-20261031-audited-100 -- .
 ```
 
 그 다음 변경사항 확인 후 커밋·푸시하면 Firebase Hosting(`https://googler.edutogether.kr/`, 구 주소 `g00gler.web.app`도 동일하게 갱신됨)이 검증된 상태로 재배포된다.
