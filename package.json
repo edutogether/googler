@@ -29,7 +29,6 @@
     "hono": "4.13.13",
     "csv-parse": "7.0.2",
     "qs": "6.17.1",
-    "basic-ftp": "6.2.3",
     "chokidar": "4.0.3",
     "gaxios": {
       "uuid": "11.1.1"

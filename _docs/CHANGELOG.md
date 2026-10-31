@@ -396,4 +396,4 @@ PR 미리보기 배포 워크플로(`firebase-hosting-pull-request.yml`)와 그 
 
 ## 2026-10-31 수시 종합감사 — 10/10 확정, 프리즈 태그 `googler-freeze-20261031-audited-100` (지시 Bumm/팀장)
 
-`googler-freeze-20261010b-audited-100` 이후 바뀐 부분(부품 판 올림·qs override·훅 실행 권한)을 §4~§7대로 점검했다. 같은 날 새로 공개된 개발 도구 쪽 권고(`glob`·`minimatch`)는 해당 두 패키지를 `overrides`로 고정해 `npm audit`을 다시 0으로 맞췄다(라이브 번들 무관, 배포 결과 차이 0). `.githooks/pre-push`에 실행 권한(100755)을 줘서 맥 클론에서도 태그 보호 훅이 돈다. 검사·규칙 테스트 13개·시각 회귀 20장 통과. 점수는 10/10.
+`googler-freeze-20261010b-audited-100` 이후 바뀐 부분(부품 판 올림·qs override·훅 실행 권한)을 §4~§7대로 점검했다. 같은 날 새로 공개된 개발 도구 쪽 권고(`glob`·`minimatch`)는 해당 두 패키지를 `overrides`로 고정해 `npm audit`을 다시 0으로 맞췄다(라이브 번들 무관, 배포 결과 차이 0). `.githooks/pre-push`에 실행 권한(100755)을 줘서 맥 클론에서도 태그 보호 훅이 돈다. 검사·규칙 테스트 13개·시각 회귀 20장 통과. 어느 곳에도 걸리지 않게 된  override도 지웠다. 점수는 10/10.
