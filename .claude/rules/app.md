@@ -57,6 +57,7 @@
 - **랭킹의 점수·합격 필드(`scoreL1/L2`·`passedL1/L2`)를 클라이언트가 쓰게 다시 열지 말 것** — 규칙이 막고 있다. 재배선 때 서버 점수 계산과 함께만 연다.
 - **`eslint` 10 / `jsdom` 30 / `typescript` 7 업그레이드 금지** — 각각 구체적
   이유로 보류 중(CLAUDE.md "나머지 outdated 패키지 정리" 참고).
+- **`@sentry/react` 11 업그레이드는 2026-12-31 정기감사 때 한다**(팀장 판단 2026-10-31) — 지금 올리지 않는다. 그때 `sendDefaultPii: false`와 세션 비콘(`BrowserSession`) 제외가 새 버전에서도 유지되는지 확인하면서 함께 올린다.
 - **제품 코드를 기본 무음으로 바꾸지 말 것** — 확인용으로 열 때만 `?qa-mute=1`.
 - **파비콘은 Calendar의 «Google Calendar» 버튼에 있는 컬러 Google «G»(`public/favicon/google-g.png`, COMMON_STANDARDS §33)**
   하나이고, 비활성 때 회색으로 바뀌는 전환은 없다 — 되살리지 말 것.
