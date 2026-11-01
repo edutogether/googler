@@ -397,3 +397,7 @@ PR 미리보기 배포 워크플로(`firebase-hosting-pull-request.yml`)와 그 
 ## 2026-10-31 수시 종합감사 — 10/10 확정, 프리즈 태그 `googler-freeze-20261031-audited-100` (지시 Bumm/팀장)
 
 `googler-freeze-20261010b-audited-100` 이후 바뀐 부분(부품 판 올림·qs override·훅 실행 권한)을 §4~§7대로 점검했다. 같은 날 새로 공개된 개발 도구 쪽 권고(`glob`·`minimatch`)는 해당 두 패키지를 `overrides`로 고정해 `npm audit`을 다시 0으로 맞췄다(라이브 번들 무관, 배포 결과 차이 0). `.githooks/pre-push`에 실행 권한(100755)을 줘서 맥 클론에서도 태그 보호 훅이 돈다. 검사·규칙 테스트 13개·시각 회귀 20장 통과. 어느 곳에도 걸리지 않게 된 `basic-ftp` override도 지웠다. 점수는 10/10..
+
+## 2026-11-01 firebase-tools를 잠금 파일에서 뺌 — npx로 판 고정 (대표님 결정, 지시 Bumm/팀장)
+
+`firebase-tools`를 `devDependencies`와 잠금 파일에서 빼고, 쓰는 자리(`rules:test` 스크립트, 배포 워크플로의 규칙 배포)에서 `npx firebase-tools@15.34.2`로 부른다(_shared/CONVENTIONS.md §3.7). 이 도구에 맞춰 두었던 `overrides` 대부분이 걸릴 곳을 잃어 지우고, 아직 쓰이는 두 개(`minimatch`, `@firebase/firestore` 아래 `@grpc/grpc-js`)만 남겼다. `npm audit` 0건, 검사·규칙 테스트 13개·시각 회귀 20장 통과, 빌드 산출물 JS 해시가 이전과 같다(라이브 차이 0).

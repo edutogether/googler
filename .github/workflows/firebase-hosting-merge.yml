@@ -56,7 +56,7 @@ jobs:
           trap 'rm -f /tmp/firebase-service-account.json' EXIT
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
-          npx firebase-tools deploy --only firestore:rules,firestore:indexes --project be-a-g00gler --non-interactive
+          npx firebase-tools@15.34.2 deploy --only firestore:rules,firestore:indexes --project be-a-g00gler --non-interactive
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BE_A_G00GLER }}
       # continue-on-error hides a rules/index deploy failure from the job's
