@@ -82,7 +82,7 @@
 - 린트: `npm run lint` / 전체: `npm run check`
 - 로컬 실행: `npm run dev` / 빌드 미리보기: `npm run preview`
 - 시각 회귀: `npm run visual` (기준 갱신은 `npm run visual:update`)
-- 에뮬레이터: `rules:test`가 `firebase emulators:exec`로 Firestore만 띄운다
+- 에뮬레이터: `rules:test`가 `npx firebase-tools@15.34.2 emulators:exec`로 Firestore만 띄운다. **`firebase-tools`는 `package.json`·잠금 파일에 두지 않고** 쓰는 자리(`rules:test` 스크립트·배포 워크플로)에서 정확한 판을 박아 `npx`로 부른다(_shared/CONVENTIONS.md §3.7, Bumm님 2026-11-01). 판을 올릴 땐 두 곳의 번호를 같이 바꾼다.
 - git 훅 활성화(클론마다 1회): `git config core.hooksPath .githooks`
   — `.githooks/pre-push`가 freeze 태그 삭제·이동을 차단한다(생성은 허용)
 
