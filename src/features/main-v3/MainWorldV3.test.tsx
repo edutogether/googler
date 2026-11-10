@@ -180,7 +180,7 @@ describe('MainWorldV3 final preview', () => {
     }
   });
 
-  it('types the desktop guide message and keeps the full message when reduced motion is requested', () => {
+  it('types the desktop guide message the same way whether or not reduced motion is reported', () => {
     vi.useFakeTimers();
     try {
       render(<MainWorldV3 />);
@@ -199,9 +199,25 @@ describe('MainWorldV3 final preview', () => {
       vi.useRealTimers();
     }
 
+    // 2026-11-11 Bumm님 결정: 움직임 줄이기 신호가 와도 없을 때와 똑같이 한 글자씩 타이핑하고 화면 전환 연출도 돈다.
     vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query.includes('min-width') || query.includes('prefers-reduced-motion') })));
-    render(<MainWorldV3 />);
-    expect(document.querySelectorAll('.mw3-guide p')[1]).toHaveTextContent('안녕 ? 호기심이 아주 많은 구글러구나 ! 나와 같이 구글을 즐겁게 배워볼래 ?');
+    cleanup();
+    vi.useFakeTimers();
+    try {
+      render(<MainWorldV3 />);
+      const reducedGuide = document.querySelector('.mw3-guide p') as HTMLElement;
+      expect(reducedGuide).toHaveTextContent('');
+      act(() => vi.advanceTimersByTime(320 + 46 * 3));
+      expect(reducedGuide.textContent?.length).toBeGreaterThan(0);
+      expect(reducedGuide.textContent?.length).toBeLessThan(10);
+
+      fireEvent.click(screen.getByRole('button', { name: '퀘스트' }));
+      expect(document.querySelector('.mw3-shell')).toHaveAttribute('data-transition', 'cover');
+      act(() => vi.advanceTimersByTime(640));
+      expect(document.querySelector('.mw3-shell')).toHaveAttribute('data-transition', 'loading');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('uses one looping BGM instance and makes actions announce a toast', async () => {

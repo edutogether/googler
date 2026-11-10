@@ -51,7 +51,6 @@ export function useSceneNavigation({
     if (item.id in desktopScenes) preloadScene(item.id as keyof typeof desktopScenes);
     if (!isMobile) playUiSound('click', sfxOn);
     const switchPage = () => { setActiveNav(item.id); if (item.id === 'explore') announce('홈에서 새로운 모험을 이어가요.'); };
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { switchPage(); return; }
     transitionTimers.current.forEach((id) => window.clearTimeout(id));
     setTransitionPhase('cover');
     // Timings mirror the CSS: .mw3-transition-veil fades over 620ms and the

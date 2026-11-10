@@ -54,6 +54,7 @@ npm run check           # 위 넷을 순서대로 (커밋 전 기본)
 npm run rules:test      # Firestore 규칙 테스트 (JDK 21 + 에뮬레이터 필요)
 npm run visual          # 화면 스냅샷 비교 (아래 참고)
 npm run visual:update   # 스냅샷 기준 갱신
+npm run motion          # 움직임 줄이기 신호 reduce·no-preference 두 조건 연출 확인 (build 뒤, 시스템 Chrome)
 npm run preview         # 프로덕션 빌드 미리보기
 ```
 

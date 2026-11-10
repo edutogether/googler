@@ -15,7 +15,7 @@ export function useParallaxTilt() {
   }, []);
 
   const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLElement>) => {
-    if (window.innerWidth < 1024 || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.innerWidth < 1024) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     setParallax(((event.clientX - bounds.left) / bounds.width - .5) * 2, ((event.clientY - bounds.top) / bounds.height - .5) * 2);
   }, [setParallax]);

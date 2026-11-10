@@ -3,17 +3,13 @@ import { DESKTOP_GUIDE_MESSAGE } from './mainWorldContent';
 
 // Types the desktop guide's greeting out one character at a time, holds it,
 // then cycles it away and back — a lightweight "someone's here" presence
-// cue that respects prefers-reduced-motion by just showing the full text.
+// cue. It runs the same whatever the prefers-reduced-motion signal says
+// (Bumm 2026-11-11: shared PCs report it without anyone turning it on).
 export function useDesktopGuideBubble() {
   const [guideText, setGuideText] = useState('');
   const [guideVisible, setGuideVisible] = useState(false);
   useEffect(() => {
     if (window.innerWidth < 768) return undefined;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      setGuideVisible(true);
-      setGuideText(DESKTOP_GUIDE_MESSAGE);
-      return undefined;
-    }
 
     let timeout: number | undefined;
     let index = 0;

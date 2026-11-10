@@ -4,8 +4,10 @@
 //   npm run visual          현재 화면을 정답지와 픽셀 단위로 비교
 //
 // Captures the home screen and all four subpages at four viewport widths
-// against the local production build (dist/), with reduced-motion emulation
-// and qa-mute so every frame is deterministic. Baselines live in
+// against the local production build (dist/), under BOTH reduced-motion
+// conditions ('reduce' and 'no-preference') and with qa-mute, so every frame is
+// deterministic. The app must look the same whatever that signal says (Bumm
+// 2026-11-11), so both conditions are compared against the same baseline. Baselines live in
 // .visual-baselines/ (gitignored — they are machine-specific renderings)
 // and diff images for failures land in .visual-diffs/.
 //
@@ -64,6 +66,8 @@ const VIEWPORTS = [
   { width: 850, height: 1200, label: 'tablet-850' },
   { width: 390, height: 844, label: 'mobile-390' },
 ];
+// 움직임 줄이기 신호가 켜진 PC와 꺼진 PC 모두에서 같은 화면이어야 한다.
+const MOTION_CONDITIONS = ['reduce', 'no-preference'];
 const PAGES = [
   { nav: null, label: 'home' },
   { nav: '퀘스트', label: 'quest' },
@@ -100,35 +104,51 @@ async function waitForServer(url, tries = 40) {
 async function captureAll(chromePath) {
   const shots = new Map();
   const browser = await chromium.launch({ executablePath: chromePath, headless: true });
-  for (const viewport of VIEWPORTS) {
-    const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, reducedMotion: 'reduce' });
-    const page = await context.newPage();
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-    // The boot splash holds for 2300ms before fading (two loops of its own
-    // loading-bar animation, COMMON_STANDARDS §27), and longer if the page
-    // hasn't finished loading (see index.html's inline <style> and
-    // src/splash.ts). Reduced motion — emulated above — collapses that
-    // animation, but wait for
-    // the element to actually leave the DOM so a timing change there can never
-    // silently bake a splash frame into every baseline.
-    await page.waitForSelector('#splash', { state: 'detached', timeout: 10000 });
-    await page.waitForTimeout(700);
-    for (const target of PAGES) {
-      if (target.nav) {
-        await page.locator('.mw3-navigation button', { hasText: target.nav }).first().click();
-        // reduced-motion skips the transition sequence, so pages settle fast
-        await page.waitForTimeout(900);
+  for (const motion of MOTION_CONDITIONS) {
+    for (const viewport of VIEWPORTS) {
+      const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, reducedMotion: motion });
+      const page = await context.newPage();
+      await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+      // The boot splash holds for 2300ms before fading (two loops of its own
+      // loading-bar animation, COMMON_STANDARDS §27), and longer if the page
+      // hasn't finished loading (see index.html's inline <style> and
+      // src/splash.ts). Wait for the element to actually leave the DOM so a
+      // timing change there can never silently bake a splash frame into every
+      // baseline.
+      await page.waitForSelector('#splash', { state: 'detached', timeout: 10000 });
+      // The desktop guide bubble types its greeting out character by character
+      // and then holds it ~9.9s; wait for the full message before the first shot
+      // (the guide only exists on the desktop composition).
+      if (await page.locator('.mw3-guide').count()) {
+        await page.waitForFunction(() => (document.querySelector('.mw3-guide')?.textContent ?? '').trim().length >= 40, null, { timeout: 10000 });
       }
-      shots.set(`${viewport.label}--${target.label}`, await page.screenshot());
+      await page.waitForTimeout(700);
+      for (const target of PAGES) {
+        if (target.nav) {
+          await page.locator('.mw3-navigation button', { hasText: target.nav }).first().click();
+          // 화면 전환 연출(덮개 → 로딩 → 드러남)이 실제로 돌고 끝날 때까지 기다린다.
+          await page.waitForFunction(() => document.querySelector('.mw3-shell')?.getAttribute('data-transition') !== 'idle', null, { timeout: 3000 });
+          await page.waitForFunction(() => document.querySelector('.mw3-shell')?.getAttribute('data-transition') === 'idle', null, { timeout: 8000 });
+          await page.waitForTimeout(300);
+        }
+        // animations: 'disabled' freezes the endless ambient loops (dust, leaves,
+        // shimmer) at their start frame so two runs are pixel-comparable; it does
+        // not touch the reduced-motion signal, which the context already carries.
+        const name = `${viewport.label}--${target.label}`;
+        const shot = await page.screenshot({ animations: 'disabled' });
+        if (motion === MOTION_CONDITIONS[0]) shots.set(name, shot);
+        else shots.set(`${name}--${motion}`, shot);
+      }
+      await context.close();
     }
-    await context.close();
   }
   await browser.close();
   return shots;
 }
 
 function compare(name, actualBuffer) {
-  const baselinePath = path.join(BASELINE_DIR, `${name}.png`);
+  // 'no-preference' 조건의 화면은 'reduce' 조건과 같은 기준과 비교한다(신호와 상관없이 같은 화면).
+  const baselinePath = path.join(BASELINE_DIR, `${name.replace(/--no-preference$/, '')}.png`);
   if (!existsSync(baselinePath)) return { name, status: 'missing' };
   const expected = PNG.sync.read(readFileSync(baselinePath));
   const actual = PNG.sync.read(actualBuffer);
@@ -162,7 +182,7 @@ async function main() {
     // if PAGES/VIEWPORTS is ever emptied, that expected count becomes 0 too,
     // and the check still "passes". So the floor here is a number
     // independent of those arrays, not derived from them.
-    const MIN_EXPECTED_SHOTS = 20;
+    const MIN_EXPECTED_SHOTS = 40;
     if (VIEWPORTS.length === 0 || PAGES.length === 0) {
       console.error('VIEWPORTS 또는 PAGES가 비어 있습니다 — 검사가 화면을 하나도 찍지 않게 됩니다.');
       process.exit(1);
@@ -176,8 +196,9 @@ async function main() {
     if (updating) {
       rmSync(BASELINE_DIR, { recursive: true, force: true });
       mkdirSync(BASELINE_DIR, { recursive: true });
-      for (const [name, buffer] of shots) writeFileSync(path.join(BASELINE_DIR, `${name}.png`), buffer);
-      console.log(`기준 저장 완료: ${shots.size}장 -> .visual-baselines/`);
+      const baselineShots = [...shots].filter(([name]) => !name.endsWith('--no-preference'));
+      for (const [name, buffer] of baselineShots) writeFileSync(path.join(BASELINE_DIR, `${name}.png`), buffer);
+      console.log(`기준 저장 완료: ${baselineShots.length}장 -> .visual-baselines/`);
       return;
     }
 

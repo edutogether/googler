@@ -58,6 +58,7 @@
 - **`eslint` 10 / `jsdom` 30 / `typescript` 7 업그레이드 금지** — 각각 구체적
   이유로 보류 중(CLAUDE.md "나머지 outdated 패키지 정리" 참고).
 - **`@sentry/react` 11 업그레이드는 2026-12-31 정기감사 때 한다**(팀장 판단 2026-10-31) — 지금 올리지 않는다. 그때 `sendDefaultPii: false`와 세션 비콘(`BrowserSession`) 제외가 새 버전에서도 유지되는지 확인하면서 함께 올린다.
+- 🔴 **«움직임 줄이기(`prefers-reduced-motion`)» 신호로 연출을 멈추지 말 것**(Bumm님 2026-11-11 — 공용·원격 PC가 아무도 켜지 않은 신호를 보고해 스플래시·말풍선·화면 전환이 멈춰 보였다). 신호가 있어도 없을 때와 똑같이 돈다: 스플래시 두 바퀴 하한(2300ms)·말풍선 타이핑·기울기·노래 제목 흐름·화면 전환. 확인은 **`reduce`와 `no-preference` 둘 다**로 한다 — `npm run motion`(두 조건 브라우저 확인)과 `npm run visual`(두 조건 모두 같은 기준과 비교), 소스에 이 신호를 읽는 코드가 되살아나면 `src/motionPolicy.test.ts`가 막는다.
 - **제품 코드를 기본 무음으로 바꾸지 말 것** — 확인용으로 열 때만 `?qa-mute=1`.
 - **파비콘은 Calendar의 «Google Calendar» 버튼에 있는 컬러 Google «G»(`public/favicon/google-g.png`, COMMON_STANDARDS §33)**
   하나이고, 비활성 때 회색으로 바뀌는 전환은 없다 — 되살리지 말 것.
@@ -99,9 +100,9 @@
   곳에서 깨진다(테스트 2개 결정적 실패 / 리팩터 강제).
 - **시각 회귀 결과를 스플래시 타이밍의 증거로 오독한다.** 부팅 스플래시는
   "자기 CSS 애니메이션 종료"와 "page load 완료"를 둘 다 만족해야 사라지고
-  4초 상한이 있다(`src/splash.ts`). **`npm run visual`은 `reduced-motion`을
-  emulate하고 돌기 때문에 이 지연 자체가 거의 안 걸린다** — 그러니 시각
-  회귀가 통과했다고 "스플래시가 즉시 사라진다"고 결론 내리지 않는다.
+  4초 상한이 있다(`src/splash.ts`). **`npm run visual`은 `reduce`·`no-preference` 두 조건 모두로
+  돌고 스플래시가 사라질 때까지 기다린 뒤 찍는다** — 그러니 시각 회귀가 통과했다고
+  스플래시 타이밍까지 맞다고 결론 내리지 않는다(타이밍은 `npm run motion`이 잰다).
   일반 회선에서의 실제 타이밍은 `_docs/CHANGELOG.md`의 스플래시 표준
   전환 실측치를 본다.
 - **다른 저장소의 "번들 안 안전판" 결함을 이 앱에도 있다고 단정한다.**

@@ -58,12 +58,15 @@ describe('useSceneNavigation', () => {
     expect(announce).toHaveBeenCalledWith('홈에서 새로운 모험을 이어가요.');
   });
 
-  it('switches instantly with no transition when reduced motion is preferred', () => {
+  it('plays the same transition even when reduced motion is reported', () => {
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
     const { result } = setup();
     act(() => { result.current.activateNavigation(questNavItem); });
+    expect(result.current.transitionPhase).toBe('cover');
+    expect(result.current.activeNav).toBe('explore');
+    act(() => { vi.advanceTimersByTime(640); });
     expect(result.current.activeNav).toBe('town');
-    expect(result.current.transitionPhase).toBe('idle');
+    expect(result.current.transitionPhase).toBe('loading');
   });
 
   it('plays a click sound on desktop but not on mobile', () => {
