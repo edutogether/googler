@@ -47,7 +47,9 @@ async function waitForServer(url, tries = 40) {
 const viteConfigSource = readFileSync(path.join(root, 'vite.config.ts'), 'utf8');
 const BASE_PATH = viteConfigSource.match(/base:\s*['"]([^'"]*)['"]/)?.[1];
 if (BASE_PATH === undefined) { console.error('vite.config.ts에서 base 경로를 찾지 못했습니다.'); process.exit(1); }
-const URL_BASE = `http://${HOST}:${PORT}${BASE_PATH}?preview=main-v3&qa-mute=1`;
+// MOTION_URL로 배포된 라이브 주소를 직접 검사할 수 있다(예: https://googler.edutogether.kr/). 없으면 로컬 빌드 미리보기를 띄운다.
+const LIVE_URL = process.env.MOTION_URL;
+const URL_BASE = LIVE_URL ? `${LIVE_URL}?preview=main-v3&qa-mute=1` : `http://${HOST}:${PORT}${BASE_PATH}?preview=main-v3&qa-mute=1`;
 
 async function checkCondition(browser, reducedMotion) {
   const failures = [];
@@ -133,10 +135,10 @@ async function checkCondition(browser, reducedMotion) {
 async function main() {
   const chromePath = findChrome();
   const viteCli = path.join(root, 'node_modules', 'vite', 'bin', 'vite.js');
-  if (!existsSync(path.join(root, 'dist', 'index.html'))) { console.error('dist/가 없습니다. 먼저 npm run build를 실행하세요.'); process.exit(1); }
-  const server = spawn(process.execPath, [viteCli, 'preview', '--host', HOST, '--port', String(PORT), '--strictPort'], { cwd: root, stdio: 'ignore' });
+  if (!LIVE_URL && !existsSync(path.join(root, 'dist', 'index.html'))) { console.error('dist/가 없습니다. 먼저 npm run build를 실행하세요.'); process.exit(1); }
+  const server = LIVE_URL ? undefined : spawn(process.execPath, [viteCli, 'preview', '--host', HOST, '--port', String(PORT), '--strictPort'], { cwd: root, stdio: 'ignore' });
   try {
-    await waitForServer(`http://${HOST}:${PORT}${BASE_PATH}`);
+    if (!LIVE_URL) await waitForServer(`http://${HOST}:${PORT}${BASE_PATH}`);
     const browser = await chromium.launch({ executablePath: chromePath, headless: true });
     const conditions = ['reduce', 'no-preference'];
     let checked = 0;
@@ -154,7 +156,7 @@ async function main() {
     }
     console.log(`통과: reduce·no-preference 두 조건 모두 스플래시(${SPLASH_MIN_MS}ms 이상)·말풍선·기울기·노래 제목·화면 전환이 정상입니다.`);
   } finally {
-    server.kill();
+    server?.kill();
   }
 }
 
