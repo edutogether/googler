@@ -19,12 +19,15 @@ describe('useDesktopGuideBubble', () => {
     expect(result.current.guideText).toBe('');
   });
 
-  it('shows the full message immediately when reduced motion is preferred', () => {
+  it('types the message out one character at a time even when reduced motion is reported', () => {
     setInnerWidth(1200);
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
     const { result } = renderHook(() => useDesktopGuideBubble());
+    expect(result.current.guideVisible).toBe(false);
+    expect(result.current.guideText).toBe('');
+    act(() => { vi.advanceTimersByTime(320); });
     expect(result.current.guideVisible).toBe(true);
-    expect(result.current.guideText).toBe(DESKTOP_GUIDE_MESSAGE);
+    expect(result.current.guideText).toBe(DESKTOP_GUIDE_MESSAGE.slice(0, 1));
   });
 
   it('types the message out one character at a time on desktop', () => {

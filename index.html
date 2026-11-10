@@ -148,20 +148,6 @@
           transform: translateX(190px);
         }
       }
-
-      /* 움직임을 줄여달라고 한 사용자에게는 연출을 생략한다. 이 규칙을 앱 번들의
-         전역 reduced-motion 규칙에 맡기지 않고 여기 두는 이유: 번들 CSS는 스플래시보다
-         늦게 도착할 수 있어, 그 사이 잠깐 애니메이션이 전속으로 돈다. */
-      @media (prefers-reduced-motion: reduce) {
-        #splash,
-        #splash.is-leaving {
-          animation-duration: 1ms;
-        }
-        #splash .logo,
-        #splash .sbar i {
-          animation: none;
-        }
-      }
     </style>
     <meta
       name="description"

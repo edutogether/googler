@@ -41,6 +41,20 @@ describe('useParallaxTilt', () => {
     expect(setSpy).toHaveBeenCalledWith('--mw3-parallax-y', '1.000');
   });
 
+  it('tilts the same way even when reduced motion is reported', () => {
+    setInnerWidth(1200);
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+    const { result } = renderHook(() => useParallaxTilt());
+    const shell = document.createElement('div');
+    (result.current.shellRef as { current: HTMLElement | null }).current = shell;
+    const setSpy = vi.spyOn(shell.style, 'setProperty');
+
+    const bounds = { left: 0, top: 0, width: 200, height: 100 } as DOMRect;
+    act(() => { result.current.handlePointerMove(makePointerEvent(200, 100, bounds)); });
+    act(() => { rafCallback?.(0); });
+    expect(setSpy).toHaveBeenCalledWith('--mw3-parallax-x', '1.000');
+  });
+
   it('ignores pointer movement below the 1024px desktop breakpoint', () => {
     setInnerWidth(800);
     const { result } = renderHook(() => useParallaxTilt());
