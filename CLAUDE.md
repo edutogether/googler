@@ -1,5 +1,8 @@
 # CLAUDE.md — googler (Be a Googler)
 
+## 🔴 모든 말은 한국어로만 (Bumm님 2026-11-14)
+Bumm님께 하는 답, 중간 진행 설명, 팀장 · 다른 세션에 보내는 메시지 · 보고를 모두 한국어로 쓴다. 코드 · 명령어 · 파일 이름 · 원문 인용만 원래 표기. 대화가 요약된 뒤나 영어 도구 출력이 쌓인 뒤에도 같다 — 쓰기 전에 한국어인지 확인한다. (헌법 제0조 `_shared/constitution.md`)
+
 표시: 🔴 어기면 실사용자 화면이 깨지거나 개인정보가 샌다 · 🟠 중간 · 🟡 낮음 · 🟢 확인 끝남 (COMMON_STANDARDS §30)
 
 Google Educator 인증 학습용 20일 60미션 동료학습 앱 (React/TS/Vite). 상위 원칙은 [D:\Projects\CLAUDE.md](../../CLAUDE.md) 상속 — 여기는 이 앱 전용 상태/이슈만 기록한다.
