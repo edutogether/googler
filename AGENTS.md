@@ -1,5 +1,7 @@
 # AGENTS.md — googler (Be a Googler)
 
+🔴 **모든 말은 한국어로만 쓴다**(Bumm님 2026-11-14) — 답·중간 설명·보고 전부. 코드·명령어·파일 이름·원문 인용만 원래 표기. (헌법 제0조 `_shared/constitution.md`)
+
 어떤 도구로 이 저장소를 열든(Codex, Claude Code, 사람) 먼저 읽는 문서. Google
 Educator 인증 학습용 20일 60미션 동료학습 앱 (React 19 / TypeScript / Vite 8 /
 Tailwind 4 / Firebase 12).
