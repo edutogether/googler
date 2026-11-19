@@ -416,3 +416,10 @@ GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node
 - 패키지 최신화: tailwindcss/postcss/vite/vitest/firebase/lucide-react/playwright-core/typescript-eslint 등 + `@testing-library/jest-dom` 7 → 8. 보류(이유는 `CLAUDE.md` LOCKED): eslint 10 · @eslint/js 10 · eslint-plugin-react-hooks 7 · jsdom 31 · typescript 7 · @sentry/react 11(12/31 정기감사 때).
 - 동결 태그: `googler-freeze-20261119-pre-deps-ports`.
 - 배포 완료(PR #35 머지, 5297fe1): Verify·CodeQL·Deploy 성공, 라이브 200·콘솔 오류 0·`MOTION_URL` 스모크(reduce·no-preference) 통과.
+
+## 2026-11-19 — 보류했던 메이저 올림 (지시 Bumm/팀장, §36 «상류가 못 받아 줄 때만 미룬다»)
+- 동결 태그: `googler-freeze-20261119-pre-deps-major`.
+- eslint 10 · @eslint/js 10 · eslint-plugin-react-hooks 7: 새 규칙이 잡은 4곳을 규칙을 끄지 않고 고쳤다. `useSceneNavigation`의 «준비 중» 카드는 effect로 되돌리지 않고 «어느 페이지에서 켰는지»를 기억해 페이지가 바뀌면 저절로 가려지게 했다. `useWorldAudio`의 마운트 직후 `setState` 2개는 초기값과 같아 없앴다. `MiniVolumePanel`은 렌더 중 ref 쓰기를 없애고 `useEffectEvent`로 읽는다.
+- jsdom 31: 시험 2개 실패의 원인은 jsdom이 `<br>`을 `inline`으로 보고해 `dom-accessibility-api`가 `새로운 여정이<br />준비되고…`의 접근 가능한 이름을 «새로운 여정이준비되고…»(공백 없음)로 계산한 것이었다(타이밍 문제가 아니었다). 시험은 그대로 두고 제목에 공백 한 칸을 `<br>` 앞에 넣어 어느 환경에서도 이름이 한 문장으로 읽히게 고쳤다.
+- @sentry/react 11: `sendDefaultPii`가 `dataCollection`으로 바뀌고 기본값이 허용으로 뒤집혔다. `src/main.tsx`에 v10 엄격 기준선(userInfo·cookies 끔, 본문 수집 없음 등)을 명시했고, `BrowserSession` 제외가 그대로 먹는지 초기화한 클라이언트의 통합 목록으로 확인했다.
+- TypeScript 5.6 → 6.0.3(typescript-eslint가 6.1 미만만 받는다). 6.0의 `types` 기본값 변경에 맞춰 `@types/node`를 직접 의존성으로 두고 `tsconfig.app.json`에 `"types": ["node"]`를 추가했다. TS 7은 상류(typescript-eslint peer `<6.1.0`) 막힘으로 보류.

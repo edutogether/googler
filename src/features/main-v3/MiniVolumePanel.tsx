@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 const VOLUME_TWEEN_MS = 260;
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
@@ -13,16 +13,16 @@ const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 export function MiniVolumePanel({ enabled, volume, onVolumeChange }: { enabled: boolean; volume: number; onVolumeChange: (volume: number) => void }) {
   const [displayVolume, setDisplayVolume] = useState(enabled ? volume : 0);
   const rafRef = useRef<number | null>(null);
-  const volumeRef = useRef(volume);
-  volumeRef.current = volume;
   const displayVolumeRef = useRef(displayVolume);
-  displayVolumeRef.current = displayVolume;
+  // The tween must aim at the volume as of the moment `enabled` flips, without
+  // restarting on every drag tick, so the effect reads it through an effect event.
+  const currentVolume = useEffectEvent(() => volume);
   useEffect(() => {
-    const target = enabled ? volumeRef.current : 0;
+    const target = enabled ? currentVolume() : 0;
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     const start = displayVolumeRef.current;
     const delta = target - start;
-    if (Math.abs(delta) < 0.001) { setDisplayVolume(target); return; }
+    if (Math.abs(delta) < 0.001) { displayVolumeRef.current = target; setDisplayVolume(target); return; }
     const startedAt = performance.now();
     const step = (now: number) => {
       const t = Math.min(1, (now - startedAt) / VOLUME_TWEEN_MS);

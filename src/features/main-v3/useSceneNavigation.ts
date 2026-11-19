@@ -32,8 +32,11 @@ export function useSceneNavigation({
   // The "coming soon" card no longer auto-covers the subpage art on arrival —
   // it stays hidden so the scene is fully visible, and only pops in once the
   // visitor clicks anywhere on the page.
-  const [constructionVisible, setConstructionVisible] = useState(false);
-  useEffect(() => { setConstructionVisible(false); }, [activeNav]);
+  // Remembering which page the card was summoned on (instead of a boolean reset
+  // in an effect) makes it hide again by itself as soon as the page changes.
+  const [constructionNav, setConstructionNav] = useState<string | null>(null);
+  const constructionVisible = constructionNav === activeNav;
+  const setConstructionVisible = (visible: boolean) => setConstructionNav(visible ? activeNav : null);
 
   const desktopScene = desktopScenes[activeNav as keyof typeof desktopScenes] ?? null;
   const showsMainWorld = activeNav === 'explore';
