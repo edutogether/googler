@@ -15,7 +15,7 @@ export function useWorldAudio() {
     // without triggering autoplay audio; real users never set this.
     const qaMuted = new URLSearchParams(window.location.search).get('qa-mute') === '1';
     if (qaMuted) { audio.muted = true; audio.volume = 0; audioRef.current = audio; return () => { audio.pause(); audioRef.current = null; }; }
-    audio.loop = true; audio.preload = 'metadata'; audio.volume = DEFAULT_VOLUME; setVolumeState(DEFAULT_VOLUME);
+    audio.loop = true; audio.preload = 'metadata'; audio.volume = DEFAULT_VOLUME;
     audioRef.current = audio;
     // BGM starts on by default: the button shows "on" from the first paint
     // and an autoplay attempt fires immediately. Browsers block autoplay
@@ -23,7 +23,7 @@ export function useWorldAudio() {
     // rejected, one-time capture listeners wait for the very first gesture
     // anywhere on the page (any click/tap/key) and start playback right
     // then — the visitor never has to find the BGM button itself.
-    bgmEnabledRef.current = true; setBgmEnabled(true);
+    bgmEnabledRef.current = true;
     try { window.localStorage.removeItem(MAIN_V3_BGM_STORAGE_KEY); } catch { /* optional */ }
     let cancelled = false;
     const gestureEvents = ['pointerdown', 'click', 'touchstart', 'keydown'] as const;

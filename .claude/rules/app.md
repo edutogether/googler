@@ -55,9 +55,8 @@
   하나로 사이트 배포가 통째로 스킵된다(실제로 발생한 사고).
 - 🔴 **랭킹 읽기 규칙을 전체공개로 되돌리지 말 것** — 로그인 참가자 한정이 확정 결정.
 - **랭킹의 점수·합격 필드(`scoreL1/L2`·`passedL1/L2`)를 클라이언트가 쓰게 다시 열지 말 것** — 규칙이 막고 있다. 재배선 때 서버 점수 계산과 함께만 연다.
-- **`eslint` 10 / `jsdom` 30 / `typescript` 7 업그레이드 금지** — 각각 구체적
-  이유로 보류 중(CLAUDE.md "나머지 outdated 패키지 정리" 참고).
-- **`@sentry/react` 11 업그레이드는 2026-12-31 정기감사 때 한다**(팀장 판단 2026-10-31) — 지금 올리지 않는다. 그때 `sendDefaultPii: false`와 세션 비콘(`BrowserSession`) 제외가 새 버전에서도 유지되는지 확인하면서 함께 올린다.
+- **`typescript` 7 업그레이드 금지(상류 막힘)** — `typescript-eslint`가 TS 6.1 미만만 받는다. 상류가 7을 받아 주면 올린다(CLAUDE.md "나머지 outdated 패키지 정리" 참고).
+- **`@sentry/react`는 11이다(2026-11-19).** v11이 `sendDefaultPii`를 없애고 `dataCollection`으로 바꾸면서 기본값을 허용으로 뒤집었으므로, `src/main.tsx`는 v10 엄격 기준선을 `dataCollection`에 **명시**한다(비워 두면 쿠키·사용자 정보가 수집된다). 세션 비콘(`BrowserSession`) 제외도 유지 — 판을 올릴 때마다 둘 다 다시 확인한다.
 - 🔴 **«움직임 줄이기(`prefers-reduced-motion`)» 신호로 연출을 멈추지 말 것**(Bumm님 2026-11-11 — 공용·원격 PC가 아무도 켜지 않은 신호를 보고해 스플래시·말풍선·화면 전환이 멈춰 보였다). 신호가 있어도 없을 때와 똑같이 돈다: 스플래시 두 바퀴 하한(2300ms)·말풍선 타이핑·기울기·노래 제목 흐름·화면 전환. 확인은 **`reduce`와 `no-preference` 둘 다**로 한다 — `npm run motion`(두 조건 브라우저 확인)과 `npm run visual`(두 조건 모두 같은 기준과 비교), 소스에 이 신호를 읽는 코드가 되살아나면 `src/motionPolicy.test.ts`가 막는다.
 - **제품 코드를 기본 무음으로 바꾸지 말 것** — 확인용으로 열 때만 `?qa-mute=1`.
 - **파비콘은 Calendar의 «Google Calendar» 버튼에 있는 컬러 Google «G»(`public/favicon/google-g.png`, COMMON_STANDARDS §33)**

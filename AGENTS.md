@@ -105,9 +105,8 @@ typecheck → lint → test → rules:test → build → Hosting 배포 → Fire
 - **재배선 금지** — `MainWorldV3`를 `LegacyGooglerApp`/Firebase에 연결하지 않는다.
 - **BGM이 매 방문 초기화되는 것을 "고치지" 말 것** — 하루 동안 여러 방문객이
   거쳐가는 공용 전시 키오스크라서 매번 켜짐으로 리셋하는 게 확정된 설계다.
-- **`eslint` 10 / `jsdom` 30 / `typescript` 7 업그레이드 금지** — 각각 구체적인
-  이유로 보류 중이다(새 lint 규칙이 `MainWorldV3` 리팩터를 강제, jsdom 30에서 씬
-  전환 테스트 2개가 결정적으로 실패, tsc 네이티브 전환 생태계 미성숙).
+- **`typescript` 7 업그레이드 금지(상류 막힘)** — `typescript-eslint`가 TS 6.1 미만만 받는다. 상류가 7을 받아 주면 올린다.
+- **`@sentry/react` 11은 `dataCollection`을 명시해야 한다** — 비워 두면 쿠키·사용자 정보 수집이 켜진다(`src/main.tsx`).
 - **랭킹 읽기 규칙을 전체공개로 되돌리지 말 것** — `firestore.rules`의
   `rankings` 읽기는 로그인 참가자 한정(`request.auth != null`)이 확정 결정이다.
 - **배포 워크플로 스텝 순서 변경 금지** (위 "배포" 참고).

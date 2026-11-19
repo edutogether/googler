@@ -16,8 +16,23 @@ if (import.meta.env.PROD) {
     environment: 'production',
     release: import.meta.env.VITE_COMMIT_SHA ?? 'unknown',
     // Default-deny sending things like IP address or request cookies — this
-    // is an anonymous exhibition shell, error reports don't need them.
-    sendDefaultPii: false,
+    // is an anonymous exhibition shell, error reports don't need them. Sentry 11
+    // replaced `sendDefaultPii` with `dataCollection` and made leaving it unset
+    // permissive, so the restrictive v10 baseline is spelled out here.
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: {
+        request: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+        response: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      },
+      httpBodies: [],
+      urlQueryParams: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      genAI: { inputs: false, outputs: false },
+      databaseQueryData: false,
+      queues: false,
+      graphQL: { document: false, variables: false },
+    },
     // The SDK's default BrowserSession integration reports a "session"
     // beacon on every visit (on idle/hide, not just on error) for release
     // health stats — this app has no server-side release pipeline to make
