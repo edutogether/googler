@@ -101,5 +101,32 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "ui": {
+      "port": 6400
+    },
+    "hub": {
+      "port": 6401
+    },
+    "logging": {
+      "port": 6402
+    },
+    "firestore": {
+      "port": 6403,
+      "websocketPort": 6404
+    },
+    "auth": {
+      "port": 6405
+    },
+    "functions": {
+      "port": 6406
+    },
+    "storage": {
+      "port": 6407
+    },
+    "database": {
+      "port": 6408
+    }
   }
 }
