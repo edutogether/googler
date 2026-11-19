@@ -409,3 +409,9 @@ PR 미리보기 배포 워크플로(`firebase-hosting-pull-request.yml`)와 그 
 ## 2026-11-19 Node 22에서 26으로 (대표님 결정, 지시 Bumm/팀장)
 
 GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node-version`을 22에서 26으로 올리고 `AGENTS.md`의 Node 안내를 맞췄다. 이 저장소에는 `engines`·`.nvmrc`·Functions가 없어 바꿀 곳이 이 둘뿐이다. 바꾸기 전 복구 지점 `googler-freeze-20261119-pre-node26`. Node 26에서 `npm ci` → 린트·타입·시험 132개(건너뜀 13)·빌드·규칙 테스트 13개·시각 회귀 40장·`npm run motion` 모두 통과, `npm audit` 0건.
+
+## 2026-11-19 — 에뮬레이터 포트 칸 · 의존성 전체 최신화 (지시 Bumm/팀장, COMMON_STANDARDS §36·§37)
+- `firebase.json`에 `emulators` 포트를 6400~6408(ui·hub·logging·firestore 6403·websocket 6404·auth·functions·storage·database)로 명시. 시험은 `FIRESTORE_EMULATOR_HOST`를 읽으므로 숫자를 따로 박은 곳이 없다.
+- firebase-tools 15.34.2 → 15.37.0(`npx` 고정판), 고정 액션을 최신판으로: checkout v7 · setup-node v7 · setup-java v6.3.0(해시 고정) · action-hosting-deploy v0.11.0(해시 고정).
+- 패키지 최신화: tailwindcss/postcss/vite/vitest/firebase/lucide-react/playwright-core/typescript-eslint 등 + `@testing-library/jest-dom` 7 → 8. 보류(이유는 `CLAUDE.md` LOCKED): eslint 10 · @eslint/js 10 · eslint-plugin-react-hooks 7 · jsdom 31 · typescript 7 · @sentry/react 11(12/31 정기감사 때).
+- 동결 태그: `googler-freeze-20261119-pre-deps-ports`.
