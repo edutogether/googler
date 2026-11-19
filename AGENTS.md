@@ -48,7 +48,7 @@ Tailwind 4 / Firebase 12).
 ## 명령
 
 ```bash
-npm ci                  # Node 22 기준 (CI와 동일)
+npm ci                  # Node 26 기준 (CI와 동일)
 npm run dev             # 개발 서버
 npm run typecheck       # tsc -b
 npm run lint            # eslint

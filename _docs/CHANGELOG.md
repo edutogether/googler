@@ -405,3 +405,7 @@ PR 미리보기 배포 워크플로(`firebase-hosting-pull-request.yml`)와 그 
 ## 2026-11-11 움직임 줄이기 신호와 상관없이 연출을 똑같이 돌림 (대표님 결정, 지시 Bumm/팀장)
 
 원격 접속한 PC의 브라우저가 «움직임 줄이기»를 보고해 스플래시(1ms로 즉시 사라짐, 두 바퀴 하한이 깨짐)·화면 전환·안내 말풍선·기울기·노래 제목 흐름이 멈춰 보였다. `index.html`·`MainWorldV3.css`의 reduced-motion 규칙과 세 훅(`useDesktopGuideBubble`·`useParallaxTilt`·`useSceneNavigation`)의 분기를 모두 없애 신호가 있어도 없을 때와 똑같이 돈다. 배치·디자인은 그대로다(시각 회귀 두 조건 모두 기준과 일치). 실패하는 확인(`npm run motion`, reduce 10건 실패)을 먼저 만들고 고쳤고, `npm run visual`도 두 조건으로 바꿨다. 이 신호를 읽는 코드가 되살아나지 않게 `src/motionPolicy.test.ts`를 뒀다.
+
+## 2026-11-19 Node 22에서 26으로 (대표님 결정, 지시 Bumm/팀장)
+
+GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node-version`을 22에서 26으로 올리고 `AGENTS.md`의 Node 안내를 맞췄다. 이 저장소에는 `engines`·`.nvmrc`·Functions가 없어 바꿀 곳이 이 둘뿐이다. 바꾸기 전 복구 지점 `googler-freeze-20261119-pre-node26`. Node 26에서 `npm ci` → 린트·타입·시험 132개(건너뜀 13)·빌드·규칙 테스트 13개·시각 회귀 40장·`npm run motion` 모두 통과, `npm audit` 0건.
