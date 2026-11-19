@@ -415,3 +415,4 @@ GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node
 - firebase-tools 15.34.2 → 15.37.0(`npx` 고정판), 고정 액션을 최신판으로: checkout v7 · setup-node v7 · setup-java v6.3.0(해시 고정) · action-hosting-deploy v0.11.0(해시 고정).
 - 패키지 최신화: tailwindcss/postcss/vite/vitest/firebase/lucide-react/playwright-core/typescript-eslint 등 + `@testing-library/jest-dom` 7 → 8. 보류(이유는 `CLAUDE.md` LOCKED): eslint 10 · @eslint/js 10 · eslint-plugin-react-hooks 7 · jsdom 31 · typescript 7 · @sentry/react 11(12/31 정기감사 때).
 - 동결 태그: `googler-freeze-20261119-pre-deps-ports`.
+- 배포 완료(PR #35 머지, 5297fe1): Verify·CodeQL·Deploy 성공, 라이브 200·콘솔 오류 0·`MOTION_URL` 스모크(reduce·no-preference) 통과.
