@@ -424,3 +424,7 @@ GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node
 - @sentry/react 11: `sendDefaultPii`가 `dataCollection`으로 바뀌고 기본값이 허용으로 뒤집혔다. `src/main.tsx`에 v10 엄격 기준선(userInfo·cookies 끔, 본문 수집 없음 등)을 명시했고, `BrowserSession` 제외가 그대로 먹는지 초기화한 클라이언트의 통합 목록으로 확인했다.
 - TypeScript 5.6 → 6.0.3(typescript-eslint가 6.1 미만만 받는다). 6.0의 `types` 기본값 변경에 맞춰 `@types/node`를 직접 의존성으로 두고 `tsconfig.app.json`에 `"types": ["node"]`를 추가했다. TS 7은 상류(typescript-eslint peer `<6.1.0`) 막힘으로 보류.
 - 배포 완료(PR #36 머지, 0692a4b): Verify·CodeQL·Deploy 성공, 라이브 200·콘솔 오류 0·`MOTION_URL` 스모크(reduce·no-preference) 통과.
+
+## 2026-11-22 — 규칙 장부 · 순서 문서 추가 (지시 Bumm/팀장 11/21, 헌법 §12 · COMMON_STANDARDS §38)
+- `_docs/RULES.md`(규칙 35줄)와 `_docs/RUNBOOK.md`(절 8개)를 새로 만들었다. 규칙은 `CLAUDE.md` · `AGENTS.md` · `.claude/rules/app.md` · 이 CHANGELOG에서 모았고, 원문이 남은 줄만 원문을 적고 나머지는 출처 문서를 적었다.
+- `CLAUDE.md` 맨 위에 `@_docs/RULES.md`, `AGENTS.md` 맨 위에 «먼저 읽기» 줄을 넣었다. 코드 · 설정 · 배포는 건드리지 않았다.
