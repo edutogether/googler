@@ -428,3 +428,4 @@ GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node
 ## 2026-11-22 — 규칙 장부 · 순서 문서 추가 (지시 Bumm/팀장 11/21, 헌법 §12 · COMMON_STANDARDS §38)
 - `_docs/RULES.md`(규칙 35줄)와 `_docs/RUNBOOK.md`(절 8개)를 새로 만들었다. 규칙은 `CLAUDE.md` · `AGENTS.md` · `.claude/rules/app.md` · 이 CHANGELOG에서 모았고, 원문이 남은 줄만 원문을 적고 나머지는 출처 문서를 적었다.
 - `CLAUDE.md` 맨 위에 `@_docs/RULES.md`, `AGENTS.md` 맨 위에 «먼저 읽기» 줄을 넣었다. 코드 · 설정 · 배포는 건드리지 않았다.
+- 규칙 장부의 «검사기 없음» 18줄을 정리: 4줄(R-5 · R-6 · R-20 · R-22)은 `src/ruleLedger.test.ts`로 검사기를 만들고 빨간불 시험까지 했고, 14줄은 «직접 열어 확인»으로 바꿨다. 검사기가 찾은 실제 결함 1건 — 화면 토스트 «…모아보세요!»의 느낌표 앞 공백(R-5) — 도 고쳤다(`MainWorldV3.tsx` · 시험 기대값).

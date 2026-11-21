@@ -116,7 +116,7 @@ describe('MainWorldV3 final preview', () => {
     expect(badgeLayout.querySelector('.mw3-badge-item--last .mw3-badge-next')).toBeNull();
     expect(badgeLayout.querySelector('.mw3-badge-row > .mw3-badge-next')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '더 많은 배지 보기' }));
-    expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정을 이어가며 배지를 더 모아보세요!');
+    expect(document.querySelector('.mw3-toast')).toHaveTextContent('새로운 여정을 이어가며 배지를 더 모아보세요 !');
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-sfx')).toBeNull();
     expect(document.querySelector('.mw3-desktop-profile .mw3-mini-audio [role="switch"]')).toBeNull();
   });
