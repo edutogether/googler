@@ -436,3 +436,4 @@ GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node
 - `@sentry/react` 11.18.0 · `lucide-react` 1.80.0 · `@types/node` 26.6.11 · `@types/react` 19.3.3 · `typescript-eslint` 8.74.0 · `vitest` 5.1.2로 갱신. TypeScript 7은 상류 지원 범위 밖이라 6.0.3을 유지했다. 잠금 파일의 범위 내 하위 의존성도 함께 갱신됐다.
 - Windows · Node 26.13.1 · JDK 21에서 `npm run check`(단위 137개 통과 · 13개 건너뜀) · `npm run rules:test`(13개 통과) · `npm audit`(취약점 0) · `npm run motion` · `npm run visual`(40장 통과), 각각 종료 코드 0. Sentry는 실제 브라우저에서 개인정보 설정과 기본 `BrowserSession` 제외를 확인했다.
 - Bumm님이 이번에 한해 프리즈 태그 생성 · push 생략을 승인했다. 배포하지 않았다.
+- 배포 완료(PR #38 병합 `74e23fbbfe56881ead4a0773860b9b80beaf5537`, 승인 Bumm 11/26): 병합 후 Verify · CodeQL · Hosting 및 Firestore 규칙 · 인덱스 배포 성공. 라이브 HTTP 200, 홈 제목과 시작 버튼 안내 확인, 브라우저 오류 0건.
