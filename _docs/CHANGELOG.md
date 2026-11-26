@@ -430,3 +430,9 @@ GitHub Actions 두 워크플로(`ci.yml`, `firebase-hosting-merge.yml`)의 `node
 - `CLAUDE.md` 맨 위에 `@_docs/RULES.md`, `AGENTS.md` 맨 위에 «먼저 읽기» 줄을 넣었다. 코드 · 설정 · 배포는 건드리지 않았다.
 - 규칙 장부의 «검사기 없음» 18줄을 정리: 4줄(R-5 · R-6 · R-20 · R-22)은 `src/ruleLedger.test.ts`로 검사기를 만들고 빨간불 시험까지 했고, 14줄은 «직접 열어 확인»으로 바꿨다. 검사기가 찾은 실제 결함 1건 — 화면 토스트 «…모아보세요!»의 느낌표 앞 공백(R-5) — 도 고쳤다(`MainWorldV3.tsx` · 시험 기대값).
 - 배포 완료(`2c7125c`, 팀장 승인): Verify·CodeQL·Deploy 성공, 라이브 200·콘솔 오류 0, 홈 화면 배지 토스트가 «…더 모아보세요 !»로 보임(직접 확인).
+
+## 2026-11-26 — 의존성 6개 갱신 (지시 Bumm님)
+
+- `@sentry/react` 11.18.0 · `lucide-react` 1.80.0 · `@types/node` 26.6.11 · `@types/react` 19.3.3 · `typescript-eslint` 8.74.0 · `vitest` 5.1.2로 갱신. TypeScript 7은 상류 지원 범위 밖이라 6.0.3을 유지했다. 잠금 파일의 범위 내 하위 의존성도 함께 갱신됐다.
+- Windows · Node 26.13.1 · JDK 21에서 `npm run check`(단위 137개 통과 · 13개 건너뜀) · `npm run rules:test`(13개 통과) · `npm audit`(취약점 0) · `npm run motion` · `npm run visual`(40장 통과), 각각 종료 코드 0. Sentry는 실제 브라우저에서 개인정보 설정과 기본 `BrowserSession` 제외를 확인했다.
+- Bumm님이 이번에 한해 프리즈 태그 생성 · push 생략을 승인했다. 배포하지 않았다.
